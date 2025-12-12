@@ -9,9 +9,9 @@ class Vehicle(models.Model):
     vehicle_name = models.CharField(max_length=255)
     vehicle_type = models.CharField(max_length=25, choices=VEHICLE_TYPES)
     number_plate = models.CharField(max_length=50, unique=True)
-    price_per_hour = models.DecimalField(max_digits=10, decimal_places=2)
+    price_per_hour = models.PositiveIntegerField()
     image = models.ImageField(null=True, blank=True)
-    is_available = models.BooleanField()
+    is_available = models.BooleanField(default=True)
 
     def __str__(self):
         return f"{self.vehicle_name} - {self.number_plate}"

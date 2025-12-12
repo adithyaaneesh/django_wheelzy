@@ -10,15 +10,19 @@
     <form method="post" enctype="multipart/form-data">
         {% csrf_token %}
         <label>Vehicle Name</label>
-        <input type="text" name="vehicle_name" id="">
-        <label>Vehicle Type</label>
-        <input type="text" name="vehicle_type" id="">
+        <input type="text" name="vehicle_name"><br><br>
+        <label>Vehicle Type:</label>
+        <select name="vehicle_type" required>
+            <option value="car">Car</option>
+            <option value="bike">Bike</option>
+        </select> <br>  <br>     
         <label>Number Plate</label>
-        <input type="text" name="number_plate" id="">
+        <input type="text" name="number_plate"><br><br>
         <label>Price per Hour</label>
-        <input type="text" name="price_per_hour" id="">
+        <input type="number" name="price_per_hour"><br><br>
         <label>Image</label>
-        <input type="text" name="image" id="">
+        <input type="file" name="image"><br><br>
+        <button type="submit">Add Vehicle</button>
     </form>
 </body>
 </html>

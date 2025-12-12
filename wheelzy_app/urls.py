@@ -5,8 +5,10 @@ from django.conf.urls.static import static
 
 urlpatterns = [
     path('', views.home, name="home"),
-    path('vehicle_details', views.vehicle_details, name="vehicle_details"),
-    path('payment_page', views.vehicle_details, name="payment_page"),
+    path('add/', views.add_vehicle, name="add_vehicle"),
+    path('delete/<int:id>/', views.delete_vehicle, name="delete_vehicle"),
+    path('vehicle_details/', views.vehicle_details, name="vehicle_details"),
+    # path('payment_page/', views.vehicle_details, name="payment_page"),
 ]
 
 

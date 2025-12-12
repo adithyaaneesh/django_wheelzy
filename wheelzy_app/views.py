@@ -79,15 +79,24 @@ def add_vehicle(request):
         vehiclType = request.POST.get("vehicle_type")
         number_plate = request.POST.get("number_plate")
         price_per_hour = request.POST.get("price_per_hour")
-        image = request.POST.get("image")
+        image = request.FILES.get("image")   # FIXED LINE
 
         vehicle = Vehicle.objects.create(
-            vehicle_name = vehicleName,
-            vehicle_type = vehiclType,
-            number_plate = number_plate,
-            price_per_hour = price_per_hour,
-            image = image,
+            vehicle_name=vehicleName,
+            vehicle_type=vehiclType,
+            number_plate=number_plate,
+            price_per_hour=price_per_hour,
+            image=image,
         )
-        messages.success(request, "Vehicle added successfully!!", {"vehicle":vehicle})
-        return redirect('vehicle_list')
+
+        messages.success(request, "Vehicle added successfully!!")
+        return redirect('home')
+
     return render(request, "add_vehicle.html")
+
+# delete a vehicle 
+def delete_vehicle(request, id):
+    vehicle = get_object_or_404(Vehicle, id=id)
+    vehicle.delete()
+    messages.success(request, "Vehicle deleted successfully!")
+    return redirect("home")
