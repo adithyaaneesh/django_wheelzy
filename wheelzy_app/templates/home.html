@@ -3,77 +3,358 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Home | Vehicle-List</title>
+    <title>Wheelzy | Vehicles</title>
+
+    <!-- Bootstrap -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+
+    <!-- Google Font -->
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
 
     <style>
         body {
-            background: linear-gradient(135deg, #eef2f3, #d9e4ec);
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            font-family: 'Poppins', sans-serif;
+            background: #f8f9fa;
         }
 
-        .page-title {
+        /* HERO SECTION */
+        .hero {
+            background: linear-gradient(120deg, #ffffff 60%, #1e88e5 40%);
+            padding: 80px 0;
+        }
+
+        .hero h1 {
+            font-size: 48px;
             font-weight: 700;
-            color: #2a8b38;
         }
 
+        .hero p {
+            color: #555;
+            max-width: 480px;
+        }
+
+        .hero img {
+            max-width: 100%;
+            border-radius: 12px;
+        }
+
+        .btn-main {
+            background: #000;
+            color: #fff;
+            border-radius: 30px;
+            padding: 10px 28px;
+            text-decoration: none;
+        }
+
+        .btn-main:hover {
+            background: #333;
+            color: #fff;
+        }
+
+        /* VEHICLE CARD */
         .vehicle-card {
             border: none;
-            border-radius: 15px;
-            transition: transform 0.3s ease, box-shadow 0.3s ease;
-            background: #ffffff;
+            border-radius: 16px;
+            transition: 0.3s;
+            background: #fff;
         }
 
         .vehicle-card:hover {
             transform: translateY(-8px);
-            box-shadow: 0 12px 25px rgba(0, 0, 0, 0.15);
+            box-shadow: 0 15px 30px rgba(0,0,0,0.15);
         }
 
         .vehicle-img {
             height: 180px;
             object-fit: cover;
-            border-top-left-radius: 15px;
-            border-top-right-radius: 15px;
+            border-top-left-radius: 16px;
+            border-top-right-radius: 16px;
         }
 
         .badge-type {
-            background-color: #8cb5a9;
+            background: #1e88e5;
+            font-weight: 500;
         }
 
         .btn-view {
-            border-radius: 20px;
-            padding: 6px 18px;
+            border-radius: 25px;
+            padding: 6px 22px;
         }
+
+        /* SECTION TITLE */
+        .section-title {
+            font-weight: 700;
+            margin-bottom: 40px;
+        }
+        /* PROCESS SECTION */
+        .process-section {
+            /* background: #0c0c0c; */
+            color: #fff;
+            padding: 90px 0;
+        }
+
+        .process-subtitle {
+            text-align: center;
+            color: #1e88e5;
+            letter-spacing: 2px;
+            font-size: 13px;
+            font-weight: 600;
+        }
+
+        .process-title {
+            color: #1987e7;
+            text-align: center;
+            font-size: 38px;
+            font-weight: 700;
+            margin-top: 10px;
+        }
+
+        .process-card {
+            background: #1e88e5;
+            border-radius: 16px;
+            padding: 30px;
+            position: relative;
+            height: 100%;
+        }
+
+        .process-card h4 {
+            font-weight: 600;
+            margin-bottom: 10px;
+        }
+
+        .process-card p {
+            font-size: 14px;
+            line-height: 1.6;
+            opacity: 0.9;
+        }
+
+        .step-number {
+            position: absolute;
+            bottom: -14px;
+            left: -14px;
+            background: #111;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+        }
+
+        /* CTA SECTION */
+        .cta-section {
+            background: url("https://images.unsplash.com/photo-1503376780353-7e6692767b70")
+                center/cover no-repeat;
+            padding: 100px 0;
+            position: relative;
+            color: #fff;
+        }
+
+        .cta-section::before {
+            content: "";
+            position: absolute;
+            inset: 0;
+            background: rgba(0,0,0,0.75);
+        }
+
+        .cta-section .container {
+            position: relative;
+            z-index: 1;
+        }
+
+        .cta-subtitle {
+            color: #1e88e5;
+            letter-spacing: 2px;
+            font-size: 13px;
+            font-weight: 600;
+        }
+
+        .cta-section h2 {
+            font-size: 40px;
+            font-weight: 700;
+            margin: 20px 0;
+        }
+
+        .cta-btn {
+            display: inline-block;
+            background: #1e88e5;
+            color: #fff;
+            padding: 12px 30px;
+            border-radius: 30px;
+            text-decoration: none;
+            font-weight: 500;
+            transition: 0.3s;
+        }
+
+        .cta-btn:hover {
+            background: #1987e7;
+            color: #fff;
+        }
+
     </style>
 </head>
 
 <body>
-    <div class="container py-5">
-        <h1 class="text-center mb-5 page-title">All Vehicles</h1>
-        <a href="{% url 'add_vehicle' %}" class="mb-4 btn btn-warning btn-view">
-            Add
-        </a>
+
+<!-- HERO -->
+<section class="hero">
+    <div class="container">
+        <div class="row align-items-center">
+            <div class="col-md-6">
+                <h1>Comfort Ride With Wheelzy</h1>
+                <p>
+                    Choose from premium cars & bikes at the best hourly price.
+                    Book your perfect ride in just a few clicks.
+                </p>
+                <a href="{% url 'add_vehicle' %}" class="btn-main">Add Vehicle</a>
+                <a href="{% url 'add_vehicle' %}" class="btn-main">View All</a>
+            </div>
+            <div class="col-md-6 text-center">
+                <img src="https://images.unsplash.com/photo-1503376780353-7e6692767b70" alt="Car">
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- ABOUT WHEELZY -->
+<section class="py-5 bg-white">
+    <div class="container">
+        <div class="row align-items-center g-5">
+
+            <!-- Text -->
+            <div class="col-md-6">
+                <h2 class="fw-bold mb-3">
+                    About <span class="text-primary">Wheelzy</span>
+                </h2>
+
+                <p class="text-muted">
+                    Wheelzy is a modern vehicle rental platform built to simplify
+                    urban travel. Whether you need a comfortable car for long rides
+                    or a quick bike for city commuting, Wheelzy makes booking fast,
+                    affordable, and reliable.
+                </p>
+
+                <p class="text-muted">
+                    Our platform ensures transparent pricing, well-maintained vehicles,
+                    and a seamless booking experience powered by smart technology.
+                </p>
+
+                <ul class="list-unstyled mt-4">
+                    <li class="mb-2">✔ Cars & Bikes for every need</li>
+                    <li class="mb-2">✔ Flexible hourly pricing</li>
+                    <li class="mb-2">✔ Secure booking system</li>
+                    <li class="mb-2">✔ 24/7 customer support</li>
+                </ul>
+            </div>
+
+            <!-- Images -->
+            <div class="col-md-6">
+                <div class="row g-3">
+                    <div class="col-6">
+                        <img
+                            src="https://images.unsplash.com/photo-1503376780353-7e6692767b70"
+                            class="img-fluid rounded-4 shadow"
+                            alt="Car Rental">
+                        <p class="text-center mt-2 fw-semibold">Cars</p>
+                    </div>
+                    <div class="col-6">
+                        <img
+                            src="https://images.unsplash.com/photo-1503376780353-7e6692767b70"
+                            class="img-fluid rounded-4 shadow"
+                            alt="Bike Rental">
+                        <p class="text-center mt-2 fw-semibold">Bikes</p>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</section>
+<!-- PROCESS SECTION -->
+<section class="process-section">
+    <div class="container">
+
+        <p class="process-subtitle">OUR PROCESS</p>
+        <h2 class="process-title">Car rental steps</h2>
+
+        <div class="row g-4 mt-5">
+
+            <!-- Step 1 -->
+            <div class="col-md-4">
+                <div class="process-card">
+                    <span class="step-number">1</span>
+                    <h4>Choose a car</h4>
+                    <p>
+                        Browse from a wide range of cars and bikes
+                        that suit your comfort and budget.
+                    </p>
+                </div>
+            </div>
+
+            <!-- Step 2 -->
+            <div class="col-md-4">
+                <div class="process-card">
+                    <span class="step-number">2</span>
+                    <h4>Book a rental</h4>
+                    <p>
+                        Select date & time, confirm your booking
+                        and get instant confirmation.
+                    </p>
+                </div>
+            </div>
+
+            <!-- Step 3 -->
+            <div class="col-md-4">
+                <div class="process-card">
+                    <span class="step-number">3</span>
+                    <h4>Enjoy the journey</h4>
+                    <p>
+                        Pick up your ride and enjoy a smooth,
+                        comfortable travel experience.
+                    </p>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</section>
+
+<!-- CTA SECTION -->
+<section class="cta-section">
+    <div class="container text-center">
+        <p class="cta-subtitle">EXPERIENCE</p>
+        <h2>Are you ready to experience?</h2>
+        <a href="{% url 'home' %}" class="cta-btn">Rent a car →</a>
+    </div>
+</section>
+<!-- VEHICLE LIST -->
+<section class="py-5">
+    <div class="container">
+        <h2 class="text-center section-title">Available Vehicles</h2>
+
         <div class="row g-4">
             {% for v in vehicles %}
             <div class="col-sm-6 col-md-4 col-lg-3">
                 <div class="card vehicle-card h-100">
-                    
+
                     {% if v.image %}
-                        <img src="{{ v.image.url }}" class="card-img-top vehicle-img" alt="Vehicle Image">
+                        <img src="{{ v.image.url }}" class="vehicle-img" alt="Vehicle">
                     {% else %}
-                        <div class="d-flex align-items-center justify-content-center vehicle-img bg-light text-muted">
+                        <div class="vehicle-img d-flex align-items-center justify-content-center bg-light text-muted">
                             No Image
                         </div>
                     {% endif %}
 
                     <div class="card-body text-center">
-                        <h5 class="card-title">{{ v.vehicle_name }}</h5>
-                        <span class="badge badge-type">{{ v.vehicle_type }}</span>
+                        <h5 class="fw-semibold">{{ v.vehicle_name }}</h5>
+                        <span class="badge badge-type">{{ v.vehicle_type|title }}</span>
+                        <p class="mt-2 fw-bold">₹ {{ v.price_per_hour }} / hour</p>
                     </div>
 
                     <div class="card-footer bg-transparent border-0 text-center pb-3">
-                        <a href="{% url 'vehicle_details' v.id %}" class="btn btn-success btn-view">
-                            View More
+                        <a href="{% url 'vehicle_details' v.id %}" class="btn btn-dark btn-view">
+                            View Details
                         </a>
                     </div>
 
@@ -82,5 +363,6 @@
             {% endfor %}
         </div>
     </div>
+</section>
 </body>
 </html>
