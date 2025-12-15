@@ -23,6 +23,13 @@ def home(request):
     })
 
 
+def all_vehicle(request):
+    vehicles = Vehicle.objects.all()
+    return render(request, "vehicle_list.html", {
+        "vehicles": vehicles
+    })
+
+
 # view a vehicle details for user
 def vehicle_details(request, id):
     vehicle = get_object_or_404(Vehicle, id=id)

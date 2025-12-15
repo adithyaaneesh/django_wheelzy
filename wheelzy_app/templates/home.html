@@ -51,36 +51,6 @@
             color: #fff;
         }
 
-        /* VEHICLE CARD */
-        .vehicle-card {
-            border: none;
-            border-radius: 16px;
-            transition: 0.3s;
-            background: #fff;
-        }
-
-        .vehicle-card:hover {
-            transform: translateY(-8px);
-            box-shadow: 0 15px 30px rgba(0,0,0,0.15);
-        }
-
-        .vehicle-img {
-            height: 180px;
-            object-fit: cover;
-            border-top-left-radius: 16px;
-            border-top-right-radius: 16px;
-        }
-
-        .badge-type {
-            background: #1e88e5;
-            font-weight: 500;
-        }
-
-        .btn-view {
-            border-radius: 25px;
-            padding: 6px 22px;
-        }
-
         /* SECTION TITLE */
         .section-title {
             font-weight: 700;
@@ -191,6 +161,75 @@
             background: #1987e7;
             color: #fff;
         }
+        /* CONTACT */
+        .contact-section {
+            background: #ffffff;
+        }
+
+        .contact-box {
+            padding: 25px;
+            border-radius: 14px;
+            background: #f8f9fa;
+            transition: 0.3s;
+        }
+
+        .contact-box:hover {
+            transform: translateY(-6px);
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+        }
+
+        .contact-icon {
+            font-size: 36px;
+            margin-bottom: 10px;
+            color: #1e88e5;
+        }
+
+        /* FOOTER */
+        .footer-section {
+            background: #111;
+            color: #ccc;
+        }
+
+        .footer-title {
+            color: #fff;
+            font-weight: 600;
+            margin-bottom: 15px;
+        }
+
+        .footer-text {
+            font-size: 14px;
+            line-height: 1.7;
+        }
+
+        .footer-links {
+            list-style: none;
+            padding: 0;
+        }
+
+        .footer-links li {
+            margin-bottom: 8px;
+            font-size: 14px;
+        }
+
+        .footer-links a {
+            text-decoration: none;
+            color: #ccc;
+        }
+
+        .footer-links a:hover {
+            color: #fff;
+        }
+
+        .footer-line {
+            border-color: #333;
+            margin: 30px 0;
+        }
+
+        .footer-bottom {
+            font-size: 14px;
+            color: #aaa;
+        }
+
 
     </style>
 </head>
@@ -208,7 +247,7 @@
                     Book your perfect ride in just a few clicks.
                 </p>
                 <a href="{% url 'add_vehicle' %}" class="btn-main">Add Vehicle</a>
-                <a href="{% url 'add_vehicle' %}" class="btn-main">View All</a>
+                <a href="{% url 'all_vehicles' %}" class="btn-main">View All</a>
             </div>
             <div class="col-md-6 text-center">
                 <img src="https://images.unsplash.com/photo-1503376780353-7e6692767b70" alt="Car">
@@ -325,44 +364,107 @@
     <div class="container text-center">
         <p class="cta-subtitle">EXPERIENCE</p>
         <h2>Are you ready to experience?</h2>
-        <a href="{% url 'home' %}" class="cta-btn">Rent a car →</a>
+        <a href="{% url 'all_vehicles' %}" class="cta-btn">Rent a car →</a>
     </div>
 </section>
-<!-- VEHICLE LIST -->
-<section class="py-5">
-    <div class="container">
-        <h2 class="text-center section-title">Available Vehicles</h2>
+<!-- CONTACT SECTION -->
+<section class="contact-section py-5">
+    <div class="container text-center">
+        <h2 class="fw-bold mb-2">Contact Us</h2>
+        <p class="text-muted mb-5">
+            Have questions or need help? We’re here to assist you.
+        </p>
 
         <div class="row g-4">
-            {% for v in vehicles %}
-            <div class="col-sm-6 col-md-4 col-lg-3">
-                <div class="card vehicle-card h-100">
 
-                    {% if v.image %}
-                        <img src="{{ v.image.url }}" class="vehicle-img" alt="Vehicle">
-                    {% else %}
-                        <div class="vehicle-img d-flex align-items-center justify-content-center bg-light text-muted">
-                            No Image
-                        </div>
-                    {% endif %}
-
-                    <div class="card-body text-center">
-                        <h5 class="fw-semibold">{{ v.vehicle_name }}</h5>
-                        <span class="badge badge-type">{{ v.vehicle_type|title }}</span>
-                        <p class="mt-2 fw-bold">₹ {{ v.price_per_hour }} / hour</p>
-                    </div>
-
-                    <div class="card-footer bg-transparent border-0 text-center pb-3">
-                        <a href="{% url 'vehicle_details' v.id %}" class="btn btn-dark btn-view">
-                            View Details
-                        </a>
-                    </div>
-
+            <!-- Write Us -->
+            <div class="col-md-4">
+                <div class="contact-box">
+                    <div class="contact-icon">✉️</div>
+                    <h5>Write Us</h5>
+                    <p class="text-muted mb-0">support@wheelzy.com</p>
+                    <p class="text-muted">info@wheelzy.com</p>
                 </div>
             </div>
-            {% endfor %}
+
+            <!-- Call Us -->
+            <div class="col-md-4">
+                <div class="contact-box">
+                    <div class="contact-icon">📞</div>
+                    <h5>Call Us</h5>
+                    <p class="text-muted mb-0">+91 98765 43210</p>
+                    <p class="text-muted">+91 91234 56789</p>
+                </div>
+            </div>
+
+            <!-- Visit Us -->
+            <div class="col-md-4">
+                <div class="contact-box">
+                    <div class="contact-icon">📍</div>
+                    <h5>Visit Us</h5>
+                    <p class="text-muted mb-0">Kannur, Kerala</p>
+                    <p class="text-muted">India</p>
+                </div>
+            </div>
+
         </div>
     </div>
 </section>
+<!-- FOOTER -->
+<footer class="footer-section">
+    <div class="container py-5">
+        <div class="row g-4">
+
+            <!-- About -->
+            <div class="col-md-4">
+                <h5 class="footer-title">Wheelzy</h5>
+                <p class="footer-text">
+                    Wheelzy is a smart vehicle rental platform offering
+                    affordable cars and bikes with flexible hourly pricing.
+                    Experience comfort, convenience, and reliability.
+                </p>
+            </div>
+
+            <!-- Quick Links -->
+            <div class="col-md-2">
+                <h5 class="footer-title">Quick Links</h5>
+                <ul class="footer-links">
+                    <li><a href="{% url 'home' %}">Home</a></li>
+                    <li><a href="{% url 'add_vehicle' %}">Add Vehicle</a></li>
+                    <li><a href="#">Bookings</a></li>
+                    <li><a href="#">About</a></li>
+                </ul>
+            </div>
+
+            <!-- Support -->
+            <div class="col-md-3">
+                <h5 class="footer-title">Support</h5>
+                <ul class="footer-links">
+                    <li>24/7 Customer Support</li>
+                    <li>Secure Payments</li>
+                    <li>Easy Cancellations</li>
+                </ul>
+            </div>
+
+            <!-- Newsletter -->
+            <div class="col-md-3">
+                <h5 class="footer-title">Newsletter</h5>
+                <p class="footer-text">Subscribe for updates & offers</p>
+                <form>
+                    <input type="email" class="form-control mb-2" placeholder="Enter your email">
+                    <button class="btn btn-primary w-100">Subscribe</button>
+                </form>
+            </div>
+
+        </div>
+
+        <hr class="footer-line">
+
+        <div class="text-center footer-bottom">
+            © 2025 Wheelzy. All Rights Reserved.
+        </div>
+    </div>
+</footer>
+
 </body>
 </html>
