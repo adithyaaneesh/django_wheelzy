@@ -12,9 +12,9 @@ def home(request):
     return render(request, 'home.html', {'vehicles': vehicles})
 
 # view a vehicle details for user
-def vehicle_details(request,v_id):
-    vehicle = get_object_or_404(Vehicle, id=v_id)
-    return render(request, 'vehicle_detail.html', {'vehicle': vehicle})
+def vehicle_details(request, id):
+    vehicle = get_object_or_404(Vehicle, id=id)
+    return render(request, "vehicle_detail.html", {"vehicle": vehicle})
 
 # book a vehicle by user
 def book_vehicle(request, v_id):
@@ -79,7 +79,7 @@ def add_vehicle(request):
         vehiclType = request.POST.get("vehicle_type")
         number_plate = request.POST.get("number_plate")
         price_per_hour = request.POST.get("price_per_hour")
-        image = request.FILES.get("image")   # FIXED LINE
+        image = request.FILES.get("image")
 
         vehicle = Vehicle.objects.create(
             vehicle_name=vehicleName,

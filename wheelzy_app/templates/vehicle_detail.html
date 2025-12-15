@@ -6,6 +6,21 @@
     <title>Vehicle Details</title>
 </head>
 <body>
-    
+
+    <h1>{{ vehicle.vehicle_name }}</h1>
+
+    <p>Type: {{ vehicle.vehicle_type }}</p>
+    <p>Number Plate: {{ vehicle.number_plate }}</p>
+    <p>Price: ₹{{ vehicle.price_per_hour }}/hour</p>
+
+    {% if vehicle.image %}
+        <img src="{{ vehicle.image.url }}" width="300">
+    {% else %}
+        <p>No image available</p>
+    {% endif %}
+
+    <br><br>
+    <a href="{% url 'home' %}">⬅ Back to Home</a>
+
 </body>
 </html>
