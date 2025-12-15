@@ -4,49 +4,107 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Home | Vehicle-List</title>
+
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: "Segoe UI", Tahoma, sans-serif;
+            background: linear-gradient(135deg, #e3f2fd, #f1f8e9);
+        }
+
+        h1 {
+            text-align: center;
+            padding: 30px 0;
+            color: #0f4c75;
+            letter-spacing: 1px;
+        }
+
+        .card {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+            gap: 25px;
+            padding: 20px 40px 40px;
+        }
+
+        .sm_card {
+            background: #ffffff;
+            border-radius: 18px;
+            padding: 18px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+            text-align: center;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .sm_card:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 18px 40px rgba(0, 0, 0, 0.15);
+        }
+
+        .sm_card h3 {
+            margin: 10px 0 15px;
+            color: #333;
+            font-size: 20px;
+        }
+
+        .sm_card img {
+            width: 100%;
+            max-height: 180px;
+            object-fit: cover;
+            border-radius: 12px;
+            margin-bottom: 15px;
+        }
+
+        .no-image {
+            height: 180px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: #e0f2f1;
+            border-radius: 12px;
+            color: #555;
+            margin-bottom: 15px;
+            font-size: 14px;
+        }
+
+        .btn {
+            display: inline-block;
+            padding: 10px 20px;
+            background: linear-gradient(135deg, #0077b6, #00b4d8);
+            color: #fff;
+            border-radius: 25px;
+            text-decoration: none;
+            font-weight: 500;
+            transition: background 0.3s ease;
+        }
+
+        .btn:hover {
+            background: linear-gradient(135deg, #023e8a, #0096c7);
+        }
+    </style>
 </head>
-<style>
-    .card{
-        display:grid;
-        grid-template-columns: repeat(4,1fr);
-    }
-    .sm_card {
-        background-color: rgb(226, 234, 231);
-        border: 3px solid cadetblue;
-        border-style: groove;
-        border-radius: 20px;
-        margin-bottom: 10px;
-        max-width: 300px;
-        display: grid;
-        place-content: center;
-    }
-    a {
-        text-decoration: none;
-        color: red;
-    }
-</style>
+
 <body>
-    <h1>All Vehicles</h1>
+
+    <h1>🚗 All Vehicles</h1>
+
     <div class="card">
-    {% for v in vehicles %}
+        {% for v in vehicles %}
         <div class="sm_card">
-            <h3>{{ v.vehicle_name }} ({{ v.vehicle_type }})</h3>
-            <!-- <p>Number Plate: {{ v.number_plate }}</p> -->
-            <!-- <p>Price: {{ v.price_per_hour }}/hour</p> -->
+            <h3>{{ v.vehicle_name }} <br> ({{ v.vehicle_type }})</h3>
 
             {% if v.image %}
-                <img src="{{ v.image.url }}" width="200">
+                <img src="{{ v.image.url }}" alt="{{ v.vehicle_name }}">
             {% else %}
-                <p>No image available</p>
+                <div class="no-image">No image available</div>
             {% endif %}
-            <a href="{% url 'delete_vehicle' v.id %}" onclick="return confirm('Are you sure you want to delete this vehicle?');">
-                Delete
-            </a>
-            <a href="{% url 'vehicle_details' v.id %}">
-                View More
+
+            <a href="{% url 'vehicle_details' v.id %}" class="btn">
+                View Details
             </a>
         </div>
-    {% endfor %}
+        {% endfor %}
     </div>
+
 </body>
 </html>

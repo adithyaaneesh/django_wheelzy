@@ -7,18 +7,42 @@ from datetime import datetime
 from .models import Vehicle, Booking, DamageReport
 
 # list all the rental vehicles
+from django.utils import timezone
+from .models import Vehicle, Booking
+
 def home(request):
     vehicles = Vehicle.objects.all()
-    return render(request, 'home.html', {'vehicles': vehicles})
+
+    active_bookings = Booking.objects.filter(
+        status__in=["pending", "confirmed", "in_use"]
+    ).values_list("vehicle_id", flat=True)
+
+    return render(request, "home.html", {
+        "vehicles": vehicles,
+        "booked_vehicle_ids": active_bookings
+    })
+
 
 # view a vehicle details for user
 def vehicle_details(request, id):
     vehicle = get_object_or_404(Vehicle, id=id)
-    return render(request, "vehicle_detail.html", {"vehicle": vehicle})
+
+    is_booked = Booking.objects.filter(
+        vehicle=vehicle,
+        status__in=["pending", "confirmed", "in_use"]
+    ).exists()
+
+    return render(request, "vehicle_detail.html", {
+        "vehicle": vehicle,
+        "is_booked": is_booked
+    })
+
 
 # book a vehicle by user
-def book_vehicle(request, v_id):
-    vehicle = get_object_or_404(Vehicle, id=v_id)
+
+def book_vehicle(request, vehicle_id):
+    vehicle = get_object_or_404(Vehicle, id=vehicle_id)
+
     if request.method == 'POST':
         start_time = request.POST.get('start_time')
         end_time = request.POST.get('end_time')
@@ -26,20 +50,36 @@ def book_vehicle(request, v_id):
         start = datetime.fromisoformat(start_time)
         end = datetime.fromisoformat(end_time)
 
-        booking = Booking.objects.create(
-            user = request.user,
-            vehicle = vehicle,
-            start_time = start,
-            end_time = end,
+        # 🔒 CHECK BEFORE CREATING
+        existing_booking = Booking.objects.filter(
+            vehicle=vehicle,
+            status__in=["pending", "confirmed", "in_use"]
+        ).exists()
+
+        if existing_booking:
+            messages.error(request, "This vehicle is already booked")
+            return redirect("vehicle_details", vehicle.id)
+
+        # ✅ CREATE BOOKING
+        Booking.objects.create(
+            # user=request.user,
+            vehicle=vehicle,
+            start_time=start,
+            end_time=end,
+            status="pending"
         )
+
         messages.success(request, "Booking created! Proceed to payment.")
-        return redirect("payment_page", booking.id)
-    return render(request, "booking_form.html", {"vehicle":vehicle})
+        return redirect("home")
+
+    return render(request, "booking_form.html", {"vehicle": vehicle})
+
 
 # list all bookings
 def my_booking(request):
-    bookings = Vehicle.objects.filter(user=request.user)
-    return render(request, "my_bookings.html", {"bookings":bookings})
+    bookings = Booking.objects.filter(user=request.user)
+    return render(request, "my_bookings.html", {"bookings": bookings})
+
 
 # return a vehicle
 def return_vehicle(request, booking_id):

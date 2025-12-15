@@ -2,10 +2,65 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Booking Form</title>
+    <title>Book Vehicle</title>
+    <!-- <style>
+        body {
+            font-family: Arial, sans-serif;
+        }
+        .container {
+            width: 40%;
+            margin: 40px auto;
+            padding: 20px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+        }
+        label {
+            font-weight: bold;
+        }
+        input, button {
+            width: 100%;
+            padding: 8px;
+            margin-top: 8px;
+            margin-bottom: 15px;
+        }
+        button {
+            background-color: #0d6efd;
+            color: white;
+            border: none;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #084298;
+        }
+    </style> -->
 </head>
 <body>
-    
+
+<div class="container">
+    <h2>Book Vehicle</h2>
+
+    <!-- Vehicle Info -->
+    <p><strong>Vehicle:</strong> {{ vehicle.vehicle_name }}</p>
+    <p><strong>Number Plate:</strong> {{ vehicle.number_plate }}</p>
+    <p><strong>Price Per Hour:</strong> ₹{{ vehicle.price_per_hour }}</p>
+
+    <!-- Booking Form -->
+    <form method="POST">
+        {% csrf_token %}
+
+        <label>Start Time</label>
+        <input type="datetime-local" name="start_time" required>
+
+        <label>End Time</label>
+        <input type="datetime-local" name="end_time" required>
+
+        <button type="submit">Confirm Booking</button>
+    </form>
+    <a href="{% url 'home' %}">⬅ Back to Home</a>
+    <p style="color: gray; font-size: 14px;">
+        * Total price and security deposit will be calculated automatically.
+    </p>
+</div>
+
 </body>
 </html>

@@ -9,17 +9,28 @@
 
     <h1>{{ vehicle.vehicle_name }}</h1>
 
+    {% if is_booked %}
+        <span style=" background:red; color:white;  padding:5px 10px; border-radius:6px; font-size:14px;">
+            BOOKED
+        </span>
+    {% endif %}
+
     <p>Type: {{ vehicle.vehicle_type }}</p>
     <p>Number Plate: {{ vehicle.number_plate }}</p>
     <p>Price: ₹{{ vehicle.price_per_hour }}/hour</p>
 
     {% if vehicle.image %}
         <img src="{{ vehicle.image.url }}" width="300">
-    {% else %}
-        <p>No image available</p>
     {% endif %}
 
     <br><br>
+
+    {% if is_booked %}
+        <button disabled style="opacity:0.6;">Unavailable</button>
+    {% else %}
+        <a href="{% url 'book_vehicle' vehicle.id %}">Book</a>
+    {% endif %}
+
     <a href="{% url 'home' %}">⬅ Back to Home</a>
 
 </body>
