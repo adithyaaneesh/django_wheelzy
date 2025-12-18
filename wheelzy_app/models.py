@@ -2,19 +2,22 @@ from django.db import models
 
 # Create your models here.
 class Vehicle(models.Model):
-    VEHICLE_TYPES =(
-        ('car','Car'),
-        ('bike','Bike'),
+    VEHICLE_TYPES = (
+        ('car', 'Car'),
+        ('bike', 'Bike'),
     )
+
     vehicle_name = models.CharField(max_length=255)
     vehicle_type = models.CharField(max_length=25, choices=VEHICLE_TYPES)
     number_plate = models.CharField(max_length=50, unique=True)
     price_per_hour = models.PositiveIntegerField()
+    seats = models.PositiveIntegerField(help_text="Number of seats", default=2)
     image = models.ImageField(null=True, blank=True)
     is_available = models.BooleanField(default=True)
 
     def __str__(self):
         return f"{self.vehicle_name} - {self.number_plate}"
+
     
 class Booking(models.Model):
     STATUS = (
