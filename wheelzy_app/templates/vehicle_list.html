@@ -17,9 +17,8 @@
             margin: 0;
         }
 
-        /* FIXED BACKGROUND */
         .bg-fixed {
-            background: 
+            background:
                 linear-gradient(rgba(0,0,0,0.65), rgba(0,0,0,0.65)),
                 url("https://images.unsplash.com/photo-1503376780353-7e6692767b70");
             background-size: cover;
@@ -63,29 +62,82 @@
             padding: 6px 22px;
         }
 
-        .btn-back {
-            border-radius: 30px;
-            padding: 8px 24px;
-            background: #fff;
-            color: black;
+        .filter-box {
+            background: rgba(255,255,255,0.9);
+            border-radius: 16px;
+            padding: 20px;
+            margin-bottom: 30px;
         }
     </style>
 </head>
 
 <body>
 
-<!-- VEHICLE LIST WITH FIXED BACKGROUND -->
 <section class="bg-fixed">
     <div class="container">
 
         <!-- HEADER -->
         <div class="d-flex justify-content-between align-items-center mb-4">
             <h2 class="section-title mb-0">Available Vehicles</h2>
-            <a href="{% url 'home' %}" class="btn btn-outline-light btn-back">
+            <a href="{% url 'home' %}" class="btn btn-outline-light">
                 ← Back to Home
             </a>
         </div>
 
+        <!-- 🔍 SEARCH & FILTER -->
+        <form method="get" class="filter-box">
+            <div class="row g-3 align-items-end">
+
+                <!-- Search -->
+                <div class="col-md-4">
+                    <label class="form-label fw-semibold">Search</label>
+                    <input type="text" name="q" class="form-control"
+                           placeholder="Vehicle name"
+                           value="{{ request.GET.q }}">
+                </div>
+
+                <!-- Type -->
+                <div class="col-md-2">
+                    <label class="form-label fw-semibold">Type</label>
+                    <select name="type" class="form-select">
+                        <option value="">All</option>
+                        <option value="car" {% if request.GET.type == "car" %}selected{% endif %}>Car</option>
+                        <option value="bike" {% if request.GET.type == "bike" %}selected{% endif %}>Bike</option>
+                    </select>
+                </div>
+
+                <!-- Seats -->
+                <div class="col-md-2">
+                    <label class="form-label fw-semibold">Seats</label>
+                    <select name="seats" class="form-select">
+                        <option value="">Any</option>
+                        <option value="2" {% if request.GET.seats == "2" %}selected{% endif %}>2</option>
+                        <option value="4" {% if request.GET.seats == "4" %}selected{% endif %}>4</option>
+                    </select>
+                </div>
+
+                <!-- Availability -->
+                <div class="col-md-2">
+                    <div class="form-check mt-4">
+                        <input class="form-check-input" type="checkbox"
+                               name="available" value="1"
+                               {% if request.GET.available %}checked{% endif %}>
+                        <label class="form-check-label fw-semibold">
+                            Available only
+                        </label>
+                    </div>
+                </div>
+
+                <!-- Buttons -->
+                <div class="col-md-2 d-flex gap-2">
+                    <button type="submit" class="btn btn-dark w-100">Apply</button>
+                    <a href="{% url 'all_vehicles' %}" class="btn btn-outline-secondary w-100">Reset</a>
+                </div>
+
+            </div>
+        </form>
+
+        <!-- 🚗 VEHICLE LIST -->
         <div class="row g-4">
             {% for v in vehicles %}
             <div class="col-sm-6 col-md-4 col-lg-3">
@@ -101,8 +153,18 @@
 
                     <div class="card-body text-center">
                         <h5 class="fw-semibold">{{ v.vehicle_name }}</h5>
+
                         <span class="badge badge-type">{{ v.vehicle_type|title }}</span>
-                        <p class="mt-2 fw-bold">₹ {{ v.price_per_hour }} / hour</p>
+
+                        <p class="mt-2 mb-1">Seats: <strong>{{ v.seats }}</strong></p>
+                        <p class="fw-bold mb-1">₹ {{ v.price_per_hour }} / hour</p>
+
+                        {% if v.id not in booked_vehicle_ids %}
+                            <span class="badge bg-success">Available</span>
+                        {% else %}
+                            <span class="badge bg-danger">Booked</span>
+                        {% endif %}
+
                     </div>
 
                     <div class="card-footer bg-transparent border-0 text-center pb-3">
@@ -112,6 +174,10 @@
                     </div>
 
                 </div>
+            </div>
+            {% empty %}
+            <div class="col-12 text-center text-white">
+                <h4>No vehicles found</h4>
             </div>
             {% endfor %}
         </div>

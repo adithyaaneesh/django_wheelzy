@@ -22,13 +22,40 @@ def home(request):
         "booked_vehicle_ids": active_bookings
     })
 
-
 def all_vehicle(request):
     vehicles = Vehicle.objects.all()
-    return render(request, "vehicle_list.html", {
-        "vehicles": vehicles
-    })
 
+    search_query = request.GET.get("q")
+    vehicle_type = request.GET.get("type")
+    seats = request.GET.get("seats")
+    available = request.GET.get("available")
+
+    # 🔍 Search
+    if search_query:
+        vehicles = vehicles.filter(vehicle_name__icontains=search_query) | \
+                   vehicles.filter(number_plate__icontains=search_query)
+
+    # 🚗 Filter by type
+    if vehicle_type:
+        vehicles = vehicles.filter(vehicle_type=vehicle_type)
+
+    # 💺 Filter by seats
+    if seats:
+        vehicles = vehicles.filter(seats=seats)
+
+    # 🚫 ACTIVE BOOKINGS
+    booked_vehicle_ids = Booking.objects.filter(
+        status__in=["pending", "confirmed", "in_use"]
+    ).values_list("vehicle_id", flat=True)
+
+    # ✅ Available only → EXCLUDE booked vehicles
+    if available == "1":
+        vehicles = vehicles.exclude(id__in=booked_vehicle_ids)
+
+    return render(request, "vehicle_list.html", {
+        "vehicles": vehicles,
+        "booked_vehicle_ids": booked_vehicle_ids
+    })
 
 # view a vehicle details for user
 def vehicle_details(request, id):
