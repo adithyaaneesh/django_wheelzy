@@ -13,6 +13,9 @@ urlpatterns = [
     path("register/", views.register, name="register"),
     path("login/", views.login_view, name="login"),
     path("logout/", views.logout_view, name="logout"),
+    path("owner_dashboard/", views.owner_dashboard, name="owner_dashboard"),
+    path("admin_dashboard/", views.admin_dashboard, name="admin_dashboard"),
+    
 
     # path('payment_page/', views.vehicle_details, name="payment_page"),
 ]

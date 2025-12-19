@@ -55,7 +55,7 @@ def register(request):
 
         login(request, user)
         messages.success(request, "Registration successful!")
-        return redirect("home")
+        return redirect("login")
 
     return render(request, "register.html")
 
@@ -64,13 +64,39 @@ def login_view(request):
     if request.method == "POST":
         username = request.POST.get("username")
         password = request.POST.get("password")
-
+        selected_role = request.POST.get("role") 
         user = authenticate(request, username=username, password=password)
-        if user:
+
+        if user is None:
+            messages.error(request, "Invalid username or password")
+            return redirect("login")
+
+        if selected_role == "admin":
+            if not user.is_superuser:
+                messages.error(request, "You are not an admin")
+                return redirect("login")
+
+            login(request, user)
+            return redirect("admin_dashboard")
+
+        if selected_role == "owner":
+            if not user.groups.filter(name="owner").exists():
+                messages.error(request, "You are not registered as an owner")
+                return redirect("login")
+
+            login(request, user)
+            return redirect("owner_dashboard")
+
+        if selected_role == "customer":
+            if user.is_superuser or user.groups.filter(name="owner").exists():
+                messages.error(request, "Please login using the correct role")
+                return redirect("login")
+
             login(request, user)
             return redirect("home")
-        else:
-            messages.error(request, "Invalid credentials")
+
+        messages.error(request, "Invalid role selected")
+        return redirect("login")
 
     return render(request, "login.html")
 
@@ -79,6 +105,13 @@ def logout_view(request):
     logout(request)
     return redirect("login")
 
+def owner_dashboard(request):
+    if not request.user.groups.filter(name="owner").exists():
+        return redirect("home")
+    return render(request, "owner_dashboard.html")
+
+def admin_dashboard(request):
+    return render(request, "admin_dashboard.html")
 
 def home(request):
     vehicles = Vehicle.objects.all()
