@@ -78,6 +78,7 @@
 
                         <p class="text-muted"><strong>Type:</strong> {{ vehicle.vehicle_type }}</p>
                         <p class="text-muted"><strong>Number Plate:</strong> {{ vehicle.number_plate }}</p>
+                        <p class="text-muted"><strong>Seats:</strong> {{ vehicle.seats }}</p>
                         <p class="price mt-2">
                             ₹{{ vehicle.price_per_hour }} / hour
                         </p>
@@ -93,8 +94,8 @@
                                 </a>
                             {% endif %}
 
-                            <a href="{% url 'home' %}" class="btn btn-outline-primary btn-book">
-                                ⬅ Back to Home
+                            <a href="{% url 'all_vehicles' %}" class="btn btn-outline-primary btn-book">
+                                ⬅ Back
                             </a>
                         </div>
                     </div>

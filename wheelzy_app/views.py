@@ -83,9 +83,14 @@ def book_vehicle(request, vehicle_id):
 
 
 # list all bookings
+# def my_booking(request):
+#     bookings = Booking.objects.filter(user=request.user)
+#     return render(request, "my_bookings.html", {"bookings": bookings})
+
 def my_booking(request):
-    bookings = Booking.objects.filter(user=request.user)
+    bookings = Booking.objects.all()
     return render(request, "my_bookings.html", {"bookings": bookings})
+
 
 
 # return a vehicle
@@ -123,15 +128,17 @@ def damage_details(request, booking_id):
 def add_vehicle(request):
     if request.method == 'POST':
         vehicleName = request.POST.get("vehicle_name")
-        vehiclType = request.POST.get("vehicle_type")
+        vehicleType = request.POST.get("vehicle_type")
         number_plate = request.POST.get("number_plate")
+        num_of_seats = request.POST.get("number_of_seats")
         price_per_hour = request.POST.get("price_per_hour")
         image = request.FILES.get("image")
 
         vehicle = Vehicle.objects.create(
             vehicle_name=vehicleName,
-            vehicle_type=vehiclType,
+            vehicle_type=vehicleType,
             number_plate=number_plate,
+            seats=num_of_seats,
             price_per_hour=price_per_hour,
             image=image,
         )
