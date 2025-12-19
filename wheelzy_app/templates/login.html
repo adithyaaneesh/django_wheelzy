@@ -31,31 +31,30 @@
 
         h2 {
             text-align: center;
-            margin-bottom: 20px;
+            margin-bottom: 18px;
             color: #1e40ff;
             font-size: 26px;
             font-weight: 700;
         }
 
-        /* 🔹 Role Card Section */
+        /* ROLE SELECTION */
         .role-container {
             display: flex;
-            justify-content: space-between;
-            margin-bottom: 18px;
             gap: 10px;
+            margin-bottom: 14px;
         }
 
         .role-card {
             flex: 1;
             border: 2px solid #d1d5db;
-            border-radius: 12px;
-            padding: 12px 8px;
+            border-radius: 10px;
+            padding: 10px 6px;
             text-align: center;
             cursor: pointer;
-            transition: all 0.25s ease;
-            font-size: 13px;
+            font-size: 12px;
             font-weight: 600;
             color: #374151;
+            transition: 0.25s;
         }
 
         .role-card input {
@@ -63,9 +62,9 @@
         }
 
         .role-card span {
+            font-size: 18px;
             display: block;
-            font-size: 20px;
-            margin-bottom: 4px;
+            margin-bottom: 3px;
         }
 
         .role-card:hover {
@@ -74,24 +73,19 @@
         }
 
         .role-card input:checked + div {
-            border-color: #2563eb;
             background: #eef2ff;
+            border-radius: 8px;
             color: #2563eb;
         }
 
-        .role-card div {
-            border-radius: 10px;
-            padding: 10px;
-        }
-
-        input[type="text"],
-        input[type="password"] {
+        /* INPUTS */
+        input {
             width: 100%;
-            padding: 13px 14px;
+            padding: 13px;
             border-radius: 10px;
             border: 1px solid #d1d5db;
             font-size: 14px;
-            margin-bottom: 16px;
+            margin-bottom: 14px;
         }
 
         input:focus {
@@ -100,17 +94,47 @@
             box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15);
         }
 
+        /* DEMO SECTION */
+        .demo-title {
+            text-align: center;
+            font-size: 12px;
+            color: #6b7280;
+            margin: 6px 0 8px;
+        }
+
+        .demo-container {
+            display: flex;
+            justify-content: center;
+            gap: 8px;
+            margin-bottom: 14px;
+        }
+
+        .demo-card {
+            padding: 6px 10px;
+            border-radius: 8px;
+            border: 1px dashed #2563eb;
+            font-size: 11px;
+            font-weight: 600;
+            cursor: pointer;
+            color: #2563eb;
+            transition: 0.2s;
+        }
+
+        .demo-card:hover {
+            background: #eef2ff;
+        }
+
+        /* BUTTON */
         button {
             width: 100%;
             padding: 13px;
             background: linear-gradient(135deg, #2563eb, #1e40ff);
-            color: #ffffff;
+            color: white;
             border: none;
             border-radius: 12px;
             font-size: 16px;
             font-weight: 600;
             cursor: pointer;
-            margin-top: 6px;
         }
 
         button:hover {
@@ -119,7 +143,7 @@
 
         p {
             text-align: center;
-            margin-top: 18px;
+            margin-top: 16px;
             font-size: 14px;
             color: gray;
             font-weight: 600;
@@ -127,8 +151,8 @@
 
         a {
             color: #2563eb;
-            font-weight: 600;
             text-decoration: none;
+            font-weight: 600;
         }
 
         a:hover {
@@ -144,46 +168,55 @@
 
     <h2>Welcome Back</h2>
 
-    <!-- 🔹 ROLE SELECTION -->
+    <!-- ROLE SELECTION -->
     <div class="role-container">
-
         <label class="role-card">
-            <input type="radio" name="role" value="customer" checked>
-            <div>
-                <span>👤</span>
-                Customer
-            </div>
+            <input type="radio" name="role" value="customer" checked onclick="setRole('customer')">
+            <div><span>👤</span>Customer</div>
         </label>
 
         <label class="role-card">
-            <input type="radio" name="role" value="owner">
-            <div>
-                <span>🚗</span>
-                Owner
-            </div>
+            <input type="radio" name="role" value="owner" onclick="setRole('owner')">
+            <div><span>🚗</span>Owner</div>
         </label>
 
         <label class="role-card">
-            <input type="radio" name="role" value="admin">
-            <div>
-                <span>🛠</span>
-                Admin
-            </div>
+            <input type="radio" name="role" value="admin" onclick="setRole('admin')">
+            <div><span>🛠</span>Admin</div>
         </label>
-
     </div>
 
-    <input type="text" name="username" placeholder="Username" required>
-
-    <input type="password" name="password" placeholder="Password" required>
-
+    <input type="text" id="username" name="username" placeholder="Username" required>
+    <input type="password" id="password" name="password" placeholder="Password" required>
+    <div class="demo-title">Quick demo login</div>
+    <div class="demo-container">
+        <div class="demo-card" onclick="fillDemo()">Use demo</div>
+    </div>
     <button type="submit">Login</button>
 
     <p>Don’t have an account?
         <a href="{% url 'register' %}">Register</a>
     </p>
-
 </form>
+
+<script>
+    let selectedRole = "customer";
+
+    const demoUsers = {
+        customer: { username: "customer1", password: "1234567890" },
+        owner: { username: "owner1", password: "1234567890" },
+        admin: { username: "admin", password: "admin" }
+    };
+
+    function setRole(role) {
+        selectedRole = role;
+    }
+
+    function fillDemo() {
+        document.getElementById("username").value = demoUsers[selectedRole].username;
+        document.getElementById("password").value = demoUsers[selectedRole].password;
+    }
+</script>
 
 </body>
 </html>
