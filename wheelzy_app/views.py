@@ -1,14 +1,84 @@
-from django.shortcuts import render
 from django.shortcuts import render, redirect, get_object_or_404
-from django.contrib.auth.decorators import login_required
+from django.contrib.auth.models import User, Group
+from django.contrib.auth import login, authenticate, logout
 from django.contrib import messages
-from django.conf import settings
+from .models import Vehicle, Booking, DamageReport, UserProfile
 from datetime import datetime
-from .models import Vehicle, Booking, DamageReport
-
-# list all the rental vehicles
 from django.utils import timezone
-from .models import Vehicle, Booking
+from django.contrib.auth.decorators import login_required
+
+
+from django.shortcuts import render, redirect
+from django.contrib.auth.models import User, Group
+from django.contrib.auth import login
+from django.contrib import messages
+from .models import UserProfile
+
+
+def register(request):
+    if request.method == "POST":
+        username = request.POST.get("username")
+        email = request.POST.get("email")
+        password = request.POST.get("password")
+        cpassword = request.POST.get("cpassword")
+        role = request.POST.get("role")
+        phone = request.POST.get("phone")
+        address = request.POST.get("address")
+
+        if not all([username, email, password, cpassword, phone, address]):
+            messages.error(request, "All fields are required")
+            return redirect("register")
+
+        if User.objects.filter(username=username).exists():
+            messages.error(request, "Username already exists")
+            return redirect("register")
+
+        if password != cpassword:
+            messages.error(request, "Passwords do not match")
+            return redirect("register")
+
+        user = User.objects.create_user(
+            username=username,
+            email=email,
+            password=password
+        )
+
+        UserProfile.objects.create(
+            user=user,
+            phone_number=phone,
+            address=address
+        )
+
+        if role == "owner":
+            owner_group, _ = Group.objects.get_or_create(name="owner")
+            user.groups.add(owner_group)
+
+        login(request, user)
+        messages.success(request, "Registration successful!")
+        return redirect("home")
+
+    return render(request, "register.html")
+
+
+def login_view(request):
+    if request.method == "POST":
+        username = request.POST.get("username")
+        password = request.POST.get("password")
+
+        user = authenticate(request, username=username, password=password)
+        if user:
+            login(request, user)
+            return redirect("home")
+        else:
+            messages.error(request, "Invalid credentials")
+
+    return render(request, "login.html")
+
+
+def logout_view(request):
+    logout(request)
+    return redirect("login")
+
 
 def home(request):
     vehicles = Vehicle.objects.all()
@@ -96,7 +166,7 @@ def book_vehicle(request, vehicle_id):
 
         # ✅ CREATE BOOKING
         Booking.objects.create(
-            # user=request.user,
+            user=request.user,
             vehicle=vehicle,
             start_time=start,
             end_time=end,

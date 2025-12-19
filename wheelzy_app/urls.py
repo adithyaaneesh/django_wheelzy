@@ -10,6 +10,10 @@ urlpatterns = [
     path('delete/<int:id>/', views.delete_vehicle, name="delete_vehicle"),
     path('vehicle_details/<int:id>/', views.vehicle_details, name="vehicle_details"),
     path('booking/<int:vehicle_id>/', views.book_vehicle, name="book_vehicle"),
+    path("register/", views.register, name="register"),
+    path("login/", views.login_view, name="login"),
+    path("logout/", views.logout_view, name="logout"),
+
     # path('payment_page/', views.vehicle_details, name="payment_page"),
 ]
 
