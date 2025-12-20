@@ -177,32 +177,29 @@ def vehicle_details(request, id):
 
 # book a vehicle by user
 @login_required
-@login_required
 def book_vehicle(request, vehicle_id):
     vehicle = get_object_or_404(Vehicle, id=vehicle_id)
-
+    owner = vehicle.owner
+    owner_profile = None
+    if owner:
+        owner_profile = getattr(owner, "profile", None)
     if vehicle.owner == request.user:
         messages.error(request, "You cannot book your own vehicle")
         return redirect("vehicle_details", vehicle.id)
-
     if request.method == "POST":
         start_time = request.POST.get("start_time")
         end_time = request.POST.get("end_time")
-
         start = datetime.fromisoformat(start_time)
         end = datetime.fromisoformat(end_time)
-
         if end <= start:
             messages.error(request, "End time must be after start time")
             return redirect("book_vehicle", vehicle.id)
-
         if Booking.objects.filter(
             vehicle=vehicle,
             status__in=["pending", "confirmed", "in_use"]
         ).exists():
             messages.error(request, "This vehicle is already booked")
             return redirect("vehicle_details", vehicle.id)
-
         Booking.objects.create(
             user=request.user,
             vehicle=vehicle,
@@ -210,11 +207,14 @@ def book_vehicle(request, vehicle_id):
             end_time=end,
             status="pending"
         )
-
         messages.success(request, "Booking created successfully!")
         return redirect("home")
+    return render(request, "booking_form.html", {
+        "vehicle": vehicle,
+        "owner": owner,
+        "owner_profile": owner_profile
+    })
 
-    return render(request, "booking_form.html", {"vehicle": vehicle})
 
 
 

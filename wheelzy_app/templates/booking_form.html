@@ -4,33 +4,74 @@
     <title>Book Vehicle</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
 </head>
+
 <body class="bg-light">
 
 <div class="container mt-5">
-    <div class="card p-4 shadow">
-        <h3 class="mb-3">Book {{ vehicle.vehicle_name }}</h3>
+    <div class="row justify-content-center">
+        <div class="col-md-8">
 
-        <form method="POST">
-            {% csrf_token %}
-
-            <div class="mb-3">
-                <label>Start Time</label>
-                <input type="datetime-local" name="start_time" class="form-control" required>
+            <!-- VEHICLE INFO -->
+            <div class="card shadow mb-4">
+                <div class="card-body">
+                    <h4 class="mb-2">{{ vehicle.vehicle_name }}</h4>
+                    <p class="mb-1"><strong>Type:</strong> {{ vehicle.vehicle_type }}</p>
+                    <p class="mb-1"><strong>Seats:</strong> {{ vehicle.seats }}</p>
+                    <p class="mb-1 text-success fw-bold">
+                        ₹{{ vehicle.price_per_hour }} / hour
+                    </p>
+                </div>
             </div>
 
-            <div class="mb-3">
-                <label>End Time</label>
-                <input type="datetime-local" name="end_time" class="form-control" required>
+            <!-- OWNER INFO -->
+            <div class="card shadow mb-4 border-primary">
+                <div class="card-body">
+                    <h5 class="text-primary mb-3">Vehicle Owner Details</h5>
+
+                    <p><strong>Name:</strong> {{ owner.username }}</p>
+                    <p><strong>Email:</strong> {{ owner.email }}</p>
+
+                    {% if owner_profile %}
+                        <p><strong>Phone:</strong> {{ owner_profile.phone_number }}</p>
+                        <p><strong>Address:</strong> {{ owner_profile.address }}</p>
+                    {% else %}
+                        <p class="text-muted">Owner contact details not available</p>
+                    {% endif %}
+                </div>
             </div>
 
-            <button type="submit" class="btn btn-success">
-                Confirm Booking
-            </button>
+            <!-- BOOKING FORM -->
+            <div class="card shadow">
+                <div class="card-body">
+                    <h5 class="mb-3">Booking Details</h5>
 
-            <a href="{% url 'vehicle_details' vehicle.id %}" class="btn btn-secondary">
-                Cancel
-            </a>
-        </form>
+                    <form method="POST">
+                        {% csrf_token %}
+
+                        <div class="mb-3">
+                            <label>Start Time</label>
+                            <input type="datetime-local" name="start_time" class="form-control" required>
+                        </div>
+
+                        <div class="mb-3">
+                            <label>End Time</label>
+                            <input type="datetime-local" name="end_time" class="form-control" required>
+                        </div>
+
+                        <div class="d-flex gap-2">
+                            <button type="submit" class="btn btn-success">
+                                Confirm Booking
+                            </button>
+
+                            <a href="{% url 'vehicle_details' vehicle.id %}" class="btn btn-secondary">
+                                Cancel
+                            </a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+        </div>
     </div>
 </div>
 
