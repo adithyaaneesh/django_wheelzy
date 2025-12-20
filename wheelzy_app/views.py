@@ -6,13 +6,7 @@ from .models import Vehicle, Booking, DamageReport, UserProfile
 from datetime import datetime
 from django.utils import timezone
 from django.contrib.auth.decorators import login_required
-
-
-from django.shortcuts import render, redirect
-from django.contrib.auth.models import User, Group
-from django.contrib.auth import login
 from django.contrib import messages
-from .models import UserProfile
 
 
 def register(request):
@@ -132,26 +126,16 @@ def all_vehicle(request):
     vehicle_type = request.GET.get("type")
     seats = request.GET.get("seats")
     available = request.GET.get("available")
-
-    # 🔍 Search
     if search_query:
         vehicles = vehicles.filter(vehicle_name__icontains=search_query) | \
                    vehicles.filter(number_plate__icontains=search_query)
-
-    # 🚗 Filter by type
     if vehicle_type:
         vehicles = vehicles.filter(vehicle_type=vehicle_type)
-
-    # 💺 Filter by seats
     if seats:
         vehicles = vehicles.filter(seats=seats)
-
-    # 🚫 ACTIVE BOOKINGS
     booked_vehicle_ids = Booking.objects.filter(
         status__in=["pending", "confirmed", "in_use"]
     ).values_list("vehicle_id", flat=True)
-
-    # ✅ Available only → EXCLUDE booked vehicles
     if available == "1":
         vehicles = vehicles.exclude(id__in=booked_vehicle_ids)
 
@@ -277,6 +261,25 @@ def add_vehicle(request):
         return redirect("owner_dashboard")
     return render(request, "add_vehicle.html")
 
+# update a vehicle
+@login_required
+def update_vehicle(request, id):
+    vehicle = get_object_or_404(Vehicle, id=id)
+    if vehicle.owner != request.user:
+        messages.error(request, "You are not allowed to edit this vehicle")
+        return redirect("home")
+    if request.method == "POST":
+        vehicle.vehicle_name = request.POST.get("vehicle_name")
+        vehicle.vehicle_type = request.POST.get("vehicle_type")
+        vehicle.number_plate = request.POST.get("number_plate")
+        vehicle.seats = request.POST.get("number_of_seats")
+        vehicle.price_per_hour = request.POST.get("price_per_hour")
+        if request.FILES.get("image"):
+            vehicle.image = request.FILES.get("image")
+        vehicle.save()
+        messages.success(request, "Vehicle updated successfully!")
+        return redirect("owner_vehicle_list")
+    return render(request, "update_vehicle.html", {"vehicle": vehicle})
 
 # delete a vehicle 
 def delete_vehicle(request, id):
@@ -284,3 +287,16 @@ def delete_vehicle(request, id):
     vehicle.delete()
     messages.success(request, "Vehicle deleted successfully!")
     return redirect("home")
+
+
+@login_required
+def owner_vehicles(request):
+    if not request.user.groups.filter(name="owner").exists():
+        messages.error(request, "Access denied")
+        return redirect("home")
+
+    vehicles = Vehicle.objects.filter(owner=request.user)
+
+    return render(request, "owner_vehicles_list.html", {
+        "vehicles": vehicles
+    })
