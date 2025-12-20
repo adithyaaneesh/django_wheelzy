@@ -17,7 +17,8 @@ urlpatterns = [
     path("owner_dashboard/", views.owner_dashboard, name="owner_dashboard"),
     path("admin_dashboard/", views.admin_dashboard, name="admin_dashboard"),
     path("owner_vehicle_list/", views.owner_vehicles, name="owner_vehicle_list"),
-    path("owner_vehicle_bookings/", views.my_booking, name="owner_vehicle_bookings"),
+    path("my_bookings/", views.my_booking, name="my_bookings"),
+    path("owner_vehicle_bookings/", views.owner_bookings, name="owner_vehicle_bookings"),
     
 
     # path('payment_page/', views.vehicle_details, name="payment_page"),

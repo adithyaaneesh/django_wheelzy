@@ -203,13 +203,13 @@ def book_vehicle(request, vehicle_id):
 
 
 # list all bookings
-# def my_booking(request):
-#     bookings = Booking.objects.filter(user=request.user)
-#     return render(request, "my_bookings.html", {"bookings": bookings})
-
 def my_booking(request):
-    bookings = Booking.objects.all()
+    bookings = Booking.objects.filter(user=request.user)
     return render(request, "my_bookings.html", {"bookings": bookings})
+
+# def my_booking(request):
+#     bookings = Booking.objects.all()
+#     return render(request, "my_bookings.html", {"bookings": bookings})
 
 
 
@@ -299,4 +299,17 @@ def owner_vehicles(request):
 
     return render(request, "owner_vehicles_list.html", {
         "vehicles": vehicles
+    })
+
+
+@login_required
+def owner_bookings(request):
+    if not request.user.groups.filter(name="owner").exists():
+        messages.error(request, "Access denied")
+        return redirect("home")
+    bookings = Booking.objects.filter(
+        vehicle__owner=request.user
+    ).select_related("vehicle", "user").order_by("-ordered_at")
+    return render(request, "owner_bookings.html", {
+        "bookings": bookings
     })
