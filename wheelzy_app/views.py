@@ -94,18 +94,21 @@ def login_view(request):
 
     return render(request, "login.html")
 
-
+@login_required
 def logout_view(request):
     logout(request)
     return redirect("login")
 
+@login_required
 def owner_dashboard(request):
     if not request.user.groups.filter(name="owner").exists():
         return redirect("home")
     return render(request, "owner_dashboard.html")
 
+@login_required
 def admin_dashboard(request):
     return render(request, "admin_dashboard.html")
+
 
 def home(request):
     vehicles = Vehicle.objects.all()
@@ -119,6 +122,7 @@ def home(request):
         "booked_vehicle_ids": active_bookings
     })
 
+@login_required
 def all_vehicle(request):
     vehicles = Vehicle.objects.all()
 
@@ -145,6 +149,7 @@ def all_vehicle(request):
     })
 
 # view a vehicle details for user
+@login_required
 def vehicle_details(request, id):
     vehicle = get_object_or_404(Vehicle, id=id)
 
@@ -199,21 +204,14 @@ def book_vehicle(request, vehicle_id):
         "owner_profile": owner_profile
     })
 
-
-
-
 # list all bookings
-def my_booking(request):
-    bookings = Booking.objects.filter(user=request.user)
+@login_required
+def my_bookings(request):
+    bookings = Booking.objects.filter(user=request.user).select_related("vehicle").order_by("-ordered_at")
     return render(request, "my_bookings.html", {"bookings": bookings})
 
-# def my_booking(request):
-#     bookings = Booking.objects.all()
-#     return render(request, "my_bookings.html", {"bookings": bookings})
-
-
-
 # return a vehicle
+@login_required
 def return_vehicle(request, booking_id):
     booking = get_object_or_404(Booking, id=booking_id)
 
@@ -240,6 +238,7 @@ def return_vehicle(request, booking_id):
     return render(request, "return_vehicle.html", {"booking": booking})
 
 # admin/owner view damage details
+@login_required
 def damage_details(request, booking_id):
     report = get_object_or_404(DamageReport, booking_id=booking_id)
     return render(request, "damage_details.html", {"report": report})
@@ -282,6 +281,7 @@ def update_vehicle(request, id):
     return render(request, "update_vehicle.html", {"vehicle": vehicle})
 
 # delete a vehicle 
+@login_required
 def delete_vehicle(request, id):
     vehicle = get_object_or_404(Vehicle, id=id)
     vehicle.delete()
