@@ -176,28 +176,33 @@ def vehicle_details(request, id):
 
 
 # book a vehicle by user
-
+@login_required
+@login_required
 def book_vehicle(request, vehicle_id):
     vehicle = get_object_or_404(Vehicle, id=vehicle_id)
 
-    if request.method == 'POST':
-        start_time = request.POST.get('start_time')
-        end_time = request.POST.get('end_time')
+    if vehicle.owner == request.user:
+        messages.error(request, "You cannot book your own vehicle")
+        return redirect("vehicle_details", vehicle.id)
+
+    if request.method == "POST":
+        start_time = request.POST.get("start_time")
+        end_time = request.POST.get("end_time")
 
         start = datetime.fromisoformat(start_time)
         end = datetime.fromisoformat(end_time)
 
-        # 🔒 CHECK BEFORE CREATING
-        existing_booking = Booking.objects.filter(
+        if end <= start:
+            messages.error(request, "End time must be after start time")
+            return redirect("book_vehicle", vehicle.id)
+
+        if Booking.objects.filter(
             vehicle=vehicle,
             status__in=["pending", "confirmed", "in_use"]
-        ).exists()
-
-        if existing_booking:
+        ).exists():
             messages.error(request, "This vehicle is already booked")
             return redirect("vehicle_details", vehicle.id)
 
-        # ✅ CREATE BOOKING
         Booking.objects.create(
             user=request.user,
             vehicle=vehicle,
@@ -206,10 +211,11 @@ def book_vehicle(request, vehicle_id):
             status="pending"
         )
 
-        messages.success(request, "Booking created! Proceed to payment.")
+        messages.success(request, "Booking created successfully!")
         return redirect("home")
 
     return render(request, "booking_form.html", {"vehicle": vehicle})
+
 
 
 # list all bookings
@@ -255,28 +261,22 @@ def damage_details(request, booking_id):
     return render(request, "damage_details.html", {"report": report})
 
 # add vehicles by owners
+@login_required
 def add_vehicle(request):
     if request.method == 'POST':
-        vehicleName = request.POST.get("vehicle_name")
-        vehicleType = request.POST.get("vehicle_type")
-        number_plate = request.POST.get("number_plate")
-        num_of_seats = request.POST.get("number_of_seats")
-        price_per_hour = request.POST.get("price_per_hour")
-        image = request.FILES.get("image")
-
         vehicle = Vehicle.objects.create(
-            vehicle_name=vehicleName,
-            vehicle_type=vehicleType,
-            number_plate=number_plate,
-            seats=num_of_seats,
-            price_per_hour=price_per_hour,
-            image=image,
+            owner=request.user,
+            vehicle_name=request.POST.get("vehicle_name"),
+            vehicle_type=request.POST.get("vehicle_type"),
+            number_plate=request.POST.get("number_plate"),
+            seats=request.POST.get("number_of_seats"),
+            price_per_hour=request.POST.get("price_per_hour"),
+            image=request.FILES.get("image"),
         )
-
-        messages.success(request, "Vehicle added successfully!!")
-        return redirect('home')
-
+        messages.success(request, "Vehicle added successfully!")
+        return redirect("owner_dashboard")
     return render(request, "add_vehicle.html")
+
 
 # delete a vehicle 
 def delete_vehicle(request, id):

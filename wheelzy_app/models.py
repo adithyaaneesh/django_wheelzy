@@ -9,14 +9,12 @@ class UserProfile(models.Model):
     def __str__(self):
         return self.user.username
     
-    
+
 class Vehicle(models.Model):
     VEHICLE_TYPES = (
         ('car', 'Car'),
         ('bike', 'Bike'),
     )
-
-    # 👤 Owner of the vehicle
     owner = models.ForeignKey(
         User,
         on_delete=models.CASCADE,
