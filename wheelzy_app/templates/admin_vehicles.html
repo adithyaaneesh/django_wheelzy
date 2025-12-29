@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>All Vehicles | Admin</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
+
+    <style>
+        body { font-family: Poppins; background: #f4f6fb; }
+        .container { max-width: 1200px; margin: auto; padding: 30px; }
+
+        .top-bar { display: flex; gap: 10px; margin-bottom: 20px; }
+
+        input, select {
+            padding: 8px;
+            border-radius: 8px;
+            border: 1px solid #ccc;
+            width: 100%;
+        }
+
+        .btn {
+            padding: 8px 14px;
+            border-radius: 8px;
+            text-decoration: none;
+            font-weight: 600;
+            cursor: pointer;
+            border: none;
+        }
+
+        .btn-dark { background: #111827; color: white; }
+        .btn-blue { background: #2563eb; color: white; }
+        .btn-red { background: #ef4444; color: white; }
+
+        table {
+            width: 100%;
+            background: white;
+            border-radius: 12px;
+            border-collapse: collapse;
+        }
+
+        th, td {
+            padding: 12px;
+            border-bottom: 1px solid #eee;
+        }
+
+        th { background: #111827; color: white; }
+
+        .vehicle-img {
+            width: 70px;
+            height: 45px;
+            object-fit: contain;
+            background: #f3f4f6;
+            border-radius: 6px;
+        }
+
+        /* ===== MODAL ===== */
+        .modal {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.5);
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+
+        .modal-content {
+            background: white;
+            width: 420px;
+            padding: 20px;
+            border-radius: 12px;
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+        }
+
+        .close {
+            cursor: pointer;
+            font-size: 20px;
+            font-weight: bold;
+        }
+
+        .form-group {
+            margin-bottom: 10px;
+        }
+    </style>
+</head>
+
+<body>
+
+<div class="container">
+
+    <a href="{% url 'admin_dashboard' %}" class="btn btn-dark">← Back</a>
+    <button class="btn btn-blue" onclick="openModal()">+ Add Vehicle</button>
+
+    <h2>All Vehicles</h2>
+
+    <!-- VEHICLE TABLE -->
+    <table>
+        <tr>
+            <th>#</th><th>Vehicle</th><th>Name</th><th>Type</th>
+            <th>Seats</th><th>Plate</th><th>Price</th><th>Action</th>
+        </tr>
+
+        {% for v in vehicles %}
+        <tr>
+            <td>{{ forloop.counter }}</td>
+
+            <td>
+                {% if v.image %}
+                    <img src="{{ v.image.url }}" class="vehicle-img">
+                {% else %}
+                    —
+                {% endif %}
+            </td>
+
+            <td>{{ v.vehicle_name }}</td>
+            <td>{{ v.vehicle_type }}</td>
+            <td>{{ v.seats }}</td>
+            <td>{{ v.number_plate }}</td>
+            <td>₹{{ v.price_per_hour }}</td>
+
+            <td>
+                <a href="{% url 'admin_update_vehicle' v.id %}" class="btn btn-blue">Edit</a>
+                <a href="{% url 'admin_delete_vehicle' v.id %}"
+                   class="btn btn-red"
+                   onclick="return confirm('Delete vehicle?')">
+                    Delete
+                </a>
+            </td>
+        </tr>
+        {% endfor %}
+    </table>
+
+</div>
+
+<div class="modal" id="vehicleModal">
+    <div class="modal-content">
+
+        <div class="modal-header">
+            <h3>Add Vehicle</h3>
+            <span class="close" onclick="closeModal()">×</span>
+        </div>
+
+        <form method="post" enctype="multipart/form-data"
+              action="{% url 'admin_add_vehicle' %}">
+            {% csrf_token %}
+
+            <div class="form-group">
+                <input name="vehicle_name" placeholder="Vehicle Name" required>
+            </div>
+
+            <div class="form-group">
+                <select name="vehicle_type" required>
+                    <option value="">Select Type</option>
+                    <option value="car">Car</option>
+                    <option value="bike">Bike</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <input name="number_plate" placeholder="Number Plate" required>
+            </div>
+
+            <div class="form-group">
+                <input name="seats" type="number" placeholder="Seats" required>
+            </div>
+
+            <div class="form-group">
+                <input name="price_per_hour" type="number" placeholder="Price / Hour" required>
+            </div>
+
+            <div class="form-group">
+                <input type="file" name="image">
+            </div>
+
+            <button class="btn btn-blue" type="submit">Save Vehicle</button>
+        </form>
+
+    </div>
+</div>
+
+<script>
+    function openModal() {
+        document.getElementById("vehicleModal").style.display = "flex";
+    }
+
+    function closeModal() {
+        document.getElementById("vehicleModal").style.display = "none";
+    }
+</script>
+
+</body>
+</html>

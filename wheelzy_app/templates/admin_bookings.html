@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>All Bookings | Wheelzy Admin</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <!-- Google Font -->
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
+
+    <style>
+        body {
+            margin: 0;
+            font-family: 'Poppins', sans-serif;
+            background: #f4f6fb;
+        }
+
+        .container {
+            max-width: 1300px;
+            margin: auto;
+            padding: 30px;
+        }
+
+        h2 {
+            margin-bottom: 16px;
+            color: #111827;
+        }
+
+        .back-btn {
+            display: inline-block;
+            margin-bottom: 16px;
+            padding: 8px 14px;
+            background: #111827;
+            color: white;
+            border-radius: 8px;
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 14px;
+        }
+
+        .back-btn:hover {
+            background: #000;
+        }
+
+        table {
+            width: 100%;
+            background: white;
+            border-radius: 14px;
+            border-collapse: collapse;
+            overflow: hidden;
+            box-shadow: 0 12px 28px rgba(0,0,0,0.1);
+        }
+
+        thead {
+            background: #111827;
+            color: white;
+        }
+
+        th, td {
+            padding: 14px;
+            border-bottom: 1px solid #e5e7eb;
+            font-size: 14px;
+            vertical-align: top;
+        }
+
+        tbody tr:hover {
+            background: #f9fafb;
+        }
+
+        th {
+            font-weight: 600;
+        }
+
+        .status {
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+            display: inline-block;
+        }
+
+        .status-pending {
+            background: #fde68a;
+            color: #92400e;
+        }
+
+        .status-confirmed {
+            background: #bfdbfe;
+            color: #1e40af;
+        }
+
+        .status-in_use {
+            background: #bae6fd;
+            color: #0369a1;
+        }
+
+        .status-returned {
+            background: #bbf7d0;
+            color: #166534;
+        }
+
+        .status-cancelled {
+            background: #e5e7eb;
+            color: #374151;
+        }
+
+        .muted {
+            color: #6b7280;
+            font-size: 13px;
+        }
+    </style>
+</head>
+
+<body>
+
+<div class="container">
+
+    <a href="{% url 'admin_dashboard' %}" class="back-btn">← Back to Dashboard</a>
+
+    <h2>All Bookings</h2>
+
+    <table>
+        <thead>
+            <tr>
+                <th>#</th>
+                <th>Customer</th>
+                <th>Vehicle</th>
+                <th>Booking Period</th>
+                <th>Status</th>
+                <th>Total Price</th>
+                <th>Security Deposit</th>
+                <th>Booked At</th>
+            </tr>
+        </thead>
+
+        <tbody>
+            {% for booking in bookings %}
+            <tr>
+                <td>{{ forloop.counter }}</td>
+
+                <!-- CUSTOMER -->
+                <td>
+                    <strong>{{ booking.user.username }}</strong><br>
+                    <span class="muted">{{ booking.user.email }}</span>
+                </td>
+
+                <!-- VEHICLE -->
+                <td>
+                    <strong>{{ booking.vehicle.vehicle_name }}</strong><br>
+                    <span class="muted">{{ booking.vehicle.number_plate }}</span>
+                </td>
+
+                <!-- TIME -->
+                <td>
+                    <strong>From:</strong>
+                    {{ booking.start_time|date:"d M Y, h:i A" }}<br>
+                    <strong>To:</strong>
+                    {{ booking.end_time|date:"d M Y, h:i A" }}
+                </td>
+
+                <!-- STATUS -->
+                <td>
+                    <span class="status status-{{ booking.status }}">
+                        {{ booking.status|title }}
+                    </span>
+                </td>
+
+                <!-- PRICE -->
+                <td class="fw-bold text-success">
+                    ₹{{ booking.total_price }}
+                </td>
+
+                <!-- DEPOSIT -->
+                <td>
+                    ₹{{ booking.security_deposit }}
+                </td>
+
+                <!-- BOOKED AT -->
+                <td>
+                    {{ booking.ordered_at|date:"d M Y" }}<br>
+                    <span class="muted">
+                        {{ booking.ordered_at|time:"h:i A" }}
+                    </span>
+                </td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="8" style="text-align:center; padding:20px;">
+                    No bookings found.
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+</div>
+</body>
+</html>

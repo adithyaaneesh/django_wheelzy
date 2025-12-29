@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Manage Users | Wheelzy Admin</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <!-- Google Font -->
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
+
+    <style>
+        body {
+            margin: 0;
+            font-family: 'Poppins', sans-serif;
+            background: #f4f6fb;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: auto;
+            padding: 30px;
+        }
+
+        h2 {
+            margin-bottom: 20px;
+            color: #111827;
+        }
+
+        .back-btn {
+            display: inline-block;
+            margin-bottom: 20px;
+            padding: 8px 14px;
+            background: #111827;
+            color: white;
+            border-radius: 8px;
+            text-decoration: none;
+            font-size: 14px;
+            font-weight: 600;
+        }
+
+        .back-btn:hover {
+            background: #000;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            background: white;
+            border-radius: 14px;
+            overflow: hidden;
+            box-shadow: 0 12px 28px rgba(0,0,0,0.1);
+        }
+
+        thead {
+            background: #111827;
+            color: white;
+        }
+
+        th, td {
+            padding: 14px 16px;
+            text-align: left;
+            font-size: 14px;
+        }
+
+        th {
+            font-weight: 600;
+        }
+
+        tbody tr {
+            border-bottom: 1px solid #e5e7eb;
+        }
+
+        tbody tr:hover {
+            background: #f9fafb;
+        }
+
+        .role {
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+            display: inline-block;
+        }
+
+        .role-admin {
+            background: #fee2e2;
+            color: #991b1b;
+        }
+
+        .role-owner {
+            background: #e0e7ff;
+            color: #1e40af;
+        }
+
+        .role-customer {
+            background: #dcfce7;
+            color: #166534;
+        }
+
+        .muted {
+            color: #6b7280;
+            font-size: 13px;
+        }
+    </style>
+</head>
+
+<body>
+
+<div class="container">
+
+    <a href="{% url 'admin_dashboard' %}" class="back-btn">← Back to Dashboard</a>
+
+    <h2>All Users</h2>
+
+    <table>
+        <thead>
+            <tr>
+                <th>#</th>
+                <th>Username</th>
+                <th>Email</th>
+                <th>Role</th>
+                <th>Phone</th>
+                <th>Address</th>
+            </tr>
+        </thead>
+
+        <tbody>
+            {% for item in users_with_roles %}
+                {% with user=item.user role=item.role %}
+                <tr>
+                    <td>{{ forloop.counter }}</td>
+
+                    <td>
+                        <strong>{{ user.username }}</strong>
+                    </td>
+
+                    <td>{{ user.email }}</td>
+
+                    <td>
+                        {% if role == "admin" %}
+                            <span class="role role-admin">Admin</span>
+                        {% elif role == "owner" %}
+                            <span class="role role-owner">Owner</span>
+                        {% else %}
+                            <span class="role role-customer">Customer</span>
+                        {% endif %}
+                    </td>
+
+                    <td>
+                        {% if user.profile %}
+                            {{ user.profile.phone_number }}
+                        {% else %}
+                            <span class="muted">—</span>
+                        {% endif %}
+                    </td>
+
+                    <td>
+                        {% if user.profile %}
+                            {{ user.profile.address }}
+                        {% else %}
+                            <span class="muted">—</span>
+                        {% endif %}
+                    </td>
+                </tr>
+                {% endwith %}
+            {% empty %}
+                <tr>
+                    <td colspan="6" style="text-align:center; padding:20px;">
+                        No users found.
+                    </td>
+                </tr>
+            {% endfor %}
+        </tbody>
+
+    </table>
+
+</div>
+
+</body>
+</html>

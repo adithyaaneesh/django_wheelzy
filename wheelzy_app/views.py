@@ -7,6 +7,7 @@ from datetime import datetime
 from django.utils import timezone
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
+from . import models
 
 
 def register(request):
@@ -110,17 +111,53 @@ def admin_dashboard(request):
     return render(request, "admin_dashboard.html")
 
 
+
 def home(request):
     vehicles = Vehicle.objects.all()
-
     active_bookings = Booking.objects.filter(
         status__in=["pending", "confirmed", "in_use"]
     ).values_list("vehicle_id", flat=True)
 
+    profile = None
+    if request.user.is_authenticated:
+        profile, _ = UserProfile.objects.get_or_create(user=request.user)
+
     return render(request, "home.html", {
         "vehicles": vehicles,
-        "booked_vehicle_ids": active_bookings
+        "booked_vehicle_ids": active_bookings,
+        "profile": profile
     })
+
+
+@login_required
+def profile_view(request):
+    profile, created = UserProfile.objects.get_or_create(
+        user=request.user
+    )
+    return render(request, "profile.html", {"profile": profile})
+
+
+@login_required
+def edit_profile(request):
+    if request.method == "POST":
+
+        # ✅ Get or create profile safely
+        profile, created = UserProfile.objects.get_or_create(
+            user=request.user
+        )
+
+        request.user.email = request.POST.get("email", "")
+        profile.phone = request.POST.get("phone", "")
+        profile.address = request.POST.get("address", "")
+
+        request.user.save()
+        profile.save()
+
+        messages.success(request, "Profile updated successfully")
+        return redirect("profile")
+
+    return redirect("profile")
+
 
 @login_required
 def all_vehicle(request):
@@ -313,3 +350,147 @@ def owner_bookings(request):
     return render(request, "owner_bookings.html", {
         "bookings": bookings
     })
+
+
+@login_required
+def admin_users(request):
+    if not request.user.is_superuser:
+        return redirect("home")
+
+    users = User.objects.filter(is_superuser=False).prefetch_related("groups")
+
+    users_with_roles = []
+    for user in users:
+        if user.is_superuser:
+            role = "admin"
+        elif user.groups.filter(name="owner").exists():
+            role = "owner"
+        else:
+            role = "customer"
+
+        users_with_roles.append({
+            "user": user,
+            "role": role
+        })
+
+    return render(request, "admin_users.html", {
+        "users_with_roles": users_with_roles
+    })
+@login_required
+def admin_vehicles(request):
+    if not request.user.is_superuser:
+        return redirect("home")
+
+    vehicles = Vehicle.objects.select_related("owner")
+
+    q = request.GET.get("q")
+    if q:
+        vehicles = vehicles.filter(
+            vehicle_name__icontains=q
+        ) | vehicles.filter(
+            number_plate__icontains=q
+        )
+
+    vehicle_type = request.GET.get("type")
+    if vehicle_type:
+        vehicles = vehicles.filter(vehicle_type=vehicle_type)
+
+    return render(request, "admin_vehicles.html", {"vehicles": vehicles})
+
+@login_required
+def admin_add_vehicle(request):
+    if not request.user.is_superuser:
+        return redirect("home")
+
+    if request.method == "POST":
+        Vehicle.objects.create(
+            owner=None,  # admin-added vehicle
+            vehicle_name=request.POST.get("vehicle_name"),
+            vehicle_type=request.POST.get("vehicle_type"),
+            number_plate=request.POST.get("number_plate"),
+            seats=request.POST.get("seats"),
+            price_per_hour=request.POST.get("price_per_hour"),
+            image=request.FILES.get("image"),
+        )
+        messages.success(request, "Vehicle added successfully!")
+        return redirect("admin_vehicles")
+
+    return render(request, "admin_add_vehicle.html")
+
+
+@login_required
+def admin_update_vehicle(request, id):
+    if not request.user.is_superuser:
+        return redirect("home")
+
+    vehicle = get_object_or_404(Vehicle, id=id)
+
+    if request.method == "POST":
+        vehicle.vehicle_name = request.POST.get("vehicle_name")
+        vehicle.vehicle_type = request.POST.get("vehicle_type")
+        vehicle.number_plate = request.POST.get("number_plate")
+        vehicle.seats = request.POST.get("seats")
+        vehicle.price_per_hour = request.POST.get("price_per_hour")
+
+        if request.FILES.get("image"):
+            vehicle.image = request.FILES.get("image")
+
+        vehicle.save()
+        messages.success(request, "Vehicle updated successfully!")
+        return redirect("admin_vehicles")
+
+    return render(request, "admin_update_vehicle.html", {"vehicle": vehicle})
+
+
+@login_required
+def admin_delete_vehicle(request, id):
+    if not request.user.is_superuser:
+        return redirect("home")
+
+    vehicle = get_object_or_404(Vehicle, id=id)
+    vehicle.delete()
+    messages.success(request, "Vehicle deleted successfully!")
+    return redirect("admin_vehicles")
+
+@login_required
+def admin_bookings(request):
+    if not request.user.is_superuser:
+        return redirect("home")
+    bookings = Booking.objects.select_related("vehicle", "user").order_by("-ordered_at")
+    return render(request, "admin_bookings.html", {"bookings": bookings})
+
+
+@login_required
+def admin_damage_reports(request):
+    if not request.user.is_superuser:
+        return redirect("home")
+    reports = DamageReport.objects.select_related("booking", "booking__vehicle")
+    return render(request, "admin_damage_reports.html", {"reports": reports})
+
+
+@login_required
+def admin_revenue(request):
+    if not request.user.is_superuser:
+        return redirect("home")
+    total_revenue = Booking.objects.filter(
+        status__in=["confirmed", "returned"]
+    ).aggregate(total=models.Sum("total_price"))["total"] or 0
+
+    return render(request, "admin_revenue.html", {
+        "total_revenue": total_revenue
+    })
+
+
+@login_required
+def admin_analytics(request):
+    if not request.user.is_superuser:
+        return redirect("home")
+
+    data = {
+        "total_users": User.objects.count(),
+        "total_owners": User.objects.filter(groups__name="owner").count(),
+        "total_vehicles": Vehicle.objects.count(),
+        "total_bookings": Booking.objects.count(),
+    }
+
+    return render(request, "admin_analytics.html", data)

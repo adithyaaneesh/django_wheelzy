@@ -13,13 +13,76 @@
 
     <!-- Google Font -->
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
+
     <style>
+        /* ================= BASE ================= */
         body {
             font-family: 'Poppins', sans-serif;
             background: #f8f9fa;
+            padding-bottom: 120px; /* space for pill navbar */
         }
 
-        /* HERO SECTION */
+        a {
+            text-decoration: none;
+        }
+
+        /* ================= FLOATING PILL NAVBAR ================= */
+        .pill-nav {
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #0f0f0f;
+            padding: 10px;
+            border-radius: 50px;
+            display: flex;
+            gap: 8px;
+            z-index: 9999;
+            box-shadow: 0 12px 35px rgba(0,0,0,0.35);
+        }
+
+        .pill-item {
+            color: #bdbdbd;
+            padding: 12px 18px;
+            border-radius: 30px;
+            font-size: 15px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.25s ease;
+            white-space: nowrap;
+        }
+
+        .pill-item:hover {
+            color: #ffffff;
+            background: rgba(255,255,255,0.08);
+        }
+
+        .pill-item.active {
+            background: #ffffff;
+            color: #000000;
+            font-weight: 600;
+        }
+
+        .pill-item span {
+            font-size: 14px;
+        }
+
+        .profile-card {
+            position: fixed;
+            bottom: 90px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #ffffff;
+            width: 220px;
+            border-radius: 14px;
+            padding: 15px;
+            box-shadow: 0 15px 30px rgba(0,0,0,0.25);
+            display: none;
+            z-index: 10000;
+        }
+
+
         .hero {
             background: linear-gradient(120deg, #ffffff 60%, #1e88e5 40%);
             padding: 80px 0;
@@ -45,7 +108,7 @@
             color: #fff;
             border-radius: 30px;
             padding: 10px 28px;
-            text-decoration: none;
+            display: inline-block;
         }
 
         .btn-main:hover {
@@ -53,14 +116,8 @@
             color: #fff;
         }
 
-        /* SECTION TITLE */
-        .section-title {
-            font-weight: 700;
-            margin-bottom: 40px;
-        }
-        /* PROCESS SECTION */
+        /* ================= PROCESS ================= */
         .process-section {
-            /* background: #0c0c0c; */
             color: #fff;
             padding: 90px 0;
         }
@@ -91,13 +148,12 @@
 
         .process-card h4 {
             font-weight: 600;
-            margin-bottom: 10px;
         }
 
         .process-card p {
             font-size: 14px;
             line-height: 1.6;
-            opacity: 0.9;
+            opacity: 0.95;
         }
 
         .step-number {
@@ -114,7 +170,7 @@
             font-weight: 700;
         }
 
-        /* CTA SECTION */
+        /* ================= CTA ================= */
         .cta-section {
             background: url("https://images.unsplash.com/photo-1503376780353-7e6692767b70")
                 center/cover no-repeat;
@@ -135,26 +191,12 @@
             z-index: 1;
         }
 
-        .cta-subtitle {
-            color: #1e88e5;
-            letter-spacing: 2px;
-            font-size: 13px;
-            font-weight: 600;
-        }
-
-        .cta-section h2 {
-            font-size: 40px;
-            font-weight: 700;
-            margin: 20px 0;
-        }
-
         .cta-btn {
             display: inline-block;
             background: #1e88e5;
             color: #fff;
             padding: 12px 30px;
             border-radius: 30px;
-            text-decoration: none;
             font-weight: 500;
             transition: 0.3s;
         }
@@ -163,7 +205,8 @@
             background: #1987e7;
             color: #fff;
         }
-        /* CONTACT */
+
+        /* ================= CONTACT ================= */
         .contact-section {
             background: #ffffff;
         }
@@ -186,14 +229,14 @@
             color: #1e88e5;
         }
 
-        /* FOOTER */
+        /* ================= FOOTER ================= */
         .footer-section {
             background: #111;
             color: #ccc;
         }
 
         .footer-title {
-            color: #fff;
+            color: #1e88e5;
             font-weight: 600;
             margin-bottom: 15px;
         }
@@ -210,16 +253,15 @@
 
         .footer-links li {
             margin-bottom: 8px;
-            font-size: 14px;
         }
 
         .footer-links a {
-            text-decoration: none;
             color: #ccc;
+            font-size: 14px;
         }
 
         .footer-links a:hover {
-            color: #fff;
+            color: #ffffff;
         }
 
         .footer-line {
@@ -231,55 +273,59 @@
             font-size: 14px;
             color: #aaa;
         }
-
-
     </style>
 </head>
 
 <body>
-<!-- NAVBAR -->
-<nav class="navbar navbar-expand-lg navbar-light bg-white shadow-sm ">
-    <div class="container">
-        <!-- Logo / Brand -->
-        <a class="navbar-brand fw-bold text-primary" href="{% url 'home' %}">
-            <i class="fa-solid fa-car-side me-1"></i> Wheelzy
+
+<!-- ===== FLOATING NAVBAR (UNCHANGED) ===== -->
+<div class="pill-nav">
+
+    <a href="{% url 'home' %}" class="pill-item active">
+        <i class="fa-solid fa-house"></i><span>Home</span>
+    </a>
+
+    <a href="#contact" class="pill-item">
+        <i class="fa-solid fa-phone"></i><span>Contact</span>
+    </a>
+
+    {% if user.is_authenticated %}
+
+        <a href="{% url 'my_bookings' %}" class="pill-item">
+            <i class="fa-regular fa-folder"></i><span>My Bookings</span>
         </a>
 
-        <!-- Toggle button (mobile) -->
-        <button class="navbar-toggler" type="button" data-bs-toggle="collapse"
-            data-bs-target="#wheelzyNavbar">
-            <span class="navbar-toggler-icon"></span>
-        </button>
-
-        <!-- Nav links -->
-        <div class="collapse navbar-collapse" id="wheelzyNavbar">
-            <ul class="navbar-nav ms-auto mb-2 mb-lg-0 align-items-lg-center">
-
-                <!-- <li class="nav-item">
-                    <a class="nav-link fw-semibold" href="{% url 'home' %}">Home</a>
-                </li> -->
-
-                <li class="nav-item">
-                    <a href="{% url 'my_bookings' %}">My Bookings</a>
-                </li>
-
-                <li class="nav-item">
-                    <a class="nav-link fw-semibold" href="#contact">Contact</a>
-                </li>
-                <li class="nav-item">
-                    <a href="{% url 'logout' %}" class="btn btn-light rounded-pill px-4">Logout</a>
-                </li>
-
-                <li class="nav-item ms-lg-3">
-                    <a href="{% url 'login' %}" class="btn btn-dark rounded-pill px-4">
-                       Sign-In
-                    </a>
-                </li>
-
-            </ul>
+        <!-- PROFILE ICON -->
+        <div class="pill-item profile-btn" onclick="toggleProfileCard()">
+            <i class="fa-solid fa-user"></i><span>Profile</span>
         </div>
-    </div>
-</nav>
+
+        <!-- PROFILE POPUP -->
+        <div class="profile-card" id="profileCard">
+            <p class="fw-bold mb-1">{{ user.username }}</p>
+            <p class="text-muted mb-2">
+                {{ profile.phone|default:"No phone number" }}
+            </p>
+
+            <a href="{% url 'profile' %}" class="btn btn-sm btn-dark w-100 mb-2">
+                View Profile
+            </a>
+
+            <a href="{% url 'logout' %}" class="btn btn-sm btn-danger w-100">
+                Logout
+            </a>
+        </div>
+
+    {% else %}
+
+        <a href="{% url 'login' %}" class="pill-item">
+            <i class="fa-solid fa-right-to-bracket"></i><span>Sign Up</span>
+        </a>
+
+    {% endif %}
+</div>
+
+
 
 <!-- HERO -->
 <section class="hero">
@@ -300,8 +346,8 @@
     </div>
 </section>
 
-<!-- ABOUT WHEELZY -->
-<section class="py-5 bg-white">
+<!-- ABOUT -->
+<section id="about" class="py-5 bg-white">
     <div class="container">
         <div class="row align-items-center g-5">
 
@@ -354,7 +400,8 @@
         </div>
     </div>
 </section>
-<!-- PROCESS SECTION -->
+
+<!-- PROCESS / SERVICES -->
 <section class="process-section">
     <div class="container">
 
@@ -403,7 +450,7 @@
     </div>
 </section>
 
-<!-- CTA SECTION -->
+<!-- CTA -->
 <section class="cta-section">
     <div class="container text-center">
         <p class="cta-subtitle">EXPERIENCE</p>
@@ -411,8 +458,9 @@
         <a href="{% url 'all_vehicles' %}" class="cta-btn">Rent a car →</a>
     </div>
 </section>
-<!-- CONTACT SECTION -->
-<section class="contact-section py-5">
+
+<!-- CONTACT -->
+<section id="contact" class="contact-section py-5">
     <div class="container text-center">
         <h2 class="fw-bold mb-2">Contact Us</h2>
         <p class="text-muted mb-5">
@@ -454,6 +502,7 @@
         </div>
     </div>
 </section>
+
 <!-- FOOTER -->
 <footer class="footer-section">
     <div class="container py-5">
@@ -475,8 +524,8 @@
                 <ul class="footer-links">
                     <li><a href="{% url 'home' %}">Home</a></li>
                     <li><a href="{% url 'add_vehicle' %}">Add Vehicle</a></li>
-                    <li><a href="#">Bookings</a></li>
-                    <li><a href="#">About</a></li>
+                    <li><a href="{% url 'my_bookings' %}">Bookings</a></li>
+                    <li><a href="#about">About</a></li>
                 </ul>
             </div>
 
@@ -509,6 +558,33 @@
         </div>
     </div>
 </footer>
+
+<script>
+    const links = document.querySelectorAll(".pill-item");
+    const currentUrl = window.location.href;
+
+    links.forEach(link => {
+        if (currentUrl.includes(link.getAttribute("href"))) {
+            links.forEach(l => l.classList.remove("active"));
+            link.classList.add("active");
+        }
+    });
+
+
+    function toggleProfileCard() {
+        const card = document.getElementById("profileCard");
+        card.style.display = card.style.display === "block" ? "none" : "block";
+    }
+
+    document.addEventListener("click", function(e) {
+        const card = document.getElementById("profileCard");
+        const btn = document.querySelector(".profile-btn");
+        if (card && btn && !card.contains(e.target) && !btn.contains(e.target)) {
+            card.style.display = "none";
+        }
+    });
+
+</script>
 
 </body>
 </html>
