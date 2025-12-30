@@ -2,141 +2,121 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Register</title>
+    <title>Register | Wheelzy</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
     <style>
         * {
             box-sizing: border-box;
+            font-family: "Segoe UI", Tahoma, sans-serif;
         }
 
         body {
-            font-family: "Segoe UI", Tahoma, sans-serif;
-            background: linear-gradient(135deg, #eef2ff, #f8fafc);
+            margin: 0;
             min-height: 100vh;
             display: flex;
             align-items: center;
             justify-content: center;
-            margin: 0;
+            background: #f4f6fb;
         }
 
-        .card {
-            background: #ffffff;
+        /* CARD */
+        .register-wrapper {
             width: 100%;
-            max-width: 380px;
-            padding: 32px 28px;
-            border-radius: 16px;
-            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.08);
-            animation: fadeIn 0.4s ease-in-out;
+            max-width: 980px;
+            height: 570px;
+            background: #fff;
+            border-radius: 22px;
+            overflow: hidden;
+            display: flex;
+            box-shadow: 0 25px 60px rgba(0,0,0,.25);
         }
 
-        .card h2 {
-            text-align: center;
-            margin-bottom: 24px;
-            color: #1e40ff;
-            font-size: 26px;
+        /* LEFT FORM */
+        .register-form {
+            flex: 1;
+            padding: 22px 34px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+
+        .brand {
+            font-size: 11px;
             font-weight: 700;
+            letter-spacing: 2px;
+            color: #1e88e5;
+            margin-bottom: 6px;
+        }
+
+        h1 {
+            font-size: 22px;
+            margin: 0 0 2px;
+        }
+
+        .subtitle {
+            font-size: 12px;
+            color: #6b7280;
+            margin-bottom: 10px;
         }
 
         .form-group {
-            margin-bottom: 14px;
+            margin-bottom: 8px;
         }
 
         input,
-        textarea,
-        select {
+        textarea {
             width: 100%;
-            padding: 13px 14px;
-            border-radius: 10px;
+            padding: 10px 12px;
+            font-size: 12.5px;
+            border-radius: 9px;
             border: 1px solid #d1d5db;
-            font-size: 14px;
-            transition: all 0.25s ease;
+            background: #f9fafb;
         }
 
         textarea {
             resize: none;
         }
 
-        input::placeholder,
-        textarea::placeholder {
-            color: #9ca3af;
-        }
-
         input:focus,
-        textarea:focus,
-        select:focus {
+        textarea:focus {
             outline: none;
-            border-color: #2563eb;
-            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15);
+            border-color: #1e88e5;
+            box-shadow: 0 0 0 3px rgba(30,136,229,.18);
+            background: #fff;
         }
 
-        button {
-            width: 100%;
-            padding: 13px;
-            background: linear-gradient(135deg, #2563eb, #1e40ff);
-            color: #ffffff;
-            border: none;
-            border-radius: 12px;
-            font-size: 16px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: transform 0.2s ease, box-shadow 0.2s ease;
-            margin-top: 10px;
-        }
-
-        button:hover {
-            transform: translateY(-1px);
-            box-shadow: 0 10px 20px rgba(37, 99, 235, 0.3);
-        }
-
-        .login-link {
-            text-align: center;
-            margin-top: 16px;
-            font-size: 14px;
-        }
-
-        .login-link a {
-            color: #2563eb;
-            font-weight: 600;
-            text-decoration: none;
-        }
+        /* ROLE */
         .role-section {
-            margin-bottom: 18px;
+            margin: 6px 0 10px;
         }
 
         .role-title {
-            font-size: 14px;
+            font-size: 11.5px;
             font-weight: 600;
-            color: #374151;
-            margin-bottom: 8px;
+            margin-bottom: 6px;
         }
 
         .role-cards {
             display: flex;
-            gap: 12px;
+            gap: 8px;
         }
 
         .role-card {
             flex: 1;
-            border: 2px solid #e5e7eb;
-            border-radius: 12px;
-            padding: 14px;
+            border: 1.5px solid #e5e7eb;
+            border-radius: 20px;
+            padding: 6px 8px;
             cursor: pointer;
-            transition: all 0.25s ease;
-            display: flex;
-            align-items: center;
-            gap: 10px;
             background: #f9fafb;
+            text-align: center;
+            transition: .25s ease;
         }
 
         .role-card h4 {
             margin: 0;
-            font-size: 15px;
-            color: #111827;
-        }
-
-        .role-card span {
             font-size: 12px;
-            color: #6b7280;
+            font-weight: 600;
         }
 
         .role-card input {
@@ -144,77 +124,241 @@
         }
 
         .role-card:has(input:checked) {
-            border-color: #2563eb;
-            background: #eef2ff;
+            border-color: #1e88e5;
+            background: #eef4ff;
+            color: #1e88e5;
         }
 
+        /* BUTTON */
+        button {
+            background: linear-gradient(135deg, #1e88e5, #1987e7);
+            border: none;
+            padding: 11px;
+            border-radius: 12px;
+            font-size: 13.5px;
+            font-weight: 600;
+            color: #fff;
+            cursor: pointer;
+            margin-top: 6px;
+        }
 
+        button:hover {
+            box-shadow: 0 10px 25px rgba(30,136,229,.35);
+        }
+
+        .login-link {
+            margin-top: 8px;
+            font-size: 12.5px;
+            text-align: center;
+            color: #6b7280;
+        }
+
+        .login-link a {
+            color: #1e88e5;
+            font-weight: 600;
+            text-decoration: none;
+        }
+
+        /* RIGHT IMAGE */
+        .register-image {
+            flex: 1;
+            background: url("/static/images/register.jpg") center/cover no-repeat;
+            position: relative;
+        }
+
+        .register-image::after {
+            content: "";
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(to left, rgba(0,0,0,.15), rgba(0,0,0,.55));
+        }
+
+        .image-text {
+            position: absolute;
+            bottom: 24px;
+            right: 24px;
+            color: #fff;
+            text-align: right;
+        }
+
+        .image-text h2 {
+            margin: 0;
+            font-size: 25px;
+            font-weight: 700;
+        }
+
+        .image-text p {
+            font-size: 12px;
+            opacity: .9;
+            margin-top: 4px;
+        }
+
+        /* MOBILE */
+        @media (max-width: 768px) {
+            .register-wrapper {
+                height: auto;
+                border-radius: 0;
+            }
+
+            .register-image {
+                display: none;
+            }
+
+            .register-form {
+                padding: 26px 22px;
+            }
+        }
+        @media (max-width: 768px) {
+
+            body {
+                background: url("/static/images/register-car.jpg") center / cover no-repeat fixed;
+                position: relative;
+            }
+
+            body::before {
+                content: "";
+                position: fixed;
+                inset: 0;
+                background: linear-gradient(
+                    rgba(0,0,0,0.6),
+                    rgba(0,0,0,0.85)
+                );
+                z-index: -1;
+            }
+
+            .register-wrapper {
+                height: auto;
+                max-width: 360px;
+                border-radius: 28px;
+                background: rgba(255,255,255,0.08);
+                backdrop-filter: blur(14px);
+                box-shadow: 0 25px 60px rgba(0,0,0,.6);
+            }
+
+            .register-image {
+                display: none;
+            }
+
+            .register-form {
+                padding: 26px 22px;
+                color: #fff;
+            }
+
+            .register-form input,
+            .register-form textarea {
+                background: rgba(255,255,255,0.15);
+                border: 1px solid rgba(255,255,255,0.25);
+                color: #fff;
+            }
+
+            .register-form input::placeholder,
+            .register-form textarea::placeholder {
+                color: rgba(255,255,255,0.7);
+            }
+
+            .register-form input:focus,
+            .register-form textarea:focus {
+                background: rgba(255,255,255,0.2);
+                border-color: #1e88e5;
+            }
+
+            .register-form h1,
+            .register-form .brand,
+            .register-form .subtitle,
+            .register-form .login-link,
+            .register-form .login-link a {
+                color: #fff;
+                text-align: center;
+            }
+
+            .role-card {
+                background: rgba(255,255,255,0.12);
+                border-color: rgba(255,255,255,0.3);
+                color: #fff;
+            }
+
+            .role-card:has(input:checked) {
+                background: rgba(30,136,229,0.35);
+                border-color: #1e88e5;
+            }
+        }
 
     </style>
 </head>
 
 <body>
 
-<form method="post" class="card" enctype="multipart/form-data">
-    {% csrf_token %}
+<div class="register-wrapper">
 
-    <h2>Create Account</h2>
-    <div class="form-group">
-        <input type="file" name="photo" accept="image/*" required>
-    </div>
+    <!-- FORM -->
+    <form method="post" class="register-form" enctype="multipart/form-data">
+        {% csrf_token %}
 
-    <div class="form-group">
-        <input type="text" name="username" placeholder="Username" required>
-    </div>
+        <div class="brand">WHEELZY</div>
+        <h1>Create Account</h1>
+        <div class="subtitle">Get started in just a minute</div>
 
-    <div class="form-group">
-        <input type="email" name="email" placeholder="Email" required>
-    </div>
+        <div class="form-group">
+            <input type="file" name="photo" accept="image/*" required>
+        </div>
 
-    <div class="form-group">
-        <input type="password" name="password" placeholder="Password" required>
-    </div>
+        <div class="form-group">
+            <input type="text" name="username" placeholder="Username" required>
+        </div>
 
-    <div class="form-group">
-        <input type="password" name="cpassword" placeholder="Confirm Password" required>
-    </div>
+        <div class="form-group">
+            <input type="email" name="email" placeholder="Email" required>
+        </div>
 
-    <div class="form-group">
-        <input type="text" name="phone" placeholder="Phone Number" required>
-    </div>
+        <div class="form-group">
+            <input type="password" name="password" placeholder="Password" required>
+        </div>
 
-    <div class="form-group">
-        <textarea name="address" placeholder="Address" rows="3" required></textarea>
-    </div>
+        <div class="form-group">
+            <input type="password" name="cpassword" placeholder="Confirm Password" required>
+        </div>
 
-    <div class="role-section">
-        <p class="role-title">Select Role</p>
+        <div class="form-group">
+            <input type="text" name="phone" placeholder="Phone Number" required>
+        </div>
 
-        <div class="role-cards">
-            <label class="role-card">
-                <input type="radio" name="role" value="customer" required>
-                <div>
+        <div class="form-group">
+            <textarea name="address" rows="2" placeholder="Address" required></textarea>
+        </div>
+
+        <!-- ROLE -->
+        <div class="role-section">
+            <div class="role-title">Select Role</div>
+            <div class="role-cards">
+                <label class="role-card">
+                    <input type="radio" name="role" value="customer" required>
                     <h4>Customer</h4>
-                    <span>Book vehicles</span>
-                </div>
-            </label>
+                </label>
 
-            <label class="role-card">
-                <input type="radio" name="role" value="owner">
-                <div>
+                <label class="role-card">
+                    <input type="radio" name="role" value="owner">
                     <h4>Owner</h4>
-                    <span>Add & manage vehicles</span>
-                </div>
-            </label>
+                </label>
+            </div>
+        </div>
+
+        <button type="submit">REGISTER</button>
+
+        <div class="login-link">
+            Already have an account?
+            <a href="{% url 'login' %}">Login</a>
+        </div>
+    </form>
+
+    <!-- IMAGE -->
+    <div class="register-image">
+        <div class="image-text">
+            <h2>Join Wheelzy</h2>
+            <p>Create your account & start riding</p>
         </div>
     </div>
-    <button type="submit">Register</button>
 
-    <div class="login-link">
-        Already have an account?
-        <a href="{% url 'login' %}">Login</a>
-    </div>
-</form>
+</div>
 
 </body>
 </html>

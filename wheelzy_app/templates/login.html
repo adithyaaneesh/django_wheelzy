@@ -24,7 +24,7 @@
         .login-wrapper {
             width: 100%;
             max-width: 980px;
-            height: 520px; /* FIXED HEIGHT */
+            height: 570px;
             background: #fff;
             border-radius: 22px;
             overflow: hidden;
@@ -35,7 +35,7 @@
         /* LEFT IMAGE */
         .login-image {
             flex: 1;
-            background: url("/static/images/login-car.jpg") center/cover no-repeat;
+            background: url("/static/images/login-logo.jpg") center/cover no-repeat;
             position: relative;
         }
 
@@ -209,12 +209,31 @@
             text-decoration: none;
             font-weight: 600;
         }
-
-        /* MOBILE */
         @media (max-width: 768px) {
+
+            body {
+                background: url("/static/images/login-car.jpg") center / cover no-repeat fixed;
+                position: relative;
+            }
+
+            body::before {
+                content: "";
+                position: fixed;
+                inset: 0;
+                background: linear-gradient(
+                    rgba(0,0,0,0.65),
+                    rgba(0,0,0,0.85)
+                );
+                z-index: -1;
+            }
+
             .login-wrapper {
                 height: auto;
-                border-radius: 0;
+                max-width: 360px;
+                border-radius: 28px;
+                background: rgba(255,255,255,0.08);
+                backdrop-filter: blur(14px);
+                box-shadow: 0 25px 60px rgba(0,0,0,.6);
             }
 
             .login-image {
@@ -223,8 +242,34 @@
 
             .login-form {
                 padding: 28px 22px;
+                color: #fff;
+            }
+
+            .login-form input {
+                background: rgba(255,255,255,0.15);
+                border: 1px solid rgba(255,255,255,0.25);
+                color: #fff;
+            }
+
+            .login-form input::placeholder {
+                color: rgba(255,255,255,0.7);
+            }
+
+            .login-form input:focus {
+                background: rgba(255,255,255,0.2);
+                border-color: #1e88e5;
+            }
+
+            .login-form h1,
+            .login-form .brand,
+            .login-form .subtitle,
+            .login-form .signup,
+            .login-form .signup a {
+                color: #fff;
+                text-align: center;
             }
         }
+
     </style>
 </head>
 
