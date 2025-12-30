@@ -54,18 +54,19 @@ def register(request):
 
     return render(request, "register.html")
 
-
 def login_view(request):
     if request.method == "POST":
         username = request.POST.get("username")
         password = request.POST.get("password")
-        selected_role = request.POST.get("role") 
+        selected_role = request.POST.get("role")
+
         user = authenticate(request, username=username, password=password)
 
         if user is None:
             messages.error(request, "Invalid username or password")
             return redirect("login")
 
+        # -------- ADMIN --------
         if selected_role == "admin":
             if not user.is_superuser:
                 messages.error(request, "You are not an admin")
@@ -74,31 +75,36 @@ def login_view(request):
             login(request, user)
             return redirect("admin_dashboard")
 
-        if selected_role == "owner":
-            if not user.groups.filter(name="owner").exists():
+        # -------- OWNER --------
+        elif selected_role == "owner":
+            if user.is_superuser or not user.groups.filter(name="owner").exists():
                 messages.error(request, "You are not registered as an owner")
                 return redirect("login")
 
             login(request, user)
             return redirect("owner_dashboard")
 
-        if selected_role == "customer":
+        # -------- CUSTOMER --------
+        elif selected_role == "customer":
+            # Block admin and owner from logging in as customer
             if user.is_superuser or user.groups.filter(name="owner").exists():
-                messages.error(request, "Please login using the correct role")
+                messages.error(request, "Admins and Owners cannot login as customers")
                 return redirect("login")
 
             login(request, user)
             return redirect("home")
 
-        messages.error(request, "Invalid role selected")
-        return redirect("login")
+        else:
+            messages.error(request, "Invalid role selected")
+            return redirect("login")
 
     return render(request, "login.html")
+
 
 @login_required
 def logout_view(request):
     logout(request)
-    return redirect("login")
+    return redirect("home")
 
 @login_required
 def owner_dashboard(request):
@@ -110,9 +116,13 @@ def owner_dashboard(request):
 def admin_dashboard(request):
     return render(request, "admin_dashboard.html")
 
-
-
 def home(request):
+    if request.user.is_authenticated:
+        if request.user.is_superuser:
+            return redirect("admin_dashboard")
+        if request.user.groups.filter(name="owner").exists():
+            return redirect("owner_dashboard")
+
     vehicles = Vehicle.objects.all()
     active_bookings = Booking.objects.filter(
         status__in=["pending", "confirmed", "in_use"]
@@ -141,13 +151,12 @@ def profile_view(request):
 def edit_profile(request):
     if request.method == "POST":
 
-        # ✅ Get or create profile safely
         profile, created = UserProfile.objects.get_or_create(
             user=request.user
         )
 
         request.user.email = request.POST.get("email", "")
-        profile.phone = request.POST.get("phone", "")
+        profile.phone_number = request.POST.get("phone", "")
         profile.address = request.POST.get("address", "")
 
         request.user.save()

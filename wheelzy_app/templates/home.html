@@ -304,7 +304,7 @@
         <div class="profile-card" id="profileCard">
             <p class="fw-bold mb-1">{{ user.username }}</p>
             <p class="text-muted mb-2">
-                {{ profile.phone|default:"No phone number" }}
+                {{ profile.phone_number|default:"Not added" }}
             </p>
 
             <a href="{% url 'profile' %}" class="btn btn-sm btn-dark w-100 mb-2">
@@ -401,7 +401,7 @@
     </div>
 </section>
 
-<!-- PROCESS / SERVICES -->
+<!-- SERVICES -->
 <section class="process-section">
     <div class="container">
 
@@ -450,7 +450,6 @@
     </div>
 </section>
 
-<!-- CTA -->
 <section class="cta-section">
     <div class="container text-center">
         <p class="cta-subtitle">EXPERIENCE</p>
@@ -508,7 +507,6 @@
     <div class="container py-5">
         <div class="row g-4">
 
-            <!-- About -->
             <div class="col-md-4">
                 <h5 class="footer-title">Wheelzy</h5>
                 <p class="footer-text">
@@ -518,7 +516,6 @@
                 </p>
             </div>
 
-            <!-- Quick Links -->
             <div class="col-md-2">
                 <h5 class="footer-title">Quick Links</h5>
                 <ul class="footer-links">
@@ -529,7 +526,6 @@
                 </ul>
             </div>
 
-            <!-- Support -->
             <div class="col-md-3">
                 <h5 class="footer-title">Support</h5>
                 <ul class="footer-links">
@@ -539,7 +535,6 @@
                 </ul>
             </div>
 
-            <!-- Newsletter -->
             <div class="col-md-3">
                 <h5 class="footer-title">Newsletter</h5>
                 <p class="footer-text">Subscribe for updates & offers</p>
