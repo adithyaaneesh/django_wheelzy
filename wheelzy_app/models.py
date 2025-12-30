@@ -5,6 +5,7 @@ class UserProfile(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE, related_name="profile")
     phone_number = models.CharField(max_length=15)
     address = models.TextField()
+    photo = models.ImageField(upload_to="profile_photos/", blank=True, null=True)
 
     def __str__(self):
         return self.user.username

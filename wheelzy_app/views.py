@@ -9,7 +9,6 @@ from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from . import models
 
-
 def register(request):
     if request.method == "POST":
         username = request.POST.get("username")
@@ -19,8 +18,9 @@ def register(request):
         role = request.POST.get("role")
         phone = request.POST.get("phone")
         address = request.POST.get("address")
+        photo = request.FILES.get("photo")  # 👈 IMPORTANT
 
-        if not all([username, email, password, cpassword, phone, address]):
+        if not all([username, email, password, cpassword, phone, address, photo]):
             messages.error(request, "All fields are required")
             return redirect("register")
 
@@ -41,18 +41,19 @@ def register(request):
         UserProfile.objects.create(
             user=user,
             phone_number=phone,
-            address=address
+            address=address,
+            photo=photo
         )
 
         if role == "owner":
             owner_group, _ = Group.objects.get_or_create(name="owner")
             user.groups.add(owner_group)
 
-        login(request, user)
         messages.success(request, "Registration successful!")
         return redirect("login")
 
     return render(request, "register.html")
+
 
 def login_view(request):
     if request.method == "POST":

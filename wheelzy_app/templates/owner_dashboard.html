@@ -173,7 +173,14 @@
         </div>
         <div class="header-actions">
             <div class="profile-icon" onclick="toggleProfile()">
-                {{ request.user.username|slice:":1"|upper }}
+                {% if request.user.profile.photo %}
+                    <img src="{{ request.user.profile.photo.url }}"
+                        style="width:44px;height:44px;border-radius:50%;object-fit:cover;">
+                {% else %}
+                    <div class="profile-icon">
+                        {{ request.user.username|slice:":1"|upper }}
+                    </div>
+                {% endif %}           
             </div>
             <div class="profile-popup" id="profilePopup">
                 <h4>{{ request.user.username }}</h4>

@@ -155,10 +155,13 @@
 
 <body>
 
-<form method="post" class="card">
+<form method="post" class="card" enctype="multipart/form-data">
     {% csrf_token %}
 
     <h2>Create Account</h2>
+    <div class="form-group">
+        <input type="file" name="photo" accept="image/*" required>
+    </div>
 
     <div class="form-group">
         <input type="text" name="username" placeholder="Username" required>
