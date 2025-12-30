@@ -2,7 +2,7 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.models import User, Group
 from django.contrib.auth import login, authenticate, logout
 from django.contrib import messages
-from .models import Vehicle, Booking, DamageReport, UserProfile
+from .models import Vehicle, Booking, DamageReport, UserProfile, Notification
 from datetime import datetime
 from django.utils import timezone
 from django.contrib.auth.decorators import login_required
@@ -519,3 +519,72 @@ def admin_analytics(request):
     }
 
     return render(request, "admin_analytics.html", data)
+
+@login_required
+def approve_booking(request, booking_id):
+    if not request.user.is_superuser:
+        return redirect("home")
+    booking = get_object_or_404(Booking, id=booking_id)
+    if booking.vehicle.is_available:
+        booking.status = "confirmed"
+        booking.vehicle.is_available = False
+        booking.vehicle.save()
+        booking.save()
+        Notification.objects.create(
+            user=booking.user,
+            message=f"Your booking for {booking.vehicle.vehicle_name} has been approved."
+        )
+        if booking.vehicle.owner:
+            Notification.objects.create(
+                user=booking.vehicle.owner,
+                message=f"Your vehicle {booking.vehicle.vehicle_name} has been booked."
+            )
+    return redirect("admin_bookings")
+
+@login_required
+def mark_in_use(request, booking_id):
+    booking = get_object_or_404(Booking, id=booking_id, user=request.user)
+    if booking.status == "confirmed":
+        booking.status = "in_use"
+        booking.save()
+        Notification.objects.create(
+            user=booking.vehicle.owner,
+            message=f"{booking.vehicle.vehicle_name} is now in use."
+        )
+    return redirect("my_bookings")
+
+@login_required
+def mark_returned(request, booking_id):
+    if not request.user.is_superuser:
+        return redirect("home")
+    booking = get_object_or_404(Booking, id=booking_id)
+    if booking.status == "in_use":
+        booking.status = "returned"
+        booking.vehicle.is_available = True
+        booking.vehicle.save()
+        booking.save()
+        Notification.objects.create(
+            user=booking.user,
+            message=f"You have successfully returned {booking.vehicle.vehicle_name}."
+        )
+        Notification.objects.create(
+            user=booking.vehicle.owner,
+            message=f"{booking.vehicle.vehicle_name} has been returned and is now available."
+        )
+    return redirect("admin_bookings")
+
+@login_required
+def cancel_booking(request, booking_id):
+    booking = get_object_or_404(Booking, id=booking_id, user=request.user)
+
+    if booking.status == "pending":
+        booking.status = "cancelled"
+        booking.save()
+
+        Notification.objects.create(
+            user=booking.user,
+            message="Your booking has been cancelled."
+        )
+
+    return redirect("my_bookings")
+

@@ -30,11 +30,21 @@ urlpatterns = [
     path("admin_dashboard/", views.admin_dashboard, name="admin_dashboard"),
     path("admin_users/", views.admin_users, name="admin_users"),
     path("admin_vehicles/", views.admin_vehicles, name="admin_vehicles"),
+
     path("admin_bookings/", views.admin_bookings, name="admin_bookings"),
+    path("booking/<int:booking_id>/approve/", views.approve_booking, name="approve_booking"),
+    path("booking/<int:booking_id>/in-use/", views.mark_in_use, name="mark_in_use"),
+    path("booking/<int:booking_id>/returned/", views.mark_returned, name="mark_returned"),
+    path("booking/<int:booking_id>/cancel/", views.cancel_booking, name="cancel_booking"),
+
+    
     path("admin_damages/", views.admin_damage_reports, name="admin_damage_reports"),
     path("admin_revenue/", views.admin_revenue, name="admin_revenue"),
     path("admin_analytics/", views.admin_analytics, name="admin_analytics"),
     path("admin/vehicles/delete/<int:id>/", views.admin_delete_vehicle, name="admin_delete_vehicle"),
+
+
+
 
     # path('payment_page/', views.vehicle_details, name="payment_page"),
 ]

@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html>
+<head><title>Notifications</title></head>
+<body>
+
+<h2>Notifications</h2>
+
+{% for note in request.user.notifications.all %}
+<p>
+    {% if not note.is_read %}
+        <strong>{{ note.message }}</strong>
+    {% else %}
+        {{ note.message }}
+    {% endif %}
+</p>
+{% empty %}
+<p>No notifications</p>
+{% endfor %}
+
+</body>
+</html>

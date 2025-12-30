@@ -287,6 +287,9 @@
 
     <!-- FORM -->
     <div class="login-form">
+        {% for message in messages %}
+        <p>{{ message }}</p>
+        {% endfor %}
         <div class="brand">WHEELZY</div>
 
         <h1>Please Log In</h1>

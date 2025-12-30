@@ -349,7 +349,9 @@
             <a href="{% url 'login' %}">Login</a>
         </div>
     </form>
-
+{% for message in messages %}
+<p>{{ message }}</p>
+{% endfor %}
     <!-- IMAGE -->
     <div class="register-image">
         <div class="image-text">

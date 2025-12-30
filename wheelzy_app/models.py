@@ -30,6 +30,7 @@ class Vehicle(models.Model):
     price_per_hour = models.PositiveIntegerField()
     seats = models.PositiveIntegerField(help_text="Number of seats", blank=True)
     image = models.ImageField(upload_to="vehicles/", null=True, blank=True)
+    is_available = models.BooleanField(default=True)
 
     def save(self, *args, **kwargs):
         # Auto assign seats
@@ -79,6 +80,16 @@ class Booking(models.Model):
 
     def __str__(self):
         return f"Booking #{self.id} - {self.vehicle.vehicle_name}"
+
+
+class Notification(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="notifications")
+    message = models.CharField(max_length=255)
+    is_read = models.BooleanField(default=False)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"Notification for {self.user.username}"
 
 
 class DamageReport(models.Model):

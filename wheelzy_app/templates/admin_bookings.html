@@ -163,7 +163,26 @@
                     <span class="status status-{{ booking.status }}">
                         {{ booking.status|title }}
                     </span>
+
+                    <div class="mt-2 d-flex gap-2 flex-wrap">
+
+                        {% if booking.status == "pending" %}
+                            <a href="{% url 'approve_booking' booking.id %}"
+                            class="btn btn-sm btn-success">
+                                Approve
+                            </a>
+                        {% endif %}
+
+                        {% if booking.status == "in_use" %}
+                            <a href="{% url 'mark_returned' booking.id %}"
+                            class="btn btn-sm btn-warning">
+                                Mark Returned
+                            </a>
+                        {% endif %}
+
+                    </div>
                 </td>
+
 
                 <!-- PRICE -->
                 <td class="fw-bold text-success">
