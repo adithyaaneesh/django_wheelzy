@@ -288,16 +288,6 @@
         font-size: 14px;
         color: #aaa;
     }
-
-    .profile-btn {
-        cursor: pointer;
-    }
-
-    .profile-btn:hover .pill-avatar {
-        transform: scale(1.05);
-        transition: 0.2s ease;
-    }
-
     @media (min-width: 769px) {
         .pill-nav {
             bottom: 20px;
@@ -350,27 +340,18 @@
         </a>
 
         <!-- PROFILE ICON -->
-        <a href="{% url 'profile' %}" class="pill-item profile-btn">
-
+        <div class="pill-item profile-btn" onclick="toggleProfileCard()">
             {% if profile.photo %}
-                <img
-                    src="{{ profile.photo.url }}"
-                    alt="Profile"
-                    class="pill-avatar"
-                    loading="lazy"
-                    decoding="async"
-                >
+                <img src="{{ profile.photo.url }}" alt="Profile" class="pill-avatar">
             {% else %}
                 <div class="pill-avatar-fallback">
                     {{ user.username|slice:":1"|upper }}
                 </div>
             {% endif %}
-
-        </a>
-
+        </div>
 
         <!-- PROFILE POPUP -->
-        <!-- <div class="profile-card" id="profileCard">
+        <div class="profile-card" id="profileCard">
             <p class="fw-bold mb-1">{{ user.username }}</p>
             <p class="text-muted mb-2">
                 {{ profile.phone_number|default:"Not added" }}
@@ -383,7 +364,7 @@
             <a href="{% url 'logout' %}" class="btn btn-sm btn-danger w-100">
                 Logout
             </a>
-        </div> -->
+        </div>
 
     {% else %}
 
@@ -587,7 +568,7 @@
                 <h5 class="footer-title">Quick Links</h5>
                 <ul class="footer-links">
                     <li><a href="{% url 'home' %}">Home</a></li>
-                    <li><a href="{% url 'add_vehicle' %}">Add Vehicle</a></li>
+                    <!-- <li><a href="{% url 'add_vehicle' %}">Add Vehicle</a></li> -->
                     <li><a href="{% url 'my_bookings' %}">Bookings</a></li>
                     <li><a href="#about">About</a></li>
                 </ul>
@@ -629,6 +610,20 @@
         if (currentUrl.includes(link.getAttribute("href"))) {
             links.forEach(l => l.classList.remove("active"));
             link.classList.add("active");
+        }
+    });
+
+
+    function toggleProfileCard() {
+        const card = document.getElementById("profileCard");
+        card.style.display = card.style.display === "block" ? "none" : "block";
+    }
+
+    document.addEventListener("click", function(e) {
+        const card = document.getElementById("profileCard");
+        const btn = document.querySelector(".profile-btn");
+        if (card && btn && !card.contains(e.target) && !btn.contains(e.target)) {
+            card.style.display = "none";
         }
     });
 
