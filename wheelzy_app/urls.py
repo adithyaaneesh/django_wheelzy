@@ -37,6 +37,10 @@ urlpatterns = [
     path("booking/<int:booking_id>/returned/", views.mark_returned, name="mark_returned"),
     path("booking/<int:booking_id>/cancel/", views.cancel_booking, name="cancel_booking"),
 
+    path("notificationsc", views.get_unread_notification_count, name="notificationsc"),
+    path("notifications/", views.notifications_view, name="notifications"),
+
+
     
     path("admin_damages/", views.admin_damage_reports, name="admin_damage_reports"),
     path("admin_revenue/", views.admin_revenue, name="admin_revenue"),

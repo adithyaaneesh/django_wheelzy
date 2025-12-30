@@ -113,9 +113,7 @@ def owner_dashboard(request):
         return redirect("home")
     return render(request, "owner_dashboard.html")
 
-@login_required
-def admin_dashboard(request):
-    return render(request, "admin_dashboard.html")
+
 
 def home(request):
     if request.user.is_authenticated:
@@ -136,15 +134,10 @@ def home(request):
     return render(request, "home.html", {
         "vehicles": vehicles,
         "booked_vehicle_ids": active_bookings,
-        "profile": profile
+        "profile": profile,
+        "unread_notification_count": get_unread_notification_count(request.user)
+
     })
-
-
-from django.shortcuts import render, redirect
-from django.contrib.auth.decorators import login_required
-from django.contrib import messages
-from django.contrib.auth.models import User
-from .models import UserProfile
 
 @login_required
 def profile_view(request):
@@ -423,6 +416,14 @@ def admin_vehicles(request):
     return render(request, "admin_vehicles.html", {"vehicles": vehicles})
 
 @login_required
+def admin_dashboard(request):
+    unread_count = get_unread_notification_count(request.user)
+    return render(request, "admin_dashboard.html", {
+        "unread_notification_count": unread_count
+    })
+
+
+@login_required
 def admin_add_vehicle(request):
     if not request.user.is_superuser:
         return redirect("home")
@@ -588,3 +589,16 @@ def cancel_booking(request, booking_id):
 
     return redirect("my_bookings")
 
+@login_required
+def notifications_view(request):
+    notifications = Notification.objects.filter(user=request.user).order_by("-created_at")
+    notifications.filter(is_read=False).update(is_read=True)
+    return render(request, "notifications.html", {
+        "notifications": notifications
+    })
+
+
+def get_unread_notification_count(user):
+    if user.is_authenticated:
+        return Notification.objects.filter(user=user, is_read=False).count()
+    return 0

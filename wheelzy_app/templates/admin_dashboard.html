@@ -8,6 +8,9 @@
     <!-- Google Font -->
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
 
+    <!-- Font Awesome (FOR BELL ICON) -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+
     <style>
         * {
             box-sizing: border-box;
@@ -48,7 +51,31 @@
         .admin-actions {
             display: flex;
             align-items: center;
-            gap: 14px;
+            gap: 16px;
+        }
+
+        /* 🔔 NOTIFICATION BELL */
+        .notification-bell {
+            position: relative;
+            font-size: 20px;
+            color: white;
+            text-decoration: none;
+        }
+
+        .notification-bell:hover {
+            color: #facc15;
+        }
+
+        .notification-bell .badge {
+            position: absolute;
+            top: -6px;
+            right: -8px;
+            background: #ef4444;
+            color: white;
+            font-size: 11px;
+            padding: 2px 6px;
+            border-radius: 50%;
+            font-weight: 600;
         }
 
         .admin-icon {
@@ -159,13 +186,23 @@
         </div>
 
         <div class="admin-actions">
+
+            <!-- 🔔 Notification Bell -->
+            <a href="{% url 'notifications' %}" class="notification-bell">
+                <i class="fa-solid fa-bell"></i>
+                {% if unread_notification_count > 0 %}
+                    <span class="badge">{{ unread_notification_count }}</span>
+                {% endif %}
+            </a>
+
             <div class="admin-icon">A</div>
             <a href="{% url 'logout' %}" class="logout-btn">Logout</a>
         </div>
     </div>
 </div>
-<div class="container">
 
+<!-- ================= CONTENT ================= -->
+<div class="container">
     <div class="card-grid">
 
         <div class="card">

@@ -1,20 +1,38 @@
 <!DOCTYPE html>
 <html>
-<head><title>Notifications</title></head>
+<head>
+    <title>Notifications</title>
+    <style>
+        body {
+            font-family: Poppins, sans-serif;
+            background: #f4f6fb;
+            padding: 30px;
+        }
+        .note {
+            background: white;
+            padding: 14px 18px;
+            margin-bottom: 12px;
+            border-radius: 10px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.08);
+        }
+        .unread {
+            border-left: 5px solid #ef4444;
+            font-weight: 600;
+        }
+    </style>
+</head>
 <body>
 
-<h2>Notifications</h2>
+<h2>🔔 Notifications</h2>
 
-{% for note in request.user.notifications.all %}
-<p>
-    {% if not note.is_read %}
-        <strong>{{ note.message }}</strong>
-    {% else %}
+{% for note in notifications %}
+    <div class="note {% if not note.is_read %}unread{% endif %}">
         {{ note.message }}
-    {% endif %}
-</p>
+        <br>
+        <small>{{ note.created_at|date:"d M Y, H:i" }}</small>
+    </div>
 {% empty %}
-<p>No notifications</p>
+    <p>No notifications</p>
 {% endfor %}
 
 </body>

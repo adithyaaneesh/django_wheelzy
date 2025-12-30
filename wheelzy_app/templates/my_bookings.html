@@ -89,7 +89,7 @@
                         {% if booking.status == "confirmed" %}
                             <a href="{% url 'mark_in_use' booking.id %}"
                                class="btn btn-sm btn-primary">
-                                Mark In Use
+                                In Use
                             </a>
                         {% endif %}
 
@@ -103,7 +103,7 @@
 
                         {% if booking.status == "returned" %}
                             <span class="text-success small align-self-center">
-                                Booking completed
+                                <!-- Booking completed --> Journey Completed
                             </span>
                         {% endif %}
 

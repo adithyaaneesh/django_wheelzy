@@ -175,13 +175,27 @@
 
                         {% if booking.status == "in_use" %}
                             <a href="{% url 'mark_returned' booking.id %}"
-                            class="btn btn-sm btn-warning">
-                                Mark Returned
+                            class="btn btn-sm btn-warning"
+                            onclick="return confirm('Mark this vehicle as returned?')">
+                                Returned
                             </a>
+                        {% endif %}
+
+                        {% if booking.status == "confirmed" %}
+                            <span class="text-muted small">
+                                Waiting for pickup
+                            </span>
+                        {% endif %}
+
+                        {% if booking.status == "returned" %}
+                            <span class="text-success small">
+                                Completed
+                            </span>
                         {% endif %}
 
                     </div>
                 </td>
+
 
 
                 <!-- PRICE -->
