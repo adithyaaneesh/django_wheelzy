@@ -2,202 +2,292 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Login | Wheelzy</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
     <style>
         * {
             box-sizing: border-box;
+            font-family: "Segoe UI", Tahoma, sans-serif;
         }
 
         body {
-            font-family: "Segoe UI", Tahoma, sans-serif;
-            background: linear-gradient(135deg, #eef2ff, #f8fafc);
+            margin: 0;
             min-height: 100vh;
             display: flex;
             align-items: center;
             justify-content: center;
-            margin: 0;
+            background: #f4f6fb;
         }
 
-        form {
-            background: #ffffff;
+        /* CARD */
+        .login-wrapper {
             width: 100%;
-            max-width: 380px;
-            padding: 32px 28px;
-            border-radius: 16px;
-            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.08);
+            max-width: 980px;
+            height: 520px; /* FIXED HEIGHT */
+            background: #fff;
+            border-radius: 22px;
+            overflow: hidden;
+            display: flex;
+            box-shadow: 0 25px 60px rgba(0,0,0,.25);
         }
 
-        h2 {
-            text-align: center;
-            margin-bottom: 18px;
-            color: #1e40ff;
+        /* LEFT IMAGE */
+        .login-image {
+            flex: 1;
+            background: url("/static/images/login-car.jpg") center/cover no-repeat;
+            position: relative;
+        }
+
+        .login-image::after {
+            content: "";
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(to right, rgba(0,0,0,.15), rgba(0,0,0,.55));
+        }
+
+        .image-text {
+            position: absolute;
+            bottom: 28px;
+            left: 28px;
+            color: #fff;
+            z-index: 1;
+        }
+
+        .image-text h2 {
+            margin: 0;
             font-size: 26px;
             font-weight: 700;
         }
 
-        /* ROLE SELECTION */
-        .role-container {
-            display: flex;
-            gap: 10px;
-            margin-bottom: 14px;
+        .image-text p {
+            font-size: 13px;
+            opacity: .9;
+            margin-top: 4px;
         }
 
-        .role-card {
+        /* RIGHT FORM */
+        .login-form {
             flex: 1;
-            border: 2px solid #d1d5db;
-            border-radius: 10px;
-            padding: 10px 6px;
-            text-align: center;
-            cursor: pointer;
+            padding: 32px 36px; /* TIGHTER */
+            color: #111;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+
+        .brand {
+            font-weight: 700;
+            letter-spacing: 2px;
+            font-size: 12px;
+            margin-bottom: 14px;
+            color: #1e88e5;
+        }
+
+        h1 {
+            margin: 0 0 4px;
+            font-size: 24px;
+        }
+
+        .subtitle {
+            font-size: 13px;
+            color: #6b7280;
+            margin-bottom: 18px;
+        }
+
+        label {
             font-size: 12px;
             font-weight: 600;
-            color: #374151;
-            transition: 0.25s;
-        }
-
-        .role-card input {
-            display: none;
-        }
-
-        .role-card span {
-            font-size: 18px;
+            margin-bottom: 4px;
             display: block;
-            margin-bottom: 3px;
         }
 
-        .role-card:hover {
-            border-color: #2563eb;
-            color: #2563eb;
-        }
-
-        .role-card input:checked + div {
-            background: #eef2ff;
-            border-radius: 8px;
-            color: #2563eb;
-        }
-
-        /* INPUTS */
         input {
             width: 100%;
-            padding: 13px;
-            border-radius: 10px;
+            padding: 11px 13px;
+            background: #f9fafb;
             border: 1px solid #d1d5db;
-            font-size: 14px;
+            border-radius: 10px;
+            font-size: 13px;
             margin-bottom: 14px;
         }
 
         input:focus {
             outline: none;
-            border-color: #2563eb;
-            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15);
+            border-color: #1e88e5;
+            box-shadow: 0 0 0 3px rgba(30,136,229,.18);
+            background: #fff;
         }
 
-        /* DEMO SECTION */
-        .demo-title {
-            text-align: center;
-            font-size: 12px;
-            color: #6b7280;
-            margin: 6px 0 8px;
-        }
-
-        .demo-container {
+        /* ROLE */
+        .role-box {
             display: flex;
-            justify-content: center;
             gap: 8px;
             margin-bottom: 14px;
         }
 
-        .demo-card {
-            padding: 6px 10px;
-            border-radius: 8px;
-            border: 1px dashed #2563eb;
-            font-size: 11px;
-            font-weight: 600;
+        .role-box label {
+            flex: 1;
+            border: 2px solid #e5e7eb;
+            border-radius: 12px;
+            padding: 8px;
+            text-align: center;
             cursor: pointer;
-            color: #2563eb;
-            transition: 0.2s;
+            font-size: 12px;
+            font-weight: 600;
+            color: #374151;
+            transition: .25s;
         }
 
-        .demo-card:hover {
-            background: #eef2ff;
+        .role-box input {
+            display: none;
+        }
+
+        .role-box label:has(input:checked) {
+            border-color: #1e88e5;
+            background: #eef4ff;
+            color: #1e88e5;
+        }
+
+        /* DEMO */
+        .demo-title {
+            font-size: 11px;
+            color: #6b7280;
+            text-align: center;
+            margin: 6px 0 4px;
+        }
+
+        .demo-box {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin-bottom: 14px;
+        }
+
+        .demo-btn {
+            border: 1px dashed #1e88e5;
+            padding: 5px 12px;
+            border-radius: 8px;
+            font-size: 11px;
+            font-weight: 600;
+            color: #1e88e5;
+            cursor: pointer;
+            transition: .2s;
+        }
+
+        .demo-btn:hover {
+            background: #eef4ff;
         }
 
         /* BUTTON */
         button {
-            width: 100%;
-            padding: 13px;
-            background: linear-gradient(135deg, #2563eb, #1e40ff);
-            color: white;
+            background: linear-gradient(135deg, #1e88e5, #1987e7);
             border: none;
-            border-radius: 12px;
-            font-size: 16px;
+            padding: 12px;
+            border-radius: 14px;
+            font-size: 14px;
             font-weight: 600;
+            color: #fff;
             cursor: pointer;
+            transition: transform .15s ease, box-shadow .15s ease;
         }
 
         button:hover {
-            box-shadow: 0 10px 20px rgba(37, 99, 235, 0.3);
+            transform: translateY(-1px);
+            box-shadow: 0 10px 25px rgba(30,136,229,.35);
         }
 
-        p {
+        .signup {
+            margin-top: 14px;
+            font-size: 13px;
             text-align: center;
-            margin-top: 16px;
-            font-size: 14px;
-            color: gray;
-            font-weight: 600;
+            color: #6b7280;
         }
 
-        a {
-            color: #2563eb;
+        .signup a {
+            color: #1e88e5;
             text-decoration: none;
             font-weight: 600;
         }
 
-        a:hover {
-            color: #1e40ff;
+        /* MOBILE */
+        @media (max-width: 768px) {
+            .login-wrapper {
+                height: auto;
+                border-radius: 0;
+            }
+
+            .login-image {
+                display: none;
+            }
+
+            .login-form {
+                padding: 28px 22px;
+            }
         }
     </style>
 </head>
 
 <body>
 
-<form method="post">
-    {% csrf_token %}
+<div class="login-wrapper">
 
-    <h2>Welcome Back</h2>
-
-    <!-- ROLE SELECTION -->
-    <div class="role-container">
-        <label class="role-card">
-            <input type="radio" name="role" value="customer" checked onclick="setRole('customer')">
-            <div><span>👤</span>Customer</div>
-        </label>
-
-        <label class="role-card">
-            <input type="radio" name="role" value="owner" onclick="setRole('owner')">
-            <div><span>🚗</span>Owner</div>
-        </label>
-
-        <label class="role-card">
-            <input type="radio" name="role" value="admin" onclick="setRole('admin')">
-            <div><span>🛠</span>Admin</div>
-        </label>
+    <!-- IMAGE -->
+    <div class="login-image">
+        <div class="image-text">
+            <h2>Journey Beyond</h2>
+            <p>Experience premium rides with Wheelzy</p>
+        </div>
     </div>
 
-    <input type="text" id="username" name="username" placeholder="Username" required>
-    <input type="password" id="password" name="password" placeholder="Password" required>
-    <div class="demo-title">Quick demo login</div>
-    <div class="demo-container">
-        <div class="demo-card" onclick="fillDemo()">Use demo</div>
-    </div>
-    <button type="submit">Login</button>
+    <!-- FORM -->
+    <div class="login-form">
+        <div class="brand">WHEELZY</div>
 
-    <p>Don’t have an account?
-        <a href="{% url 'register' %}">Register</a>
-    </p>
-</form>
+        <h1>Please Log In</h1>
+        <div class="subtitle">Login to continue your journey</div>
+
+        <form method="post">
+            {% csrf_token %}
+
+            <label>Username</label>
+            <input type="text" id="username" name="username" required>
+
+            <label>Password</label>
+            <input type="password" id="password" name="password" required>
+
+            <!-- ROLE -->
+            <div class="role-box">
+                <label>
+                    <input type="radio" name="role" value="customer" checked onclick="setRole('customer')">
+                    Customer
+                </label>
+                <label>
+                    <input type="radio" name="role" value="owner" onclick="setRole('owner')">
+                    Owner
+                </label>
+                <label>
+                    <input type="radio" name="role" value="admin" onclick="setRole('admin')">
+                    Admin
+                </label>
+            </div>
+
+            <!-- DEMO -->
+            <div class="demo-title">Quick demo login</div>
+            <div class="demo-box">
+                <div class="demo-btn" onclick="fillDemo()">Use demo</div>
+            </div>
+
+            <button type="submit">LOGIN</button>
+        </form>
+
+        <div class="signup">
+            Don’t have an account?
+            <a href="{% url 'register' %}">Sign up</a>
+        </div>
+    </div>
+
+</div>
 
 <script>
     let selectedRole = "customer";
