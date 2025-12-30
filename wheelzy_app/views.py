@@ -140,25 +140,39 @@ def home(request):
     })
 
 
+from django.shortcuts import render, redirect
+from django.contrib.auth.decorators import login_required
+from django.contrib import messages
+from django.contrib.auth.models import User
+from .models import UserProfile
+
 @login_required
 def profile_view(request):
-    profile, created = UserProfile.objects.get_or_create(
-        user=request.user
-    )
+    profile, _ = UserProfile.objects.get_or_create(user=request.user)
     return render(request, "profile.html", {"profile": profile})
 
 
 @login_required
 def edit_profile(request):
     if request.method == "POST":
+        profile, _ = UserProfile.objects.get_or_create(user=request.user)
 
-        profile, created = UserProfile.objects.get_or_create(
-            user=request.user
-        )
+        # update user fields
+        new_username = request.POST.get("username")
+        if new_username and new_username != request.user.username:
+            if User.objects.filter(username=new_username).exists():
+                messages.error(request, "Username already exists")
+                return redirect("profile")
+            request.user.username = new_username
 
-        request.user.email = request.POST.get("email", "")
-        profile.phone_number = request.POST.get("phone", "")
-        profile.address = request.POST.get("address", "")
+        request.user.email = request.POST.get("email")
+
+        # update profile fields
+        profile.phone_number = request.POST.get("phone")
+        profile.address = request.POST.get("address")
+
+        if request.FILES.get("photo"):
+            profile.photo = request.FILES["photo"]
 
         request.user.save()
         profile.save()
@@ -167,6 +181,7 @@ def edit_profile(request):
         return redirect("profile")
 
     return redirect("profile")
+
 
 
 @login_required
