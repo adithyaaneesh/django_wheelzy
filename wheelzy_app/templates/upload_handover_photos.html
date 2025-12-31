@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Upload Vehicle Photos</title>
+    <style>
+        body { font-family: Segoe UI; background:#f4f6fb; padding:30px; }
+        .card {
+            background:#fff;
+            padding:30px;
+            max-width:500px;
+            margin:auto;
+            border-radius:14px;
+            box-shadow:0 15px 30px rgba(0,0,0,.1);
+        }
+        h2 { color:#1e40ff; text-align:center; }
+        input, button {
+            width:100%;
+            margin-top:15px;
+            padding:12px;
+            border-radius:8px;
+            border:1px solid #ddd;
+        }
+        button {
+            background:#2563eb;
+            color:white;
+            font-weight:600;
+            cursor:pointer;
+        }
+    </style>
+</head>
+<body>
+
+<div class="card">
+    <h2>Upload Vehicle Photos</h2>
+    <p>Upload clear photos of the vehicle (all sides) before handover.</p>
+
+    <form method="post" enctype="multipart/form-data">
+        {% csrf_token %}
+        <input type="file" name="photos" multiple required>
+        <button type="submit">Upload Photos</button>
+    </form>
+</div>
+
+</body>
+</html>

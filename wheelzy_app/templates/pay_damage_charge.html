@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Pay Damage Charge</title>
+    <style>
+        body { font-family:Segoe UI; background:#f4f6fb; padding:30px; }
+        .card {
+            background:#fff;
+            padding:30px;
+            max-width:400px;
+            margin:auto;
+            border-radius:16px;
+            box-shadow:0 20px 40px rgba(0,0,0,.15);
+            text-align:center;
+        }
+        button {
+            padding:12px 20px;
+            background:#16a34a;
+            color:white;
+            border:none;
+            border-radius:10px;
+            font-weight:600;
+            cursor:pointer;
+        }
+    </style>
+</head>
+<body>
+
+<div class="card">
+    <h2>Pay Damage Charge</h2>
+    <p><strong>Vehicle:</strong> {{ report.vehicle.name }}</p>
+    <p><strong>Amount:</strong> ₹{{ report.extra_charge }}</p>
+
+    <form method="post">
+        {% csrf_token %}
+        <button type="submit">Confirm Payment</button>
+    </form>
+</div>
+
+</body>
+</html>

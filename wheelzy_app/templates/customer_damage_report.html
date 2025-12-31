@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>My Damage Reports</title>
+    <style>
+        body { font-family:Segoe UI; background:#f4f6fb; padding:30px; }
+        .card {
+            background:#fff;
+            padding:20px;
+            border-radius:14px;
+            margin-bottom:15px;
+            box-shadow:0 10px 25px rgba(0,0,0,.1);
+        }
+        .pay {
+            display:inline-block;
+            padding:8px 14px;
+            background:#2563eb;
+            color:white;
+            border-radius:8px;
+            text-decoration:none;
+        }
+    </style>
+</head>
+<body>
+
+<h2>Damage Charges</h2>
+
+{% for report in reports %}
+<div class="card">
+    <p><strong>Vehicle:</strong> {{ report.vehicle.name }}</p>
+    <p>{{ report.description }}</p>
+    <p><strong>Charge:</strong> ₹{{ report.extra_charge }}</p>
+
+    {% if not report.is_paid %}
+        <a class="pay" href="{% url 'pay_damage_charge' report.id %}">
+            Pay Now
+        </a>
+    {% else %}
+        <p style="color:green;">Paid</p>
+    {% endif %}
+</div>
+{% endfor %}
+
+</body>
+</html>

@@ -91,12 +91,20 @@ class Notification(models.Model):
     def __str__(self):
         return f"Notification for {self.user.username}"
 
+class VehicleHandoverPhoto(models.Model):
+    vehicle = models.ForeignKey(Vehicle, on_delete=models.CASCADE)
+    owner = models.ForeignKey(User, on_delete=models.CASCADE)
+    photo = models.ImageField(upload_to="handover_photos/")
+    uploaded_at = models.DateTimeField(auto_now_add=True)
+
 
 class DamageReport(models.Model):
-    booking = models.OneToOneField(Booking, on_delete=models.CASCADE)
-    damage_description = models.TextField(blank=True)
-    damage_cost = models.DecimalField(max_digits=10, decimal_places=2, default=0)
-    images = models.ImageField(upload_to="damage/", null=True, blank=True)
+    booking = models.ForeignKey(Booking, on_delete=models.CASCADE)
+    vehicle = models.ForeignKey(Vehicle, on_delete=models.CASCADE)
+    reported_by = models.ForeignKey(User, on_delete=models.CASCADE)  # admin
+    description = models.TextField()
+    damage_photo = models.ImageField(upload_to="damage_reports/")
+    extra_charge = models.DecimalField(max_digits=8, decimal_places=2)
+    is_paid = models.BooleanField(default=False)
+    created_at = models.DateTimeField(auto_now_add=True)
 
-    def __str__(self):
-        return f"Damage Report for Booking #{self.booking.id}"

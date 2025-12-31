@@ -48,7 +48,13 @@ urlpatterns = [
     path("admin/vehicles/delete/<int:id>/", views.admin_delete_vehicle, name="admin_delete_vehicle"),
 
 
+    path("vehicle/<int:vehicle_id>/handover-photos/",views.upload_handover_photos,name="upload_handover_photos"),
+    path("booking/<int:booking_id>/damage-report/",views.add_damage_report,name="add_damage_report"),
 
+    path("damage-reports/",views.admin_damage_report_list,name="admin_damage_report_list"),
+    path("damage-reports/",views.customer_damage_reports,name="customer_damage_reports"),
+    path("damage-report/<int:report_id>/pay/",views.pay_damage_charge,name="pay_damage_charge"),
+    path("damage-report/<int:report_id>/",views.admin_damage_report_detail,name="admin_damage_report_detail"),
 
     # path('payment_page/', views.vehicle_details, name="payment_page"),
 ]

@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Add Damage Report</title>
+    <style>
+        body { font-family:Segoe UI; background:#f4f6fb; padding:30px; }
+        h2 { color:#dc2626; }
+        .photos img {
+            width:180px;
+            border-radius:10px;
+            margin:10px;
+            box-shadow:0 6px 14px rgba(0,0,0,.15);
+        }
+        .card {
+            background:#fff;
+            padding:25px;
+            border-radius:16px;
+            box-shadow:0 20px 40px rgba(0,0,0,.12);
+            max-width:700px;
+            margin:auto;
+        }
+        textarea, input, button {
+            width:100%;
+            padding:12px;
+            margin-top:12px;
+            border-radius:10px;
+            border:1px solid #ddd;
+        }
+        button {
+            background:#ef4444;
+            color:white;
+            font-weight:600;
+            cursor:pointer;
+        }
+    </style>
+</head>
+<body>
+
+<div class="card">
+    <h2>Damage Report</h2>
+
+    <h4>Vehicle Photos Before Handover</h4>
+    <div class="photos">
+        {% for photo in handover_photos %}
+            <img src="{{ photo.photo.url }}">
+        {% empty %}
+            <p>No handover photos available.</p>
+        {% endfor %}
+    </div>
+
+    <hr>
+
+    <form method="post" enctype="multipart/form-data">
+        {% csrf_token %}
+        <textarea name="description" placeholder="Describe the damage clearly..." required></textarea>
+        <input type="number" name="extra_charge" placeholder="Extra Damage Charge (₹)" required>
+        <input type="file" name="photo" required>
+        <button type="submit">Submit Damage Report</button>
+    </form>
+</div>
+
+</body>
+</html>

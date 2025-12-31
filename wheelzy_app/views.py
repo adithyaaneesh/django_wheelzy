@@ -2,7 +2,7 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.models import User, Group
 from django.contrib.auth import login, authenticate, logout
 from django.contrib import messages
-from .models import Vehicle, Booking, DamageReport, UserProfile, Notification
+from .models import Vehicle, Booking, DamageReport, UserProfile, Notification, VehicleHandoverPhoto
 from datetime import datetime
 from django.utils import timezone
 from django.contrib.auth.decorators import login_required
@@ -602,3 +602,237 @@ def get_unread_notification_count(user):
     if user.is_authenticated:
         return Notification.objects.filter(user=user, is_read=False).count()
     return 0
+
+
+@login_required
+def upload_handover_photos(request, vehicle_id):
+    vehicle = get_object_or_404(Vehicle, id=vehicle_id)
+
+    if request.method == "POST":
+        photos = request.FILES.getlist("photos")
+
+        for photo in photos:
+            VehicleHandoverPhoto.objects.create(
+                vehicle=vehicle,
+                owner=request.user,
+                photo=photo
+            )
+        messages.success(request, "Vehicle photos uploaded successfully")
+        return redirect("owner_dashboard")
+
+    return render(request, "upload_handover_photos.html", {"vehicle": vehicle})
+
+@login_required
+def add_damage_report(request, booking_id):
+    booking = get_object_or_404(Booking, id=booking_id)
+
+    if request.method == "POST":
+        description = request.POST.get("description")
+        extra_charge = request.POST.get("extra_charge")
+        photo = request.FILES.get("photo")
+
+        DamageReport.objects.create(
+            booking=booking,
+            vehicle=booking.vehicle,
+            reported_by=request.user,
+            description=description,
+            damage_photo=photo,
+            extra_charge=extra_charge
+        )
+
+        Notification.objects.create(
+            user=booking.user,
+            message=f"Damage reported on {booking.vehicle.name}. Extra charge ₹{extra_charge}. Please pay to continue booking."
+        )
+
+        messages.success(request, "Damage report submitted")
+        return redirect("admin_dashboard")
+
+    handover_photos = VehicleHandoverPhoto.objects.filter(vehicle=booking.vehicle)
+
+    return render(request, "add_damage_report.html", {
+        "booking": booking,
+        "handover_photos": handover_photos
+    })
+
+def can_user_book(user):
+    unpaid_damage = DamageReport.objects.filter(
+        booking__user=user,
+        is_paid=False
+    ).exists()
+    return not unpaid_damage
+
+
+def has_unpaid_damage(user):
+    return DamageReport.objects.filter(
+        booking__user=user,
+        is_paid=False
+    ).exists()
+
+
+@login_required
+def upload_handover_photos(request, vehicle_id):
+    vehicle = get_object_or_404(Vehicle, id=vehicle_id)
+
+    if request.method == "POST":
+        photos = request.FILES.getlist("photos")
+
+        if not photos:
+            messages.error(request, "Please upload at least one photo.")
+            return redirect(request.path)
+
+        for photo in photos:
+            VehicleHandoverPhoto.objects.create(
+                vehicle=vehicle,
+                owner=request.user,
+                photo=photo
+            )
+
+        messages.success(
+            request,
+            "Vehicle handover photos uploaded successfully."
+        )
+        return redirect("owner_dashboard")
+
+    return render(
+        request,
+        "upload_handover_photos.html",
+        {"vehicle": vehicle}
+    )
+
+
+
+@login_required
+def add_damage_report(request, booking_id):
+    booking = get_object_or_404(Booking, id=booking_id)
+    handover_photos = VehicleHandoverPhoto.objects.filter(
+        vehicle=booking.vehicle
+    )
+
+    if request.method == "POST":
+        description = request.POST.get("description")
+        extra_charge = request.POST.get("extra_charge")
+        damage_photo = request.FILES.get("photo")
+
+        if not all([description, extra_charge, damage_photo]):
+            messages.error(request, "All fields are required.")
+            return redirect(request.path)
+
+        report = DamageReport.objects.create(
+            booking=booking,
+            vehicle=booking.vehicle,
+            reported_by=request.user,
+            description=description,
+            damage_photo=damage_photo,
+            extra_charge=extra_charge,
+            created_at=timezone.now()
+        )
+
+        # 🔔 Notify customer
+        Notification.objects.create(
+            user=booking.user,
+            message=(
+                f"Damage reported for vehicle "
+                f"{booking.vehicle.name}. "
+                f"Extra charge ₹{extra_charge}. "
+                f"Please pay to continue booking."
+            )
+        )
+
+        messages.success(request, "Damage report submitted successfully.")
+        return redirect("admin_damage_report_list")
+
+    return render(
+        request,
+        "admin/add_damage_report.html",
+        {
+            "booking": booking,
+            "handover_photos": handover_photos
+        }
+    )
+
+
+@login_required
+def admin_damage_report_list(request):
+    reports = DamageReport.objects.select_related(
+        "vehicle", "booking", "booking__user"
+    ).order_by("-created_at")
+
+    return render(
+        request,
+        "admin/damage_report_list.html",
+        {"reports": reports}
+    )
+
+
+@login_required
+def admin_damage_report_detail(request, report_id):
+    report = get_object_or_404(DamageReport, id=report_id)
+    handover_photos = VehicleHandoverPhoto.objects.filter(
+        vehicle=report.vehicle
+    )
+
+    return render(
+        request,
+        "admin/damage_report_detail.html",
+        {
+            "report": report,
+            "handover_photos": handover_photos
+        }
+    )
+
+@login_required
+def customer_damage_reports(request):
+    reports = DamageReport.objects.filter(
+        booking__user=request.user
+    ).order_by("-created_at")
+
+    return render(
+        request,
+        "customer/customer_damage_reports.html",
+        {"reports": reports}
+    )
+
+
+@login_required
+def pay_damage_charge(request, report_id):
+    report = get_object_or_404(
+        DamageReport,
+        id=report_id,
+        booking__user=request.user
+    )
+
+    if report.is_paid:
+        messages.info(request, "This damage charge is already paid.")
+        return redirect("customer_damage_reports")
+
+    if request.method == "POST":
+        report.is_paid = True
+        report.save()
+
+        Notification.objects.create(
+            user=request.user,
+            message=(
+                f"Damage payment of ₹{report.extra_charge} "
+                f"for {report.vehicle.name} was successful."
+            )
+        )
+
+        messages.success(request, "Damage payment successful.")
+        return redirect("customer_damage_reports")
+
+    return render(
+        request,
+        "customer/pay_damage_charge.html",
+        {"report": report}
+    )
+
+@login_required
+def booking_guard(request):
+    if has_unpaid_damage(request.user):
+        messages.error(
+            request,
+            "You have unpaid damage charges. "
+            "Please clear them to book vehicles."
+        )
+        return redirect("customer_damage_reports")
