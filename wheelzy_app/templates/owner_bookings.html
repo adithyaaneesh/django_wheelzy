@@ -10,6 +10,7 @@
     <style>
         body {
             background: #f4f6f9;
+            font-family: "Segoe UI", Tahoma, sans-serif;
         }
         .badge-status {
             font-size: 0.85rem;
@@ -40,6 +41,7 @@
                         <th>Booking Time</th>
                         <th>Total Price</th>
                         <th>Status</th>
+                        <th>Action</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -66,6 +68,7 @@
                                 ₹{{ booking.total_price }}
                             </td>
 
+                            <!-- STATUS -->
                             <td>
                                 {% if booking.status == "pending" %}
                                     <span class="badge bg-warning badge-status">Pending</span>
@@ -75,10 +78,40 @@
                                     <span class="badge bg-info badge-status">In Use</span>
                                 {% elif booking.status == "returned" %}
                                     <span class="badge bg-success badge-status">Returned</span>
+                                {% elif booking.status == "damage_reported" %}
+                                    <span class="badge bg-danger badge-status">Damage Reported</span>
                                 {% else %}
-                                    <span class="badge bg-secondary badge-status">{{ booking.status }}</span>
+                                    <span class="badge bg-secondary badge-status">
+                                        {{ booking.status|capfirst }}
+                                    </span>
                                 {% endif %}
                             </td>
+
+                            <!-- ACTION -->
+                            <td>
+                               {% if booking.status == "pending" %}
+                                    <a href="{% url 'upload_handover_photos' booking.id %}"
+                                    class="btn btn-primary btn-sm">
+                                        Upload Handover Photos
+                                    </a>
+
+                                {% elif booking.status == "handover_uploaded" %}
+                                    <span class="badge bg-info">
+                                        Photos Uploaded
+                                    </span>
+
+                                {% elif booking.status == "returned" %}
+                                    <a href="{% url 'add_damage_report' booking.id %}"
+                                    class="btn btn-danger btn-sm">
+                                        Report Damage
+                                    </a>
+
+                                {% else %}
+                                    —
+                                {% endif %}
+
+                            </td>
+
                         </tr>
                     {% endfor %}
                 </tbody>

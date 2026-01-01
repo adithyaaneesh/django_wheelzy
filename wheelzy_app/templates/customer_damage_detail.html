@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Damage Report</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+
+<body class="bg-light">
+
+<div class="container py-5">
+
+    <a href="{% url 'my_bookings' %}" class="btn btn-secondary mb-4">← Back</a>
+
+    <div class="card shadow-sm p-4">
+
+        <h4 class="text-danger">
+            Damage on {{ booking.vehicle.vehicle_name }}
+        </h4>
+
+        <p>{{ report.description }}</p>
+
+        <p class="fw-bold text-danger">
+            Charge: ₹{{ report.extra_charge }}
+        </p>
+
+        {% if report.is_paid %}
+            <span class="badge bg-success">Paid</span>
+        {% else %}
+            <span class="badge bg-warning">Pending Payment</span>
+        {% endif %}
+
+        <hr>
+
+        <h5>Damage Photos</h5>
+        <div class="row g-3">
+            {% for photo in photos %}
+                <div class="col-md-4">
+                    <img src="{{ photo.image.url }}" class="img-fluid rounded">
+                </div>
+            {% empty %}
+                <p>No photos available.</p>
+            {% endfor %}
+        </div>
+
+        {% if not report.is_paid %}
+            <a href="{% url 'pay_damage_charge' report.id %}"
+               class="btn btn-danger mt-4">
+                Pay Damage Charge
+            </a>
+        {% endif %}
+    </div>
+</div>
+
+</body>
+</html>

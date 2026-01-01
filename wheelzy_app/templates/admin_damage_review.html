@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<body>
+    <h2>Damage Review</h2>
+
+<h4>Handover Photos</h4>
+{% for photo in booking.handover_photos.all %}
+<img src="{{ photo.image.url }}" width="200">
+{% endfor %}
+
+<h4>Damage Report Photos</h4>
+{% for photo in booking.damage_report.photos.all %}
+<img src="{{ photo.image.url }}" width="200">
+{% endfor %}
+
+<form method="post">
+{% csrf_token %}
+<button type="submit" class="btn btn-danger">
+    Confirm Damage & Notify Customer
+</button>
+</form>
+
+</body>
+</html>

@@ -20,14 +20,20 @@
 
 {% for report in reports %}
 <div class="card">
-    <p><strong>Vehicle:</strong> {{ report.vehicle.name }}</p>
+    <p><strong>Vehicle:</strong> {{ report.vehicle.vehicle_name }}</p>
     <p><strong>Customer:</strong> {{ report.booking.user.username }}</p>
     <p><strong>Charge:</strong> ₹{{ report.extra_charge }}</p>
+
     <p class="{% if not report.is_paid %}unpaid{% endif %}">
         {% if report.is_paid %}Paid{% else %}Unpaid{% endif %}
     </p>
-    <a href="{% url 'admin_damage_report_detail' report.id %}">View Details</a>
+
+    <a href="{% url 'admin_damage_report_detail' report.id %}">
+        View Details
+    </a>
 </div>
+{% empty %}
+<p>No damage reports found.</p>
 {% endfor %}
 
 </body>

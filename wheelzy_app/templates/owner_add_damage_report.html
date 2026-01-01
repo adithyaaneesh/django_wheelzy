@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Add Damage Report</title>
+    <style>
+        body { font-family:Segoe UI; background:#f4f6fb; padding:30px; }
+        .card {
+            background:#fff;
+            padding:25px;
+            border-radius:16px;
+            box-shadow:0 20px 40px rgba(0,0,0,.12);
+            max-width:600px;
+            margin:auto;
+        }
+        textarea, input, button {
+            width:100%;
+            padding:12px;
+            margin-top:12px;
+            border-radius:10px;
+        }
+        button {
+            background:#ef4444;
+            color:white;
+            font-weight:600;
+        }
+    </style>
+</head>
+<body>
+
+<div class="card">
+    <h2>Damage Report</h2>
+
+    <form method="post" enctype="multipart/form-data">
+        {% csrf_token %}
+
+        <textarea name="description"
+                  placeholder="Describe the damage"
+                  required></textarea>
+
+        <input type="number"
+               name="extra_charge"
+               placeholder="Extra charge (₹)"
+               required>
+
+        <input type="file"
+               name="photos"
+               multiple
+               required>
+
+        <button type="submit">Submit Damage Report</button>
+    </form>
+</div>
+
+</body>
+</html>

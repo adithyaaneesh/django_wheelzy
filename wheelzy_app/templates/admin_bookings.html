@@ -5,7 +5,6 @@
     <title>All Bookings | Wheelzy Admin</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-    <!-- Google Font -->
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
 
     <style>
@@ -16,30 +15,13 @@
         }
 
         .container {
-            max-width: 1300px;
+            max-width: 1400px;
             margin: auto;
             padding: 30px;
         }
 
         h2 {
             margin-bottom: 16px;
-            color: #111827;
-        }
-
-        .back-btn {
-            display: inline-block;
-            margin-bottom: 16px;
-            padding: 8px 14px;
-            background: #111827;
-            color: white;
-            border-radius: 8px;
-            text-decoration: none;
-            font-weight: 600;
-            font-size: 14px;
-        }
-
-        .back-btn:hover {
-            background: #000;
         }
 
         table {
@@ -67,164 +49,157 @@
             background: #f9fafb;
         }
 
-        th {
-            font-weight: 600;
-        }
-
         .status {
-            padding: 4px 10px;
+            padding: 5px 12px;
             border-radius: 20px;
             font-size: 12px;
             font-weight: 600;
             display: inline-block;
         }
 
-        .status-pending {
-            background: #fde68a;
-            color: #92400e;
+        .pending { background: #fde68a; color: #92400e; }
+        .confirmed { background: #bfdbfe; color: #1e40af; }
+        .in_use { background: #bae6fd; color: #0369a1; }
+        .returned { background: #bbf7d0; color: #166534; }
+        .cancelled { background: #e5e7eb; color: #374151; }
+
+        .btn {
+            padding: 6px 12px;
+            font-size: 12px;
+            border-radius: 6px;
+            text-decoration: none;
+            display: inline-block;
+            font-weight: 600;
+            margin-bottom: 4px;
         }
 
-        .status-confirmed {
-            background: #bfdbfe;
-            color: #1e40af;
-        }
-
-        .status-in_use {
-            background: #bae6fd;
-            color: #0369a1;
-        }
-
-        .status-returned {
-            background: #bbf7d0;
-            color: #166534;
-        }
-
-        .status-cancelled {
-            background: #e5e7eb;
-            color: #374151;
+        .btn-success { background: #16a34a; color: white; }
+        .btn-warning { background: #f59e0b; color: white; }
+        .btn-danger { background: #dc2626; color: white; }
+        .btn-disabled {
+            background: #9ca3af;
+            color: white;
+            cursor: not-allowed;
         }
 
         .muted {
+            font-size: 12px;
             color: #6b7280;
-            font-size: 13px;
+            margin-top: 4px;
         }
     </style>
 </head>
 
 <body>
-
 <div class="container">
 
-    <a href="{% url 'admin_dashboard' %}" class="back-btn">← Back to Dashboard</a>
+<h2>All Bookings</h2>
 
-    <h2>All Bookings</h2>
+<table>
+<thead>
+<tr>
+    <th>#</th>
+    <th>Customer</th>
+    <th>Vehicle</th>
+    <th>Period</th>
+    <th>Status</th>
+    <th>Action</th>
+    <th>Total</th>
+    <th>Booked At</th>
+</tr>
+</thead>
 
-    <table>
-        <thead>
-            <tr>
-                <th>#</th>
-                <th>Customer</th>
-                <th>Vehicle</th>
-                <th>Booking Period</th>
-                <th>Status</th>
-                <th>Total Price</th>
-                <th>Security Deposit</th>
-                <th>Booked At</th>
-            </tr>
-        </thead>
+<tbody>
+{% for booking in bookings %}
+<tr>
+    <td>{{ forloop.counter }}</td>
 
-        <tbody>
-            {% for booking in bookings %}
-            <tr>
-                <td>{{ forloop.counter }}</td>
+    <td>
+        <strong>{{ booking.user.username }}</strong><br>
+        <span class="muted">{{ booking.user.email }}</span>
+    </td>
 
-                <!-- CUSTOMER -->
-                <td>
-                    <strong>{{ booking.user.username }}</strong><br>
-                    <span class="muted">{{ booking.user.email }}</span>
-                </td>
+    <td>
+        <strong>{{ booking.vehicle.vehicle_name }}</strong><br>
+        <span class="muted">{{ booking.vehicle.number_plate }}</span>
+    </td>
 
-                <!-- VEHICLE -->
-                <td>
-                    <strong>{{ booking.vehicle.vehicle_name }}</strong><br>
-                    <span class="muted">{{ booking.vehicle.number_plate }}</span>
-                </td>
+    <td>
+        {{ booking.start_time|date:"d M Y, h:i A" }}<br>
+        {{ booking.end_time|date:"d M Y, h:i A" }}
+    </td>
 
-                <!-- TIME -->
-                <td>
-                    <strong>From:</strong>
-                    {{ booking.start_time|date:"d M Y, h:i A" }}<br>
-                    <strong>To:</strong>
-                    {{ booking.end_time|date:"d M Y, h:i A" }}
-                </td>
+    <!-- STATUS -->
+    <td>
+        <span class="status {{ booking.status }}">
+            {{ booking.get_status_display }}
+        </span>
 
-                <!-- STATUS -->
-                <td>
-                    <span class="status status-{{ booking.status }}">
-                        {{ booking.status|title }}
-                    </span>
+        {% if booking.status == "pending" %}
+            {% if booking.handover_photos.exists %}
+                <div class="muted">Handover uploaded</div>
+            {% else %}
+                <div class="muted">Waiting for handover</div>
+            {% endif %}
+        {% endif %}
 
-                    <div class="mt-2 d-flex gap-2 flex-wrap">
+        {% if booking.status == "returned" and booking.damage_report %}
+            {% if booking.damage_report.is_paid %}
+                <div class="muted">Damage resolved</div>
+            {% else %}
+                <div class="muted" style="color:#b91c1c;">
+                    Damage reported (payment pending)
+                </div>
+            {% endif %}
+        {% endif %}
+    </td>
 
-                        {% if booking.status == "pending" %}
-                            <a href="{% url 'approve_booking' booking.id %}"
-                            class="btn btn-sm btn-success">
-                                Approve
-                            </a>
-                        {% endif %}
+    <!-- ACTIONS -->
+    <td>
+        {% if booking.status == "pending" %}
+            {% if booking.handover_photos.exists %}
+                <a href="{% url 'approve_booking' booking.id %}" class="btn btn-success">
+                    Confirm
+                </a>
+            {% else %}
+                <span class="btn btn-disabled">Confirm</span>
+            {% endif %}
+        {% endif %}
 
-                        {% if booking.status == "in_use" %}
-                            <a href="{% url 'mark_returned' booking.id %}"
-                            class="btn btn-sm btn-warning"
-                            onclick="return confirm('Mark this vehicle as returned?')">
-                                Returned
-                            </a>
-                        {% endif %}
+        {% if booking.status == "confirmed" %}
+            <a href="{% url 'mark_in_use' booking.id %}" class="btn btn-warning">
+                Mark In Use
+            </a>
+        {% endif %}
 
-                        {% if booking.status == "confirmed" %}
-                            <span class="text-muted small">
-                                Waiting for pickup
-                            </span>
-                        {% endif %}
+        {% if booking.status == "in_use" %}
+            <a href="{% url 'mark_returned' booking.id %}" class="btn btn-warning">
+                Mark Returned
+            </a>
+        {% endif %}
 
-                        {% if booking.status == "returned" %}
-                            <span class="text-success small">
-                                Completed
-                            </span>
-                        {% endif %}
+        {% if booking.status == "returned" and booking.damage_report %}
+            <a href="{% url 'admin_damage_review' booking.id %}" class="btn btn-danger">
+                Review Damage
+            </a>
+        {% endif %}
+    </td>
 
-                    </div>
-                </td>
-
-
-
-                <!-- PRICE -->
-                <td class="fw-bold text-success">
-                    ₹{{ booking.total_price }}
-                </td>
-
-                <!-- DEPOSIT -->
-                <td>
-                    ₹{{ booking.security_deposit }}
-                </td>
-
-                <!-- BOOKED AT -->
-                <td>
-                    {{ booking.ordered_at|date:"d M Y" }}<br>
-                    <span class="muted">
-                        {{ booking.ordered_at|time:"h:i A" }}
-                    </span>
-                </td>
-            </tr>
-            {% empty %}
-            <tr>
-                <td colspan="8" style="text-align:center; padding:20px;">
-                    No bookings found.
-                </td>
-            </tr>
-            {% endfor %}
-        </tbody>
-    </table>
+    <td>₹{{ booking.total_price }}</td>
+    <td>
+        {{ booking.ordered_at|date:"d M Y" }}<br>
+        <span class="muted">{{ booking.ordered_at|time:"h:i A" }}</span>
+    </td>
+</tr>
+{% empty %}
+<tr>
+    <td colspan="9" style="text-align:center; padding:20px;">
+        No bookings found
+    </td>
+</tr>
+{% endfor %}
+</tbody>
+</table>
 
 </div>
 </body>
