@@ -631,38 +631,24 @@ def get_unread_notification_count(user):
 def add_damage_report(request, booking_id):
     booking = get_object_or_404(Booking, id=booking_id)
 
-    if hasattr(booking, "damage_report"):
-        messages.warning(request, "Damage already reported.")
-        return redirect("admin_bookings")
-
     if request.method == "POST":
         description = request.POST.get("description")
-        extra_charge = request.POST.get("extra_charge")
-        photos = request.FILES.getlist("photos")
 
         report = DamageReport.objects.create(
             booking=booking,
-            vehicle=booking.vehicle,
-            reported_by=request.user,
             description=description,
-            extra_charge=extra_charge
+            is_paid=False
         )
+        booking.status = "damage_reported"
+        booking.save()
 
-        for photo in photos:
-            DamagePhoto.objects.create(
-                report=report,
-                image=photo
-            )
+        messages.success(request, "Damage report submitted successfully")
+        return redirect("owner_vehicle_bookings")
 
-        Notification.objects.create(
-            user=booking.user,
-            message=f"Damage reported. Extra charge ₹{extra_charge}. Please pay."
-        )
+    return render(request, "add_damage_report.html", {
+        "booking": booking
+    })
 
-        messages.success(request, "Damage report submitted.")
-        return redirect("admin_bookings")
-
-    return render(request, "add_damage_report.html", {"booking": booking})
 
 
 def can_user_book(user):
@@ -701,7 +687,7 @@ def upload_handover_photos(request, booking_id):
             )
         if booking.handover_photos.exists():
             messages.warning(request, "Handover photos already uploaded.")
-            return redirect("owner_bookings")
+            return redirect("owner_vehicle_bookings")
 
         for admin in User.objects.filter(is_superuser=True):
             Notification.objects.create(
