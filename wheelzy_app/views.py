@@ -363,18 +363,24 @@ def owner_vehicles(request):
         "vehicles": vehicles
     })
 
-
 @login_required
 def owner_bookings(request):
     if not request.user.groups.filter(name="owner").exists():
         messages.error(request, "Access denied")
         return redirect("home")
-    bookings = Booking.objects.filter(
-        vehicle__owner=request.user
-    ).select_related("vehicle", "user").order_by("-ordered_at")
+
+    bookings = (
+        Booking.objects
+        .filter(vehicle__owner=request.user)
+        .select_related("vehicle", "user")
+        .prefetch_related("handover_photos")
+        .order_by("-ordered_at")
+    )
+
     return render(request, "owner_bookings.html", {
         "bookings": bookings
     })
+
 
 
 @login_required
@@ -693,6 +699,9 @@ def upload_handover_photos(request, booking_id):
                 booking=booking,
                 image=photo
             )
+        if booking.handover_photos.exists():
+            messages.warning(request, "Handover photos already uploaded.")
+            return redirect("owner_bookings")
 
         for admin in User.objects.filter(is_superuser=True):
             Notification.objects.create(

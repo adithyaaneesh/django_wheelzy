@@ -77,7 +77,7 @@
                                 {% elif booking.status == "in_use" %}
                                     <span class="badge bg-info badge-status">In Use</span>
                                 {% elif booking.status == "returned" %}
-                                    <span class="badge bg-success badge-status">Returned</span>
+                                    <span class="badge bg-success badge-status">Completed</span>
                                 {% elif booking.status == "damage_reported" %}
                                     <span class="badge bg-danger badge-status">Damage Reported</span>
                                 {% else %}
@@ -89,16 +89,16 @@
 
                             <!-- ACTION -->
                             <td>
-                               {% if booking.status == "pending" %}
+                                {% if booking.handover_photos.exists %}
+                                    <span class="badge bg-secondary">
+                                        Handover Photos Uploaded
+                                    </span>
+
+                                {% elif booking.status == "pending" %}
                                     <a href="{% url 'upload_handover_photos' booking.id %}"
                                     class="btn btn-primary btn-sm">
                                         Upload Handover Photos
                                     </a>
-
-                                {% elif booking.status == "handover_uploaded" %}
-                                    <span class="badge bg-info">
-                                        Photos Uploaded
-                                    </span>
 
                                 {% elif booking.status == "returned" %}
                                     <a href="{% url 'add_damage_report' booking.id %}"
@@ -109,8 +109,8 @@
                                 {% else %}
                                     —
                                 {% endif %}
-
                             </td>
+
 
                         </tr>
                     {% endfor %}
