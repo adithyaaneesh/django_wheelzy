@@ -30,21 +30,25 @@
 <div class="card">
     <h2>Damage Report</h2>
 
-    <form method="POST" enctype="multipart/form-data">
-        {% csrf_token %}
+   <form method="POST" enctype="multipart/form-data">
+    {% csrf_token %}
 
-        <label>Description</label>
-        <textarea name="description" required></textarea>
+    <label>Description</label>
+    <textarea name="description" required></textarea>
 
-        <label>Extra Charge</label>
-        <input type="number" name="extra_charge" required>
+    <label>Extra Charge</label>
+    <input type="number" name="extra_charge" required>
 
-        <label>Damage Photos</label>
-        <input type="file" name="photos" multiple required>
+    <label>Damage Photos</label>
+    <input
+        type="file"
+        name="photos"
+        multiple
+        required
+    >
 
-        <button type="submit">Submit</button>
-    </form>
-
+    <button type="submit">Submit Damage Report</button>
+</form>
 
 </div>
 

@@ -97,15 +97,16 @@
             <p>{{ damage_report.description }}</p>
 
             <h4>Damage Photos</h4>
-            {% if damage_photos %}
+           {% if damage_report and damage_report.photos.exists %}
                 <div class="photos">
-                    {% for photo in damage_photos %}
+                    {% for photo in damage_report.photos.all %}
                         <img src="{{ photo.image.url }}" alt="Damage Photo">
                     {% endfor %}
                 </div>
             {% else %}
                 <p>No damage photos uploaded.</p>
             {% endif %}
+
 
         {% else %}
             <p>No damage report submitted.</p>

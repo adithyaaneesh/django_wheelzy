@@ -86,6 +86,21 @@
         justify-content: center;
     }
 
+    .notification-bell {
+        position: relative;
+    }
+
+    .notification-bell .badge {
+        position: absolute;
+        top: 6px;
+        right: 6px;
+        background: #ef4444;
+        color: white;
+        font-size: 11px;
+        padding: 2px 6px;
+        border-radius: 50%;
+        font-weight: 600;
+    }
 
     .profile-card {
         position: fixed;
@@ -338,6 +353,13 @@
         <a href="{% url 'my_bookings' %}" class="pill-item">
             <i class="fa-regular fa-folder"></i><span>My Bookings</span>
         </a>
+        <a href="{% url 'notifications' %}" class="pill-item notification-bell">
+            <i class="fa-solid fa-bell"></i>
+            {% if unread_notification_count > 0 %}
+                <span class="badge">{{ unread_notification_count }}</span>
+            {% endif %}
+        </a>
+
 
         <!-- PROFILE ICON -->
         <div class="pill-item profile-btn" onclick="toggleProfileCard()">

@@ -51,7 +51,8 @@ urlpatterns = [
     path("admin_analytics/", views.admin_analytics, name="admin_analytics"),
 
     # ================= DAMAGE REPORTS =================
-    path("booking/<int:booking_id>/damage-report/",views.add_damage_report,name="add_damage_report"),
+    path("booking/<int:booking_id>/damage-report/",views.owner_add_damage_report,name="add_damage_report"),
+    # path("booking/<int:booking_id>/damage-report/",views.add_damage_report,name="add_damage_report"),
 
     # Admin damage reports
     path("admin_damage-reports/",views.admin_damage_report_list,name="admin_damage_report_list"),

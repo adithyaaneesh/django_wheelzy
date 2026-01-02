@@ -302,36 +302,6 @@ def my_bookings(request):
 
 
 
-
-# return a vehicle
-@login_required
-def return_vehicle(request, booking_id):
-    booking = get_object_or_404(Booking, id=booking_id)
-
-    if request.method == "POST":
-        damage_cost = float(request.POST.get("damage_cost", 0))
-        damage_desc = request.POST.get("damage_desc", "")
-
-        booking.status = "returned"
-        booking.save()
-
-        DamageReport.objects.create(
-            booking=booking,
-            vehicle=booking.vehicle,
-            reported_by=request.user,
-            description=damage_desc,
-            extra_charge=damage_cost,
-            is_paid=False
-        )
-
-
-        messages.info(
-            request,"Return processed successfully.")
-
-        return redirect("my_bookings")
-
-    return render(request, "return_vehicle.html", {"booking": booking})
-
 # admin/owner view damage details
 @login_required
 def damage_details(request, booking_id):
@@ -660,33 +630,6 @@ def get_unread_notification_count(user):
         return Notification.objects.filter(user=user, is_read=False).count()
     return 0
 
-@login_required
-def add_damage_report(request, booking_id):
-    booking = get_object_or_404(Booking, id=booking_id)
-
-    if request.method == "POST":
-        description = request.POST.get("description")
-        extra_charge = request.POST.get("extra_charge", 0)
-
-        DamageReport.objects.create(
-            booking=booking,
-            vehicle=booking.vehicle,
-            reported_by=request.user,
-            description=description,
-            extra_charge=extra_charge,   # ✅ SAVE REAL VALUE
-            is_paid=False
-        )
-
-        booking.status = "damage_reported"
-        booking.save()
-
-        messages.success(request, "Damage report submitted successfully")
-        return redirect("owner_vehicle_bookings")
-
-    return render(request, "add_damage_report.html", {"booking": booking})
-
-
-
 
 def can_user_book(user):
     unpaid_damage = DamageReport.objects.filter(
@@ -929,7 +872,7 @@ def owner_add_damage_report(request, booking_id):
 
         messages.success(request, "Damage report submitted successfully")
         return redirect("owner_vehicle_bookings")
-
+    
     return render(
         request,
         "owner_add_damage_report.html",
