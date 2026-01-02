@@ -8,6 +8,9 @@ from django.utils import timezone
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from . import models
+from django.http import JsonResponse
+from django.views.decorators.http import require_POST
+
 
 def register(request):
     if request.method == "POST":
@@ -18,7 +21,7 @@ def register(request):
         role = request.POST.get("role")
         phone = request.POST.get("phone")
         address = request.POST.get("address")
-        photo = request.FILES.get("photo")  # 👈 IMPORTANT
+        photo = request.FILES.get("photo") 
 
         if not all([username, email, password, cpassword, phone, address, photo]):
             messages.error(request, "All fields are required")
@@ -660,24 +663,15 @@ def admin_damage_report_detail(request, report_id):
     )
 
 @login_required
-def notifications_view(request):
-    notifications = Notification.objects.filter(user=request.user).order_by("-created_at")
-    notifications.filter(is_read=False).update(is_read=True)
-    return render(request, "notifications.html", {
-        "notifications": notifications
-    })
-
-
-def get_unread_notification_count(user):
-    if user.is_authenticated:
-        return Notification.objects.filter(user=user, is_read=False).count()
-    return 0
-    
-@login_required
 def owner_dashboard(request):
     if not request.user.groups.filter(name="owner").exists():
         return redirect("home")
-    return render(request, "owner_dashboard.html")
+
+    context = {
+        "unread_count": get_unread_notification_count(request.user)
+    }
+
+    return render(request, "owner_dashboard.html", context)
 
 @login_required
 def add_vehicle(request):
@@ -817,12 +811,8 @@ def owner_add_damage_report(request, booking_id):
                 report=report,
                 image=photo
             )
-
-        # ✅ Update booking status
         booking.status = "damage_reported"
         booking.save()
-
-        # 🔔 Notify customer
         Notification.objects.create(
             user=booking.user,
             message=(
@@ -840,3 +830,46 @@ def owner_add_damage_report(request, booking_id):
         {"booking": booking}
     )
 
+# @login_required
+# def notifications_view(request):
+#     notifications = Notification.objects.filter(user=request.user).order_by("-created_at")
+#     notifications.filter(is_read=False).update(is_read=True)
+#     return render(request, "notifications.html", {
+#         "notifications": notifications
+#     })
+
+
+# def get_unread_notification_count(user):
+#     if user.is_authenticated:
+#         return Notification.objects.filter(user=user, is_read=False).count()
+#     return 0
+
+@login_required
+def notifications_view(request):
+    notifications = Notification.objects.filter(
+        user=request.user
+    ).order_by("-created_at")
+
+    return render(request, "notifications.html", {
+        "notifications": notifications
+    })
+
+
+@login_required
+@require_POST
+def mark_notification_read(request):
+    notif_id = request.POST.get("id")
+    Notification.objects.filter(
+        id=notif_id,
+        user=request.user
+    ).update(is_read=True)
+    return JsonResponse({"status": "ok"})
+
+
+def get_unread_notification_count(user):
+    if user.is_authenticated:
+        return Notification.objects.filter(
+            user=user,
+            is_read=False
+        ).count()
+    return 0

@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+<!-- <!DOCTYPE html>
 <html>
 <head>
     <title>Notifications</title>
@@ -34,6 +34,151 @@
 {% empty %}
     <p>No notifications</p>
 {% endfor %}
+
+</body>
+</html> -->
+
+
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Notifications</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <style>
+        body {
+            font-family: Poppins, sans-serif;
+            background: #f4f6fb;
+            padding: 30px;
+        }
+
+        h2 {
+            margin-bottom: 20px;
+        }
+
+        .note {
+            background: white;
+            padding: 16px 18px;
+            margin-bottom: 14px;
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .note.unread {
+            font-weight: 600;
+        }
+
+        .dot {
+            width: 10px;
+            height: 10px;
+            background: #2563eb;
+            border-radius: 50%;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.45);
+            justify-content: center;
+            align-items: center;
+        }
+
+        .modal-content {
+            background: white;
+            width: 95%;
+            max-width: 420px;
+            border-radius: 14px;
+            padding: 22px;
+        }
+
+        .meta {
+            color: #6b7280;
+            font-size: 13px;
+            margin-bottom: 10px;
+        }
+
+        .btn {
+            width: 100%;
+            padding: 12px;
+            border: none;
+            border-radius: 10px;
+            background: #2563eb;
+            color: white;
+            font-weight: 600;
+            cursor: pointer;
+            margin-top: 16px;
+        }
+    </style>
+</head>
+
+<body>
+
+{% csrf_token %}
+
+<h2>🔔 Notifications</h2>
+
+{% for note in notifications %}
+<div class="note {% if not note.is_read %}unread{% endif %}"
+     data-id="{{ note.id }}"
+     data-message="{{ note.message|escapejs }}"
+     data-time="{{ note.created_at|date:'d M Y, H:i' }}"
+     data-sender="info@wheelzy.com"
+     onclick="openModal(this)">
+
+    <span>{{ note.message|truncatechars:45 }}</span>
+
+    {% if not note.is_read %}
+        <span class="dot"></span>
+    {% endif %}
+</div>
+
+{% empty %}
+<p>No notifications</p>
+{% endfor %}
+
+
+<div class="modal" id="notifModal">
+    <div class="modal-content">
+        <h3>Notification</h3>
+        <div class="meta" id="modalMeta"></div>
+        <p id="modalMessage"></p>
+
+        <button class="btn" onclick="markReadAndClose()">
+            Mark as read & Close
+        </button>
+    </div>
+</div>
+
+<script>
+let currentNotifId = null;
+
+function openModal(el) {
+    currentNotifId = el.dataset.id;
+
+    document.getElementById("modalMessage").innerText =
+        el.dataset.message;
+
+    document.getElementById("modalMeta").innerText =
+        `From: ${el.dataset.sender} • ${el.dataset.time}`;
+
+    document.getElementById("notifModal").style.display = "flex";
+}
+
+function markReadAndClose() {
+    fetch("{% url 'mark_notification_read' %}", {
+        method: "POST",
+        headers: {
+            "X-CSRFToken": "{{ csrf_token }}"
+        },
+        body: new URLSearchParams({ id: currentNotifId })
+    }).then(() => location.reload());
+}
+</script>
 
 </body>
 </html>

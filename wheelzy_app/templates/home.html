@@ -353,13 +353,18 @@
         <a href="{% url 'my_bookings' %}" class="pill-item">
             <i class="fa-regular fa-folder"></i><span>My Bookings</span>
         </a>
-        <a href="{% url 'notifications' %}" class="pill-item notification-bell">
+        <!-- <a href="{% url 'notifications' %}" class="pill-item notification-bell">
             <i class="fa-solid fa-bell"></i>
             {% if unread_notification_count > 0 %}
                 <span class="badge">{{ unread_notification_count }}</span>
             {% endif %}
+        </a> -->
+        <a href="{% url 'notifications' %}" class="pill-item notification-bell">
+            <i class="fa-solid fa-bell"></i>
+            {% if unread_count > 0 %}
+                <span class="badge">{{ unread_count }}</span>
+            {% endif %}
         </a>
-
 
         <!-- PROFILE ICON -->
         <div class="pill-item profile-btn" onclick="toggleProfileCard()">
@@ -543,7 +548,7 @@
                 <div class="contact-box">
                     <div class="contact-icon"><i class="fa-solid fa-envelope"></i></div>
                     <h5>Write Us</h5>
-                    <p class="text-muted mb-0">wheelzy@gmail.com</p>
+                    <p class="text-muted mb-0">info@wheelzy.com</p>
                     <!-- <p class="text-muted">info@wheelzy.com</p> -->
                 </div>
             </div>
