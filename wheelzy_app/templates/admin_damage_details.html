@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Damage Details | Wheelzy Admin</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
+
+    <style>
+        body {
+            font-family: 'Poppins', sans-serif;
+            background: #f4f6fb;
+            margin: 0;
+            padding: 30px;
+        }
+
+        .container {
+            max-width: 1100px;
+            margin: auto;
+        }
+
+        h2 {
+            margin-bottom: 20px;
+        }
+
+        .section {
+            background: white;
+            border-radius: 14px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.08);
+        }
+
+        .photos {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+            gap: 14px;
+        }
+
+        .photos img {
+            width: 100%;
+            border-radius: 10px;
+            border: 1px solid #e5e7eb;
+        }
+
+        .btn {
+            padding: 10px 18px;
+            border-radius: 8px;
+            text-decoration: none;
+            font-weight: 600;
+            display: inline-block;
+            margin-right: 8px;
+        }
+
+        .btn-success {
+            background: #16a34a;
+            color: white;
+        }
+
+        .btn-secondary {
+            background: #6b7280;
+            color: white;
+        }
+    </style>
+</head>
+
+<body>
+<div class="container">
+
+    <h2>Damage Details – Booking #{{ booking.id }}</h2>
+
+    <!-- VEHICLE DETAILS -->
+    <div class="section">
+        <strong>Vehicle:</strong> {{ booking.vehicle.vehicle_name }}<br>
+        <strong>Number:</strong> {{ booking.vehicle.number_plate }}
+    </div>
+
+    <!-- HANDOVER PHOTOS -->
+    <div class="section">
+        <h4>Handover Photos</h4>
+
+        {% if booking.handover_photos.count %}
+            <div class="photos">
+                {% for photo in booking.handover_photos.all %}
+                    <img src="{{ photo.image.url }}" alt="Handover Photo">
+                {% endfor %}
+            </div>
+        {% else %}
+            <p>No handover photos uploaded.</p>
+        {% endif %}
+    </div>
+
+    <!-- DAMAGE REPORT -->
+    <div class="section">
+        <h4>Damage Report</h4>
+
+        {% if damage_report %}
+            <p>{{ damage_report.description }}</p>
+
+            <h4>Damage Photos</h4>
+            {% if damage_report.photos.count %}
+                <div class="photos">
+                    {% for photo in damage_report.photos.all %}
+                        <img src="{{ photo.image.url }}" alt="Damage Photo">
+                    {% endfor %}
+                </div>
+            {% else %}
+                <p>No damage photos uploaded.</p>
+            {% endif %}
+        {% else %}
+            <p>No damage report submitted.</p>
+        {% endif %}
+    </div>
+
+    <!-- ACTION BUTTONS -->
+    <div class="section">
+        {% if damage_report and not damage_report.is_paid %}
+            <a href="{% url 'mark_damage_paid' damage_report.id %}"
+               class="btn btn-success">
+                Mark as Paid
+            </a>
+        {% endif %}
+
+        <a href="{% url 'admin_bookings' %}" class="btn btn-secondary">
+            Back to Bookings
+        </a>
+    </div>
+
+</div>
+</body>
+</html>

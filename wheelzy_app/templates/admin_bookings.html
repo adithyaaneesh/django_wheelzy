@@ -178,11 +178,12 @@
             </a>
         {% endif %}
 
-        {% if booking.status == "returned" and booking.damage_report %}
-            <a href="{% url 'admin_damage_review' booking.id %}" class="btn btn-danger">
-                Review Damage
+        {% if booking.status == "damage_reported" %}
+            <a href="{% url 'admin_damage_details' booking.id %}" class="btn btn-danger">
+                View Damage Details
             </a>
         {% endif %}
+
     </td>
 
     <td>₹{{ booking.total_price }}</td>

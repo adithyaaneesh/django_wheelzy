@@ -649,7 +649,19 @@ def add_damage_report(request, booking_id):
         "booking": booking
     })
 
+# @login_required
+# def admin_damage_details(request, booking_id):
+#     booking = get_object_or_404(Booking, id=booking_id)
+#     damage_report = getattr(booking, "damage_report", None)
 
+#     return render(
+#         request,
+#         "admin_damage_details.html",
+#         {
+#             "booking": booking,
+#             "damage_report": damage_report
+#         }
+#     )
 
 def can_user_book(user):
     unpaid_damage = DamageReport.objects.filter(
@@ -672,12 +684,15 @@ def upload_handover_photos(request, booking_id):
         id=booking_id,
         vehicle__owner=request.user
     )
+    if booking.handover_photos.exists():
+        messages.warning(request, "Handover photos already uploaded.")
+        return redirect("owner_bookings")
 
     if request.method == "POST":
         photos = request.FILES.getlist("photos")
 
         if not photos:
-            messages.error(request, "Please upload at least one photo.")
+            messages.error(request, "Upload at least one photo.")
             return redirect(request.path)
 
         for photo in photos:
@@ -685,20 +700,37 @@ def upload_handover_photos(request, booking_id):
                 booking=booking,
                 image=photo
             )
-        if booking.handover_photos.exists():
-            messages.warning(request, "Handover photos already uploaded.")
-            return redirect("owner_vehicle_bookings")
 
-        for admin in User.objects.filter(is_superuser=True):
-            Notification.objects.create(
-                user=admin,
-                message=f"Handover photos uploaded for Booking #{booking.id}"
-            )
-
-        messages.success(request, "Handover photos uploaded. Waiting for admin approval.")
+        messages.success(request, "Handover photos uploaded successfully.")
         return redirect("owner_bookings")
 
     return render(request, "upload_handover_photos.html", {"booking": booking})
+
+
+@login_required
+def admin_damage_details(request, booking_id):
+    booking = get_object_or_404(Booking, id=booking_id)
+    damage_report = getattr(booking, "damage_report", None)
+
+    return render(
+        request,
+        "admin_damage_details.html",
+        {
+            "booking": booking,
+            "damage_report": damage_report
+        }
+    )
+
+
+@login_required
+def mark_damage_paid(request, damage_id):
+    report = get_object_or_404(DamageReport, id=damage_id)
+    report.is_paid = True
+    report.save()
+
+    messages.success(request, "Damage marked as paid.")
+    return redirect("admin_damage_details", booking_id=report.booking.id)
+
 
 
 

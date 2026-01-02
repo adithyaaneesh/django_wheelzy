@@ -71,6 +71,7 @@ class Booking(models.Model):
         ('confirmed', 'Confirmed'),
         ('in_use', 'In Use'),
         ('returned', 'Completed'),
+        ('damage_reported', 'Damage Reported'),
         ('cancelled', 'Cancelled'),
     )
 
@@ -171,33 +172,13 @@ class VehicleHandoverPhoto(models.Model):
 # DAMAGE REPORT
 # =========================
 class DamageReport(models.Model):
-    booking = models.ForeignKey(
-        Booking,
-        on_delete=models.CASCADE,
-        related_name="damage_reports"
-    )
-
-    vehicle = models.ForeignKey(
-        Vehicle,
-        on_delete=models.CASCADE,
-        related_name="damage_reports",null=True,blank=True
-    )
-
-    reported_by = models.ForeignKey(
-        User,
-        on_delete=models.CASCADE,
-        related_name="reported_damages", null=True, blank=True
-    )
-
+    booking = models.OneToOneField( Booking,on_delete=models.CASCADE,related_name="damage_report")
+    vehicle = models.ForeignKey(Vehicle,on_delete=models.CASCADE,related_name="damage_reports",null=True,blank=True)
+    reported_by = models.ForeignKey(User,on_delete=models.CASCADE,related_name="reported_damages")
     description = models.TextField()
-    extra_charge = models.DecimalField(
-        max_digits=8,
-        decimal_places=2,
-        default=0
-    )
-
+    extra_charge = models.DecimalField(max_digits=8,decimal_places=2,default=0)
     is_paid = models.BooleanField(default=False)
-    created_at = models.DateTimeField(default=timezone.now)
+    created_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
         return f"Damage Report #{self.id} - Booking #{self.booking.id}"
