@@ -532,12 +532,12 @@ def admin_bookings(request):
     return render(request, "admin_bookings.html", {"bookings": bookings})
 
 
-@login_required
-def admin_damage_reports(request):
-    if not request.user.is_superuser:
-        return redirect("home")
-    reports = DamageReport.objects.select_related("booking", "booking__vehicle")
-    return render(request, "admin_damage_reports.html", {"reports": reports})
+# @login_required
+# def admin_damage_reports(request):
+#     if not request.user.is_superuser:
+#         return redirect("home")
+#     reports = DamageReport.objects.select_related("booking", "booking__vehicle")
+#     return render(request, "admin_damage_reports.html", {"reports": reports})
 
 
 @login_required
@@ -790,6 +790,7 @@ def admin_damage_report_list(request):
 @login_required
 def admin_damage_report_detail(request, report_id):
     report = get_object_or_404(DamageReport, id=report_id)
+    damage_photos = DamagePhoto.objects.filter(report=report)
     handover_photos = VehicleHandoverPhoto.objects.filter(
         booking=report.booking
     )
@@ -799,7 +800,8 @@ def admin_damage_report_detail(request, report_id):
         "damage_report_detail.html",
         {
             "report": report,
-            "handover_photos": handover_photos
+            "handover_photos": handover_photos,
+            "damage_photos": damage_photos
         }
     )
 

@@ -47,7 +47,6 @@ urlpatterns = [
     path("booking/<int:booking_id>/approve/", views.approve_booking, name="approve_booking"),
     path("booking/<int:booking_id>/returned/", views.mark_returned, name="mark_returned"),
 
-    path("admin_damages/", views.admin_damage_reports, name="admin_damage_reports"),
     path("admin_revenue/", views.admin_revenue, name="admin_revenue"),
     path("admin_analytics/", views.admin_analytics, name="admin_analytics"),
 

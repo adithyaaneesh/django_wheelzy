@@ -33,30 +33,18 @@
     <form method="POST" enctype="multipart/form-data">
         {% csrf_token %}
 
-        <div class="mb-3">
-            <label class="form-label">Damage Description</label>
-            <textarea name="description" class="form-control" required></textarea>
-        </div>
+        <label>Description</label>
+        <textarea name="description" required></textarea>
 
-        <div class="mb-3">
-            <label class="form-label">Extra Charge</label>
-            <input type="number" name="extra_charge" class="form-control" required>
-        </div>
+        <label>Extra Charge</label>
+        <input type="number" name="extra_charge" required>
 
-        <div class="mb-3">
-            <label class="form-label">Damage Photos</label>
-            <input type="file"
-                name="photos"
-                class="form-control"
-                multiple
-                accept="image/*"
-                required>
-        </div>
+        <label>Damage Photos</label>
+        <input type="file" name="photos" multiple required>
 
-        <button type="submit" class="btn btn-danger">
-            Submit Damage Report
-        </button>
+        <button type="submit">Submit</button>
     </form>
+
 
 </div>
 
