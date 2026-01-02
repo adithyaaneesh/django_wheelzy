@@ -52,6 +52,13 @@
         <h2 class="fw-bold">My Bookings</h2>
         <a href="{% url 'home' %}" class="btn btn-secondary">← Back</a>
     </div>
+    {% if has_unpaid_damage %}
+    <div class="alert alert-warning">
+        ⚠ You have unpaid damage charges.
+        <strong>Please complete payment to book new vehicles.</strong>
+    </div>
+    {% endif %}
+
 
     {% if bookings %}
         <div class="row g-4">
@@ -63,17 +70,27 @@
                     <!-- TITLE + STATUS -->
                     <div class="d-flex justify-content-between align-items-center mb-2">
                         <h5 class="mb-0">{{ booking.vehicle.vehicle_name }}</h5>
-                        {% if booking.status == "damage_reported" %}
-                            <a href="{% url 'customer_damage_detail' booking.id %}"
-                            class="status-badge status-damage_reported text-decoration-none">
-                                ⚠ Damage Reported
-                            </a>
+
+                        {% if booking.status == "damage_reported" and booking.damage_report %}
+
+                            {% if booking.damage_report.is_paid %}
+                                <span class="status-badge bg-success text-white">
+                                    ✅ Damage Paid
+                                </span>
+                            {% else %}
+                                <a href="{% url 'customer_damage_detail' booking.id %}"
+                                class="status-badge status-damage_reported text-decoration-none">
+                                    ⚠ Damage Reported | Click to pay
+                                </a>
+                            {% endif %}
+
                         {% else %}
                             <span class="status-badge status-{{ booking.status }}">
                                 {{ booking.status|title }}
                             </span>
                         {% endif %}
                     </div>
+
 
                     <!-- DETAILS -->
                     <p class="text-muted mb-1">

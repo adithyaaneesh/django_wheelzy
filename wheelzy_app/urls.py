@@ -65,11 +65,7 @@ urlpatterns = [
 
     path("admin_damage/<int:booking_id>/",views.admin_damage_details,name="admin_damage_details"),
 
-    path(
-        "admin/damage/paid/<int:damage_id>/",
-        views.mark_damage_paid,
-        name="mark_damage_paid"
-    ),
+    path("admin/damage/paid/<int:damage_id>/",views.mark_damage_paid,name="mark_damage_paid"),
 
 
     # ================= NOTIFICATIONS =================

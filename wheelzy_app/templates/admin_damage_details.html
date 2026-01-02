@@ -78,9 +78,9 @@
     <div class="section">
         <h4>Handover Photos</h4>
 
-        {% if booking.handover_photos.count %}
+        {% if handover_photos %}
             <div class="photos">
-                {% for photo in booking.handover_photos.all %}
+                {% for photo in handover_photos %}
                     <img src="{{ photo.image.url }}" alt="Handover Photo">
                 {% endfor %}
             </div>
@@ -97,15 +97,16 @@
             <p>{{ damage_report.description }}</p>
 
             <h4>Damage Photos</h4>
-            {% if damage_report.photos.count %}
+            {% if damage_photos %}
                 <div class="photos">
-                    {% for photo in damage_report.photos.all %}
+                    {% for photo in damage_photos %}
                         <img src="{{ photo.image.url }}" alt="Damage Photo">
                     {% endfor %}
                 </div>
             {% else %}
                 <p>No damage photos uploaded.</p>
             {% endif %}
+
         {% else %}
             <p>No damage report submitted.</p>
         {% endif %}

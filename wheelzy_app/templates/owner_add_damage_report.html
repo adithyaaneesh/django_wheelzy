@@ -30,25 +30,34 @@
 <div class="card">
     <h2>Damage Report</h2>
 
-    <form method="post" enctype="multipart/form-data">
+    <form method="POST" enctype="multipart/form-data">
         {% csrf_token %}
 
-        <textarea name="description"
-                  placeholder="Describe the damage"
-                  required></textarea>
+        <div class="mb-3">
+            <label class="form-label">Damage Description</label>
+            <textarea name="description" class="form-control" required></textarea>
+        </div>
 
-        <input type="number"
-               name="extra_charge"
-               placeholder="Extra charge (₹)"
-               required>
+        <div class="mb-3">
+            <label class="form-label">Extra Charge</label>
+            <input type="number" name="extra_charge" class="form-control" required>
+        </div>
 
-        <input type="file"
-               name="photos"
-               multiple
-               required>
+        <div class="mb-3">
+            <label class="form-label">Damage Photos</label>
+            <input type="file"
+                name="photos"
+                class="form-control"
+                multiple
+                accept="image/*"
+                required>
+        </div>
 
-        <button type="submit">Submit Damage Report</button>
+        <button type="submit" class="btn btn-danger">
+            Submit Damage Report
+        </button>
     </form>
+
 </div>
 
 </body>
