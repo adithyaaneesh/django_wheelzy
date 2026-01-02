@@ -87,7 +87,6 @@ def login_view(request):
 
         # -------- CUSTOMER --------
         elif selected_role == "customer":
-            # Block admin and owner from logging in as customer
             if user.is_superuser or user.groups.filter(name="owner").exists():
                 messages.error(request, "Admins and Owners cannot login as customers")
                 return redirect("login")
@@ -107,11 +106,7 @@ def logout_view(request):
     logout(request)
     return redirect("login")
 
-@login_required
-def owner_dashboard(request):
-    if not request.user.groups.filter(name="owner").exists():
-        return redirect("home")
-    return render(request, "owner_dashboard.html")
+
 
 def home(request):
     if request.user.is_authenticated:
@@ -147,8 +142,6 @@ def profile_view(request):
 def edit_profile(request):
     if request.method == "POST":
         profile, _ = UserProfile.objects.get_or_create(user=request.user)
-
-        # update user fields
         new_username = request.POST.get("username")
         if new_username and new_username != request.user.username:
             if User.objects.filter(username=new_username).exists():
@@ -157,8 +150,6 @@ def edit_profile(request):
             request.user.username = new_username
 
         request.user.email = request.POST.get("email")
-
-        # update profile fields
         profile.phone_number = request.POST.get("phone")
         profile.address = request.POST.get("address")
 
@@ -201,7 +192,6 @@ def all_vehicle(request):
         "booked_vehicle_ids": booked_vehicle_ids
     })
 
-# view a vehicle details for user
 @login_required
 def vehicle_details(request, id):
     vehicle = get_object_or_404(Vehicle, id=id)
@@ -217,7 +207,6 @@ def vehicle_details(request, id):
     })
 
 
-# book a vehicle by user
 @login_required
 def book_vehicle(request, vehicle_id):
     if DamageReport.objects.filter(
@@ -275,8 +264,6 @@ def book_vehicle(request, vehicle_id):
         }
     )
 
-
-# list all bookings
 @login_required
 def my_bookings(request):
     bookings = (
@@ -301,90 +288,112 @@ def my_bookings(request):
     )
 
 
-
-# admin/owner view damage details
 @login_required
-def damage_details(request, booking_id):
-    report = get_object_or_404(DamageReport, booking_id=booking_id)
-    return render(request, "damage_details.html", {"report": report})
+def cancel_booking(request, booking_id):
+    booking = get_object_or_404(Booking, id=booking_id, user=request.user)
 
-# add vehicles by owners
-@login_required
-def add_vehicle(request):
-    if request.method == 'POST':
-        vehicle = Vehicle.objects.create(
-            owner=request.user,
-            vehicle_name=request.POST.get("vehicle_name"),
-            vehicle_type=request.POST.get("vehicle_type"),
-            number_plate=request.POST.get("number_plate"),
-            seats=request.POST.get("number_of_seats"),
-            price_per_hour=request.POST.get("price_per_hour"),
-            image=request.FILES.get("image"),
+    if booking.status == "pending":
+        booking.status = "cancelled"
+        booking.save()
+
+        Notification.objects.create(
+            user=booking.user,
+            message="Your booking has been cancelled."
         )
-        messages.success(request, "Vehicle added successfully!")
-        return redirect("owner_dashboard")
-    return render(request, "add_vehicle.html")
 
-# update a vehicle
-@login_required
-def update_vehicle(request, id):
-    vehicle = get_object_or_404(Vehicle, id=id)
-    if vehicle.owner != request.user:
-        messages.error(request, "You are not allowed to edit this vehicle")
-        return redirect("home")
-    if request.method == "POST":
-        vehicle.vehicle_name = request.POST.get("vehicle_name")
-        vehicle.vehicle_type = request.POST.get("vehicle_type")
-        vehicle.number_plate = request.POST.get("number_plate")
-        vehicle.seats = request.POST.get("number_of_seats")
-        vehicle.price_per_hour = request.POST.get("price_per_hour")
-        if request.FILES.get("image"):
-            vehicle.image = request.FILES.get("image")
-        vehicle.save()
-        messages.success(request, "Vehicle updated successfully!")
-        return redirect("owner_vehicle_list")
-    return render(request, "update_vehicle.html", {"vehicle": vehicle})
+    return redirect("my_bookings")
 
-# delete a vehicle 
-@login_required
-def delete_vehicle(request, id):
-    vehicle = get_object_or_404(Vehicle, id=id)
-    vehicle.delete()
-    messages.success(request, "Vehicle deleted successfully!")
-    return redirect("home")
+# model
+def can_user_book(user):
+    unpaid_damage = DamageReport.objects.filter(
+        booking__user=user,
+        is_paid=False
+    ).exists()
+    return not unpaid_damage
+
+
+def has_unpaid_damage(user):
+    return DamageReport.objects.filter(
+        booking__user=user,
+        is_paid=False
+    ).exists()
 
 
 @login_required
-def owner_vehicles(request):
-    if not request.user.groups.filter(name="owner").exists():
-        messages.error(request, "Access denied")
-        return redirect("home")
+def booking_guard(request):
+    if has_unpaid_damage(request.user):
+        messages.error(
+            request,
+            "You have unpaid damage charges. "
+            "Please clear them to book vehicles."
+        )
+        return redirect("customer_damage_reports")
 
-    vehicles = Vehicle.objects.filter(owner=request.user)
-
-    return render(request, "owner_vehicles_list.html", {
-        "vehicles": vehicles
-    })
 
 @login_required
-def owner_bookings(request):
-    if not request.user.groups.filter(name="owner").exists():
-        messages.error(request, "Access denied")
-        return redirect("home")
-
-    bookings = (
-        Booking.objects
-        .filter(vehicle__owner=request.user)
-        .select_related("vehicle", "user")
-        .prefetch_related("handover_photos")
-        .order_by("-ordered_at")
+def customer_damage_detail(request, booking_id):
+    booking = get_object_or_404(
+        Booking,
+        id=booking_id,
+        user=request.user
     )
 
-    return render(request, "owner_bookings.html", {
-        "bookings": bookings
+    report = (
+        DamageReport.objects
+        .filter(booking=booking)
+        .order_by("-created_at")
+        .first()
+    )
+
+    if not report:
+        messages.error(request, "No damage report found.")
+        return redirect("my_bookings")
+
+    photos = DamagePhoto.objects.filter(report=report)  # ✅ FIX
+
+    return render(
+        request,
+        "customer_damage_detail.html",
+        {
+            "booking": booking,
+            "report": report,
+            "photos": photos
+        }
+    )
+
+
+@login_required
+def pay_damage_charge(request, report_id):
+    report = get_object_or_404(
+        DamageReport,
+        id=report_id,
+        booking__user=request.user
+    )
+
+    if report.is_paid:
+        messages.info(request, "Damage already paid.")
+        return redirect("my_bookings")
+
+    if request.method == "POST":
+        report.is_paid = True
+        report.save()
+
+        Notification.objects.create(
+            user=request.user,
+            message="Damage payment successful. You may book again."
+        )
+
+        messages.success(request, "Payment completed.")
+        return redirect("my_bookings")
+
+    return render(request, "pay_damage_charge.html", {"report": report})
+
+@login_required
+def admin_dashboard(request):
+    unread_count = get_unread_notification_count(request.user)
+    return render(request, "admin_dashboard.html", {
+        "unread_notification_count": unread_count
     })
-
-
 
 @login_required
 def admin_users(request):
@@ -410,34 +419,6 @@ def admin_users(request):
     return render(request, "admin_users.html", {
         "users_with_roles": users_with_roles
     })
-@login_required
-def admin_vehicles(request):
-    if not request.user.is_superuser:
-        return redirect("home")
-
-    vehicles = Vehicle.objects.select_related("owner")
-
-    q = request.GET.get("q")
-    if q:
-        vehicles = vehicles.filter(
-            vehicle_name__icontains=q
-        ) | vehicles.filter(
-            number_plate__icontains=q
-        )
-
-    vehicle_type = request.GET.get("type")
-    if vehicle_type:
-        vehicles = vehicles.filter(vehicle_type=vehicle_type)
-
-    return render(request, "admin_vehicles.html", {"vehicles": vehicles})
-
-@login_required
-def admin_dashboard(request):
-    unread_count = get_unread_notification_count(request.user)
-    return render(request, "admin_dashboard.html", {
-        "unread_notification_count": unread_count
-    })
-
 
 @login_required
 def admin_add_vehicle(request):
@@ -458,6 +439,27 @@ def admin_add_vehicle(request):
         return redirect("admin_vehicles")
 
     return render(request, "admin_add_vehicle.html")
+
+@login_required
+def admin_vehicles(request):
+    if not request.user.is_superuser:
+        return redirect("home")
+
+    vehicles = Vehicle.objects.select_related("owner")
+
+    q = request.GET.get("q")
+    if q:
+        vehicles = vehicles.filter(
+            vehicle_name__icontains=q
+        ) | vehicles.filter(
+            number_plate__icontains=q
+        )
+
+    vehicle_type = request.GET.get("type")
+    if vehicle_type:
+        vehicles = vehicles.filter(vehicle_type=vehicle_type)
+
+    return render(request, "admin_vehicles.html", {"vehicles": vehicles})
 
 
 @login_required
@@ -500,15 +502,6 @@ def admin_bookings(request):
         return redirect("home")
     bookings = Booking.objects.select_related("vehicle", "user").order_by("-ordered_at")
     return render(request, "admin_bookings.html", {"bookings": bookings})
-
-
-# @login_required
-# def admin_damage_reports(request):
-#     if not request.user.is_superuser:
-#         return redirect("home")
-#     reports = DamageReport.objects.select_related("booking", "booking__vehicle")
-#     return render(request, "admin_damage_reports.html", {"reports": reports})
-
 
 @login_required
 def admin_revenue(request):
@@ -600,93 +593,13 @@ def admin_damage_review(request, booking_id):
 
 
 
-
-@login_required
-def cancel_booking(request, booking_id):
-    booking = get_object_or_404(Booking, id=booking_id, user=request.user)
-
-    if booking.status == "pending":
-        booking.status = "cancelled"
-        booking.save()
-
-        Notification.objects.create(
-            user=booking.user,
-            message="Your booking has been cancelled."
-        )
-
-    return redirect("my_bookings")
-
-@login_required
-def notifications_view(request):
-    notifications = Notification.objects.filter(user=request.user).order_by("-created_at")
-    notifications.filter(is_read=False).update(is_read=True)
-    return render(request, "notifications.html", {
-        "notifications": notifications
-    })
-
-
-def get_unread_notification_count(user):
-    if user.is_authenticated:
-        return Notification.objects.filter(user=user, is_read=False).count()
-    return 0
-
-
-def can_user_book(user):
-    unpaid_damage = DamageReport.objects.filter(
-        booking__user=user,
-        is_paid=False
-    ).exists()
-    return not unpaid_damage
-
-
-def has_unpaid_damage(user):
-    return DamageReport.objects.filter(
-        booking__user=user,
-        is_paid=False
-    ).exists()
-
-@login_required
-def upload_handover_photos(request, booking_id):
-    booking = get_object_or_404(
-        Booking,
-        id=booking_id,
-        vehicle__owner=request.user
-    )
-    if booking.handover_photos.exists():
-        messages.warning(request, "Handover photos already uploaded.")
-        return redirect("owner_vehicle_bookings")
-
-    if request.method == "POST":
-        photos = request.FILES.getlist("photos")
-
-        if not photos:
-            messages.error(request, "Upload at least one photo.")
-            return redirect(request.path)
-
-        for photo in photos:
-            VehicleHandoverPhoto.objects.create(
-                booking=booking,
-                image=photo
-            )
-
-        messages.success(request, "Handover photos uploaded successfully.")
-        return redirect("owner_vehicle_bookings")
-
-    return render(request, "upload_handover_photos.html", {"booking": booking})
-
 @login_required
 def admin_damage_details(request, booking_id):
     booking = get_object_or_404(Booking, id=booking_id)
-
-    # One-to-one damage report (may or may not exist)
     damage_report = getattr(booking, "damage_report", None)
-
-    # Handover photos (before trip)
     handover_photos = VehicleHandoverPhoto.objects.filter(
         booking=booking
     )
-
-    # Damage photos (after trip)
     damage_photos = []
     if damage_report:
         damage_photos = DamagePhoto.objects.filter(
@@ -713,8 +626,6 @@ def mark_damage_paid(request, damage_id):
 
     messages.success(request, "Damage marked as paid.")
     return redirect("admin_damage_details", booking_id=report.booking.id)
-
-
 
 
 @login_required
@@ -748,77 +659,129 @@ def admin_damage_report_detail(request, report_id):
         }
     )
 
+@login_required
+def notifications_view(request):
+    notifications = Notification.objects.filter(user=request.user).order_by("-created_at")
+    notifications.filter(is_read=False).update(is_read=True)
+    return render(request, "notifications.html", {
+        "notifications": notifications
+    })
+
+
+def get_unread_notification_count(user):
+    if user.is_authenticated:
+        return Notification.objects.filter(user=user, is_read=False).count()
+    return 0
+    
+@login_required
+def owner_dashboard(request):
+    if not request.user.groups.filter(name="owner").exists():
+        return redirect("home")
+    return render(request, "owner_dashboard.html")
+
+@login_required
+def add_vehicle(request):
+    if request.method == 'POST':
+        vehicle = Vehicle.objects.create(
+            owner=request.user,
+            vehicle_name=request.POST.get("vehicle_name"),
+            vehicle_type=request.POST.get("vehicle_type"),
+            number_plate=request.POST.get("number_plate"),
+            seats=request.POST.get("number_of_seats"),
+            price_per_hour=request.POST.get("price_per_hour"),
+            image=request.FILES.get("image"),
+        )
+        messages.success(request, "Vehicle added successfully!")
+        return redirect("owner_dashboard")
+    return render(request, "add_vehicle.html")
+
+@login_required
+def update_vehicle(request, id):
+    vehicle = get_object_or_404(Vehicle, id=id)
+    if vehicle.owner != request.user:
+        messages.error(request, "You are not allowed to edit this vehicle")
+        return redirect("home")
+    if request.method == "POST":
+        vehicle.vehicle_name = request.POST.get("vehicle_name")
+        vehicle.vehicle_type = request.POST.get("vehicle_type")
+        vehicle.number_plate = request.POST.get("number_plate")
+        vehicle.seats = request.POST.get("number_of_seats")
+        vehicle.price_per_hour = request.POST.get("price_per_hour")
+        if request.FILES.get("image"):
+            vehicle.image = request.FILES.get("image")
+        vehicle.save()
+        messages.success(request, "Vehicle updated successfully!")
+        return redirect("owner_vehicle_list")
+    return render(request, "update_vehicle.html", {"vehicle": vehicle})
+
+@login_required
+def delete_vehicle(request, id):
+    vehicle = get_object_or_404(Vehicle, id=id)
+    vehicle.delete()
+    messages.success(request, "Vehicle deleted successfully!")
+    return redirect("home")
 
 
 @login_required
-def customer_damage_detail(request, booking_id):
+def owner_vehicles(request):
+    if not request.user.groups.filter(name="owner").exists():
+        messages.error(request, "Access denied")
+        return redirect("home")
+
+    vehicles = Vehicle.objects.filter(owner=request.user)
+
+    return render(request, "owner_vehicles_list.html", {
+        "vehicles": vehicles
+    })
+
+@login_required
+def owner_bookings(request):
+    if not request.user.groups.filter(name="owner").exists():
+        messages.error(request, "Access denied")
+        return redirect("home")
+
+    bookings = (
+        Booking.objects
+        .filter(vehicle__owner=request.user)
+        .select_related("vehicle", "user")
+        .prefetch_related("handover_photos")
+        .order_by("-ordered_at")
+    )
+
+    return render(request, "owner_bookings.html", {
+        "bookings": bookings
+    })
+
+
+@login_required
+def upload_handover_photos(request, booking_id):
     booking = get_object_or_404(
         Booking,
         id=booking_id,
-        user=request.user
+        vehicle__owner=request.user
     )
-
-    report = (
-        DamageReport.objects
-        .filter(booking=booking)
-        .order_by("-created_at")
-        .first()
-    )
-
-    if not report:
-        messages.error(request, "No damage report found.")
-        return redirect("my_bookings")
-
-    photos = DamagePhoto.objects.filter(report=report)  # ✅ FIX
-
-    return render(
-        request,
-        "customer_damage_detail.html",
-        {
-            "booking": booking,
-            "report": report,
-            "photos": photos
-        }
-    )
-
-
-@login_required
-def pay_damage_charge(request, report_id):
-    report = get_object_or_404(
-        DamageReport,
-        id=report_id,
-        booking__user=request.user
-    )
-
-    if report.is_paid:
-        messages.info(request, "Damage already paid.")
-        return redirect("my_bookings")
+    if booking.handover_photos.exists():
+        messages.warning(request, "Handover photos already uploaded.")
+        return redirect("owner_vehicle_bookings")
 
     if request.method == "POST":
-        report.is_paid = True
-        report.save()
+        photos = request.FILES.getlist("photos")
 
-        Notification.objects.create(
-            user=request.user,
-            message="Damage payment successful. You may book again."
-        )
+        if not photos:
+            messages.error(request, "Upload at least one photo.")
+            return redirect(request.path)
 
-        messages.success(request, "Payment completed.")
-        return redirect("my_bookings")
+        for photo in photos:
+            VehicleHandoverPhoto.objects.create(
+                booking=booking,
+                image=photo
+            )
 
-    return render(request, "pay_damage_charge.html", {"report": report})
+        messages.success(request, "Handover photos uploaded successfully.")
+        return redirect("owner_vehicle_bookings")
 
+    return render(request, "upload_handover_photos.html", {"booking": booking})
 
-@login_required
-def booking_guard(request):
-    if has_unpaid_damage(request.user):
-        messages.error(
-            request,
-            "You have unpaid damage charges. "
-            "Please clear them to book vehicles."
-        )
-        return redirect("customer_damage_reports")
-    
 
 @login_required
 def owner_add_damage_report(request, booking_id):
@@ -827,8 +790,6 @@ def owner_add_damage_report(request, booking_id):
         id=booking_id,
         vehicle__owner=request.user
     )
-
-    # 🚫 Prevent duplicate reports
     if hasattr(booking, "damage_report"):
         messages.error(request, "Damage report already exists for this booking.")
         return redirect("owner_vehicle_bookings")
@@ -879,53 +840,3 @@ def owner_add_damage_report(request, booking_id):
         {"booking": booking}
     )
 
-
-# @login_required
-# def owner_add_damage_report(request, booking_id):
-#     booking = get_object_or_404(
-#         Booking,
-#         id=booking_id,
-#         vehicle__owner=request.user
-#     )
-
-#     if request.method == "POST":
-#         description = request.POST.get("description")
-#         extra_charge = request.POST.get("extra_charge")
-#         photos = request.FILES.getlist("photos")
-
-#         if not photos:
-#             messages.error(request, "Upload at least one damage photo")
-#             return redirect(request.path)
-
-#         report = DamageReport.objects.create(
-#             booking=booking,
-#             vehicle=booking.vehicle,
-#             reported_by=request.user,
-#             description=description,
-#             extra_charge=extra_charge,
-#             is_paid=False
-#         )
-
-#         for photo in photos:
-#             DamagePhoto.objects.create(
-#                 report=report,
-#                 image=photo
-#             )
-
-#         # 🔔 Notify customer
-#         Notification.objects.create(
-#             user=booking.user,
-#             message=(
-#                 f"Damage reported for {booking.vehicle.vehicle_name}. "
-#                 f"Extra charge ₹{extra_charge}. Please pay to continue."
-#             )
-#         )
-
-#         messages.success(request, "Damage report submitted successfully")
-#         return redirect("owner_vehicle_bookings")
-
-#     return render(
-#         request,
-#         "owner_add_damage_report.html",
-#         {"booking": booking}
-#     )

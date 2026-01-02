@@ -52,14 +52,9 @@ urlpatterns = [
 
     # ================= DAMAGE REPORTS =================
     path("booking/<int:booking_id>/damage-report/",views.owner_add_damage_report,name="add_damage_report"),
-    # path("booking/<int:booking_id>/damage-report/",views.add_damage_report,name="add_damage_report"),
-
-    # Admin damage reports
     path("admin_damage-reports/",views.admin_damage_report_list,name="admin_damage_report_list"),
     path("admin_damage-report/<int:report_id>/",views.admin_damage_report_detail,name="admin_damage_report_detail"),
 
-    # Customer damage reports
-    # path("my_damage-reports/",views.customer_damage_reports,name="customer_damage_reports"),
     path("damage-report/<int:report_id>/pay/",views.pay_damage_charge,name="pay_damage_charge"),
     path("customer_damage_detail/<int:booking_id>/",views.customer_damage_detail,name="customer_damage_detail"),
 
