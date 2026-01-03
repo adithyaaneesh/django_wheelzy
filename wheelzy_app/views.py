@@ -873,3 +873,8 @@ def get_unread_notification_count(user):
             is_read=False
         ).count()
     return 0
+
+@login_required
+def unread_notification_count(request):
+    count = get_unread_notification_count(request.user)
+    return JsonResponse({"count": count})

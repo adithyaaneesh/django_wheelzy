@@ -1,82 +1,50 @@
-<!-- <!DOCTYPE html>
-<html>
-<head>
-    <title>Notifications</title>
-    <style>
-        body {
-            font-family: Poppins, sans-serif;
-            background: #f4f6fb;
-            padding: 30px;
-        }
-        .note {
-            background: white;
-            padding: 14px 18px;
-            margin-bottom: 12px;
-            border-radius: 10px;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.08);
-        }
-        .unread {
-            border-left: 5px solid #ef4444;
-            font-weight: 600;
-        }
-    </style>
-</head>
-<body>
-
-<h2>🔔 Notifications</h2>
-
-{% for note in notifications %}
-    <div class="note {% if not note.is_read %}unread{% endif %}">
-        {{ note.message }}
-        <br>
-        <small>{{ note.created_at|date:"d M Y, H:i" }}</small>
-    </div>
-{% empty %}
-    <p>No notifications</p>
-{% endfor %}
-
-</body>
-</html> -->
-
-
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Notifications</title>
+    <title>Notifications | Wheelzy</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
     <style>
         body {
-            font-family: Poppins, sans-serif;
+            font-family: "Segoe UI", Tahoma, sans-serif;
             background: #f4f6fb;
             padding: 30px;
         }
 
-        h2 {
-            margin-bottom: 20px;
+        .page-header {
+            max-width: 800px;
+            margin: auto;
+            margin-bottom: 24px;
+        }
+
+        .page-header h2 {
+            margin: 0;
+        }
+
+        .notification-list {
+            max-width: 800px;
+            margin: auto;
         }
 
         .note {
             background: white;
             padding: 16px 18px;
             margin-bottom: 14px;
-            border-radius: 12px;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+            border-radius: 14px;
+            box-shadow: 0 6px 18px rgba(0,0,0,0.08);
             cursor: pointer;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
+            position: relative;
         }
 
         .note.unread {
+            background: #eef4ff;
             font-weight: 600;
         }
 
-        .dot {
-            width: 10px;
-            height: 10px;
-            background: #2563eb;
-            border-radius: 50%;
+        .note-time {
+            font-size: 12px;
+            color: #6b7280;
+            margin-top: 4px;
         }
 
         .modal {
@@ -92,14 +60,8 @@
             background: white;
             width: 95%;
             max-width: 420px;
-            border-radius: 14px;
+            border-radius: 16px;
             padding: 22px;
-        }
-
-        .meta {
-            color: #6b7280;
-            font-size: 13px;
-            margin-bottom: 10px;
         }
 
         .btn {
@@ -113,6 +75,15 @@
             cursor: pointer;
             margin-top: 16px;
         }
+
+        .back-btn {
+            background: none;
+            border: none;
+            color: #2563eb;
+            font-weight: 600;
+            cursor: pointer;
+            margin-bottom: 10px;
+        }
     </style>
 </head>
 
@@ -120,33 +91,32 @@
 
 {% csrf_token %}
 
-<h2>🔔 Notifications</h2>
+<div class="page-header">
+    <button class="back-btn" onclick="history.back()">← Back</button>
+    <h2>🔔 Notifications</h2>
+</div>
 
+<div class="notification-list">
 {% for note in notifications %}
 <div class="note {% if not note.is_read %}unread{% endif %}"
      data-id="{{ note.id }}"
      data-message="{{ note.message|escapejs }}"
      data-time="{{ note.created_at|date:'d M Y, H:i' }}"
-     data-sender="info@wheelzy.com"
      onclick="openModal(this)">
 
-    <span>{{ note.message|truncatechars:45 }}</span>
-
-    {% if not note.is_read %}
-        <span class="dot"></span>
-    {% endif %}
+    {{ note.message|truncatechars:70 }}
+    <div class="note-time">{{ note.created_at|date:"d M Y, H:i" }}</div>
 </div>
-
 {% empty %}
 <p>No notifications</p>
 {% endfor %}
-
+</div>
 
 <div class="modal" id="notifModal">
     <div class="modal-content">
         <h3>Notification</h3>
-        <div class="meta" id="modalMeta"></div>
         <p id="modalMessage"></p>
+        <small id="modalTime"></small>
 
         <button class="btn" onclick="markReadAndClose()">
             Mark as read & Close
@@ -159,13 +129,8 @@ let currentNotifId = null;
 
 function openModal(el) {
     currentNotifId = el.dataset.id;
-
-    document.getElementById("modalMessage").innerText =
-        el.dataset.message;
-
-    document.getElementById("modalMeta").innerText =
-        `From: ${el.dataset.sender} • ${el.dataset.time}`;
-
+    document.getElementById("modalMessage").innerText = el.dataset.message;
+    document.getElementById("modalTime").innerText = el.dataset.time;
     document.getElementById("notifModal").style.display = "flex";
 }
 
@@ -176,7 +141,34 @@ function markReadAndClose() {
             "X-CSRFToken": "{{ csrf_token }}"
         },
         body: new URLSearchParams({ id: currentNotifId })
-    }).then(() => location.reload());
+    }).then(() => {
+        updateBellCount();
+        document.getElementById("notifModal").style.display = "none";
+    });
+}
+
+function updateBellCount() {
+    fetch("{% url 'unread_notification_count' %}")
+        .then(res => res.json())
+        .then(data => {
+            const badge = document.querySelector(".notif-count");
+            const bell = document.querySelector(".notification-bell");
+
+            if (!bell) return;
+
+            if (data.count > 0) {
+                if (badge) {
+                    badge.innerText = data.count;
+                } else {
+                    const span = document.createElement("span");
+                    span.className = "notif-count";
+                    span.innerText = data.count;
+                    bell.appendChild(span);
+                }
+            } else if (badge) {
+                badge.remove();
+            }
+        });
 }
 </script>
 

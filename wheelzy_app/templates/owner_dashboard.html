@@ -137,7 +137,10 @@
             font-weight: 600;
         }
         .notification-bell {
-            position: relative;
+            position: absolute;
+            right: 70px; 
+            top: 50%;
+            transform: translateY(-50%);
             font-size: 20px;
             color: white;
             text-decoration: none;
@@ -155,8 +158,15 @@
             font-weight: 600;
             line-height: 1;
         }
-        .notification-bell:hover {
-            transform: scale(1.1);
+
+        .header-content {
+            position: relative;
+        }
+
+        @media (max-width: 768px) {
+            .notification-bell {
+                right: 60px;
+            }
         }
 
 
