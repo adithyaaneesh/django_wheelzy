@@ -71,6 +71,9 @@ urlpatterns = [
     path("notifications/unread-count/", views.unread_notification_count, name="unread_notification_count"),
 
 
+    path("admin_booking/<int:booking_id>/details/",views.admin_booking_details,name="admin_booking_details"),
+
+
 
 ]
 

@@ -633,6 +633,40 @@ def admin_damage_details(request, booking_id):
         }
     )
 
+@login_required
+def admin_booking_details(request, booking_id):
+    booking = get_object_or_404(
+        Booking.objects.select_related(
+            "user",
+            "vehicle"
+        ),
+        id=booking_id
+    )
+
+    # Defaults
+    damage_report = None
+    damage_amount = None
+    display_status = booking.get_status_display()
+
+    # ✅ SAFE access to OneToOneField
+    if hasattr(booking, "damage_report"):
+        damage_report = booking.damage_report
+        damage_amount = damage_report.extra_charge
+
+        # Display-only override
+        if booking.status == "damage_reported" and damage_report.is_paid:
+            display_status = "Completed"
+
+    return render(
+        request,
+        "admin_booking_details.html",
+        {
+            "booking": booking,
+            "display_status": display_status,
+            "damage_report": damage_report,  
+            "damage_amount": damage_amount, 
+        }
+    )
 
 @login_required
 def mark_damage_paid(request, damage_id):

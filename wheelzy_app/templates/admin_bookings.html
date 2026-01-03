@@ -59,7 +59,6 @@
         .returned { background: #bbf7d0; color: #166534; }
         .cancelled { background: #e5e7eb; color: #374151; }
 
-        /* ✅ NEW UI-ONLY CLASS */
         .damage_paid { background: #bbf7d0; color: #166534; }
         .damage_reported { background: #fecaca; color: #991b1b; }
 
@@ -106,7 +105,6 @@
     <th>Period</th>
     <th>Status</th>
     <th>Action</th>
-    <th>Total</th>
     <th>Booked At</th>
 </tr>
 </thead>
@@ -131,7 +129,7 @@
         {{ booking.end_time|date:"d M Y, h:i A" }}
     </td>
 
-    <!-- ✅ STATUS (FIXED DISPLAY ONLY) -->
+    <!-- STATUS -->
     <td>
         {% if booking.status == "damage_reported" and booking.damage_report and booking.damage_report.is_paid %}
             <span class="status damage_paid">Damage Paid</span>
@@ -139,9 +137,7 @@
 
         {% elif booking.status == "damage_reported" %}
             <span class="status damage_reported">Damage Reported</span>
-            <div class="muted" style="color:#b91c1c;">
-                Payment pending
-            </div>
+            <div class="muted" style="color:#b91c1c;">Payment pending</div>
 
         {% else %}
             <span class="status {{ booking.status }}">
@@ -158,38 +154,42 @@
         {% endif %}
     </td>
 
-    <!-- ACTIONS (UNCHANGED) -->
+    <!-- ACTIONS -->
     <td>
         {% if booking.status == "pending" %}
             {% if booking.handover_photos.exists %}
-                <a href="{% url 'approve_booking' booking.id %}" class="btn btn-success">
-                    Confirm
-                </a>
+                <a href="{% url 'approve_booking' booking.id %}" class="btn btn-success">Confirm</a>
             {% else %}
                 <span class="btn btn-disabled">Confirm</span>
             {% endif %}
         {% endif %}
 
         {% if booking.status == "confirmed" %}
-            <a href="{% url 'mark_in_use' booking.id %}" class="btn btn-warning">
-                Mark In Use
-            </a>
+            <a href="{% url 'mark_in_use' booking.id %}" class="btn btn-warning">Mark In Use</a>
         {% endif %}
 
         {% if booking.status == "in_use" %}
-            <a href="{% url 'mark_returned' booking.id %}" class="btn btn-warning">
-                Mark Returned
-            </a>
+            <a href="{% url 'mark_returned' booking.id %}" class="btn btn-warning">Mark Returned</a>
         {% endif %}
 
         {% if booking.status == "damage_reported" %}
-            <a href="{% url 'admin_damage_details' booking.id %}" class="btn btn-danger">
-                View Damage Details
+            {% if booking.damage_report and booking.damage_report.is_paid %}
+                <a href="{% url 'admin_booking_details' booking.id %}" class="btn btn-success">
+                    View Details
+                </a>
+            {% else %}
+                <a href="{% url 'admin_damage_details' booking.id %}" class="btn btn-danger">
+                    View Damage Details
+                </a>
+            {% endif %}
+        {% endif %}
+
+        {% if booking.status == "returned" %}
+            <a href="{% url 'admin_booking_details' booking.id %}" class="btn btn-success">
+                View Details
             </a>
         {% endif %}
     </td>
-
-    <td>₹{{ booking.total_price }}</td>
     <td>
         {{ booking.ordered_at|date:"d M Y" }}<br>
         <span class="muted">{{ booking.ordered_at|time:"h:i A" }}</span>
@@ -197,7 +197,7 @@
 </tr>
 {% empty %}
 <tr>
-    <td colspan="9" style="text-align:center; padding:20px;">
+    <td colspan="8" style="text-align:center; padding:20px;">
         No bookings found
     </td>
 </tr>

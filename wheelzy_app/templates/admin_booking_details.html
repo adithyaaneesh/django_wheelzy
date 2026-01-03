@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Booking Details | Wheelzy Admin</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
+
+    <style>
+        body {
+            margin: 0;
+            background: #f4f6fb;
+            font-family: 'Poppins', sans-serif;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: auto;
+            padding: 30px;
+        }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 25px;
+        }
+
+        h2 {
+            margin: 0;
+        }
+
+        .btn {
+            padding: 8px 14px;
+            border-radius: 8px;
+            text-decoration: none;
+            font-size: 13px;
+            font-weight: 600;
+        }
+
+        .btn-back {
+            background: #111827;
+            color: white;
+        }
+
+        .card {
+            background: white;
+            border-radius: 16px;
+            box-shadow: 0 12px 30px rgba(0,0,0,0.08);
+            padding: 24px;
+            margin-bottom: 25px;
+        }
+
+        .card h3 {
+            margin-top: 0;
+            margin-bottom: 16px;
+            font-size: 18px;
+            border-bottom: 1px solid #e5e7eb;
+            padding-bottom: 10px;
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+            gap: 20px;
+        }
+
+        .info strong {
+            display: block;
+            color: #111827;
+            margin-bottom: 4px;
+        }
+
+        .info span {
+            color: #4b5563;
+            font-size: 14px;
+        }
+
+        .status {
+            padding: 6px 14px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+            display: inline-block;
+        }
+
+        .returned { background: #bbf7d0; color: #166534; }
+        .damage_reported { background: #fecaca; color: #991b1b; }
+
+        .price {
+            font-size: 22px;
+            font-weight: 700;
+            color: #16a34a;
+        }
+
+        .alert {
+            background: #ecfeff;
+            border-left: 5px solid #0ea5e9;
+            padding: 14px 16px;
+            border-radius: 10px;
+            font-size: 14px;
+            margin-bottom: 25px;
+        }
+    </style>
+</head>
+
+<body>
+<div class="container">
+
+    <!-- HEADER -->
+    <div class="header">
+        <h2>Booking Details</h2>
+        <a href="{% url 'admin_bookings' %}" class="btn btn-back">← Back to Bookings</a>
+    </div>
+
+    <!-- DAMAGE PAID MESSAGE -->
+    {% if booking.status == "damage_reported" and booking.damage_report and booking.damage_report.is_paid %}
+        <div class="alert">
+            ⚠️ Damage was reported for this booking and the damage charge has been successfully paid.
+            This booking is now considered <strong>Completed</strong>.
+        </div>
+    {% endif %}
+
+    <!-- CUSTOMER & VEHICLE -->
+    <div class="card">
+        <h3>Customer & Vehicle</h3>
+        <div class="grid">
+            <div class="info">
+                <strong>Customer</strong>
+                <span>{{ booking.user.username }}</span>
+            </div>
+            <div class="info">
+                <strong>Email</strong>
+                <span>{{ booking.user.email }}</span>
+            </div>
+            <div class="info">
+                <strong>Vehicle</strong>
+                <span>{{ booking.vehicle.vehicle_name }}</span>
+            </div>
+            <div class="info">
+                <strong>Number Plate</strong>
+                <span>{{ booking.vehicle.number_plate }}</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- STATUS -->
+    <div class="card">
+        <h3>Booking Status</h3>
+        <div class="grid">
+            <div class="info">
+                <strong>Status</strong>
+                <span class="status returned">{{ display_status }}</span>
+            </div>
+            <div class="info">
+                <strong>Booked At</strong>
+                <span>{{ booking.ordered_at|date:"d M Y, h:i A" }}</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- PAYMENT -->
+    <div class="card">
+        <h3>Payment Summary</h3>
+        <div class="grid">
+            <div class="info">
+                <strong>Total Rent</strong>
+                <span class="price">₹{{ booking.total_price }}</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- DAMAGE PAYMENT DETAILS -->
+    {% if booking.damage_report and booking.damage_report.is_paid %}
+    <div class="card">
+        <h3>Damage Payment Details</h3>
+        <div class="grid">
+            <div class="info">
+                <strong>Damage Amount Paid</strong>
+                <span class="price">₹{{ damage_amount|default:"0.00" }}</span>
+            </div>
+            <div class="info">
+                <strong>Payment Status</strong>
+                <span class="status returned">Paid</span>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
+</div>
+</body>
+</html>
