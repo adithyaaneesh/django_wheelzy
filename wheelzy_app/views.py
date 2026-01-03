@@ -8,6 +8,7 @@ from django.utils import timezone
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from . import models
+from django.db.models import Prefetch
 from django.http import JsonResponse
 from django.views.decorators.http import require_POST
 
@@ -745,18 +746,16 @@ def owner_bookings(request):
     if not request.user.groups.filter(name="owner").exists():
         messages.error(request, "Access denied")
         return redirect("home")
-
     bookings = (
         Booking.objects
         .filter(vehicle__owner=request.user)
         .select_related("vehicle", "user")
-        .prefetch_related("handover_photos")
+        .prefetch_related("handover_photos",
+            Prefetch("damage_report", queryset=DamageReport.objects.all())
+        )
         .order_by("-ordered_at")
     )
-
-    return render(request, "owner_bookings.html", {
-        "bookings": bookings
-    })
+    return render(request,"owner_bookings.html",{"bookings": bookings})
 
 
 @login_required
@@ -855,20 +854,6 @@ def owner_add_damage_report(request, booking_id):
         "owner_add_damage_report.html",
         {"booking": booking}
     )
-
-# @login_required
-# def notifications_view(request):
-#     notifications = Notification.objects.filter(user=request.user).order_by("-created_at")
-#     notifications.filter(is_read=False).update(is_read=True)
-#     return render(request, "notifications.html", {
-#         "notifications": notifications
-#     })
-
-
-# def get_unread_notification_count(user):
-#     if user.is_authenticated:
-#         return Notification.objects.filter(user=user, is_read=False).count()
-#     return 0
 
 @login_required
 def notifications_view(request):

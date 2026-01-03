@@ -20,10 +20,6 @@
             padding: 30px;
         }
 
-        h2 {
-            margin-bottom: 16px;
-        }
-
         table {
             width: 100%;
             background: white;
@@ -63,6 +59,10 @@
         .returned { background: #bbf7d0; color: #166534; }
         .cancelled { background: #e5e7eb; color: #374151; }
 
+        /* ✅ NEW UI-ONLY CLASS */
+        .damage_paid { background: #bbf7d0; color: #166534; }
+        .damage_reported { background: #fecaca; color: #991b1b; }
+
         .btn {
             padding: 6px 12px;
             font-size: 12px;
@@ -92,9 +92,8 @@
 
 <body>
 <div class="container">
-    <a href="{% url 'admin_dashboard' %}" class="btn btn-secondary mb-4">
-        ← Back
-    </a>
+
+<a href="{% url 'admin_dashboard' %}" class="btn btn-secondary mb-4">← Back</a>
 
 <h2>All Bookings</h2>
 
@@ -132,32 +131,34 @@
         {{ booking.end_time|date:"d M Y, h:i A" }}
     </td>
 
-    <!-- STATUS -->
+    <!-- ✅ STATUS (FIXED DISPLAY ONLY) -->
     <td>
-        <span class="status {{ booking.status }}">
-            {{ booking.get_status_display }}
-        </span>
+        {% if booking.status == "damage_reported" and booking.damage_report and booking.damage_report.is_paid %}
+            <span class="status damage_paid">Damage Paid</span>
+            <div class="muted">Damage resolved</div>
 
-        {% if booking.status == "pending" %}
-            {% if booking.handover_photos.exists %}
-                <div class="muted">Handover uploaded</div>
-            {% else %}
-                <div class="muted">Waiting for handover</div>
-            {% endif %}
-        {% endif %}
+        {% elif booking.status == "damage_reported" %}
+            <span class="status damage_reported">Damage Reported</span>
+            <div class="muted" style="color:#b91c1c;">
+                Payment pending
+            </div>
 
-        {% if booking.status == "returned" and booking.damage_report %}
-            {% if booking.damage_report.is_paid %}
-                <div class="muted">Damage resolved</div>
-            {% else %}
-                <div class="muted" style="color:#b91c1c;">
-                    Damage reported (payment pending)
-                </div>
+        {% else %}
+            <span class="status {{ booking.status }}">
+                {{ booking.get_status_display }}
+            </span>
+
+            {% if booking.status == "pending" %}
+                {% if booking.handover_photos.exists %}
+                    <div class="muted">Handover uploaded</div>
+                {% else %}
+                    <div class="muted">Waiting for handover</div>
+                {% endif %}
             {% endif %}
         {% endif %}
     </td>
 
-    <!-- ACTIONS -->
+    <!-- ACTIONS (UNCHANGED) -->
     <td>
         {% if booking.status == "pending" %}
             {% if booking.handover_photos.exists %}
@@ -186,7 +187,6 @@
                 View Damage Details
             </a>
         {% endif %}
-
     </td>
 
     <td>₹{{ booking.total_price }}</td>

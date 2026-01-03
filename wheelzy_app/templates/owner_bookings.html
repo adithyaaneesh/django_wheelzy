@@ -68,7 +68,7 @@
                                 ₹{{ booking.total_price }}
                             </td>
 
-                            <!-- STATUS -->
+                            <!-- ✅ STATUS (FIXED) -->
                             <td>
                                 {% if booking.status == "pending" %}
                                     <span class="badge bg-warning badge-status">Pending</span>
@@ -89,7 +89,18 @@
                                     <span class="badge bg-success badge-status">Completed</span>
 
                                 {% elif booking.status == "damage_reported" %}
-                                    <span class="badge bg-danger badge-status">Damage Reported</span>
+                                    {% if booking.damage_report and booking.damage_report.is_paid %}
+                                        <span class="badge bg-success badge-status">
+                                            Completed
+                                        </span>
+                                         <div class="mt-1">
+                                            <span class="badge text-dark"> Damage Paid</span>
+                                        </div>
+                                    {% else %}
+                                        <span class="badge bg-danger badge-status">
+                                            Damage Reported
+                                        </span>
+                                    {% endif %}
 
                                 {% else %}
                                     <span class="badge bg-secondary badge-status">
@@ -99,16 +110,16 @@
                             </td>
 
                             <!-- ACTION -->
-                           <td>
+                            <td>
                                 {% if booking.status == "pending" %}
                                     <a href="{% url 'upload_handover_photos' booking.id %}"
-                                    class="btn btn-primary btn-sm">
+                                       class="btn btn-primary btn-sm">
                                         Upload Handover Photos
                                     </a>
 
                                 {% elif booking.status == "returned" %}
                                     <a href="{% url 'add_damage_report' booking.id %}"
-                                    class="btn btn-danger btn-sm">
+                                       class="btn btn-danger btn-sm">
                                         Report Damage
                                     </a>
 
