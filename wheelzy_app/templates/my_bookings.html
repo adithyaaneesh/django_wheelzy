@@ -14,7 +14,6 @@
             font-family: "Segoe UI", Tahoma, sans-serif;
         }
 
-        /* ================= CARD ================= */
         .booking-card {
             border-radius: 16px;
             box-shadow: 0 10px 25px rgba(0,0,0,0.08);
@@ -36,7 +35,7 @@
             flex: 1;
             text-align: center;
             position: relative;
-            font-size: 13px;
+            font-size: 12px;
             color: #9ca3af;
         }
 
@@ -56,8 +55,8 @@
         }
 
         .step-circle {
-            width: 34px;
-            height: 34px;
+            width: 32px;
+            height: 32px;
             margin: auto;
             border-radius: 50%;
             background: #e5e7eb;
@@ -75,7 +74,6 @@
             font-weight: 600;
         }
 
-        /* COMPLETED STEP */
         .step.done {
             color: #16a34a;
         }
@@ -88,7 +86,6 @@
             background: #16a34a;
         }
 
-        /* ACTIVE STEP */
         .step.active {
             color: #2563eb;
         }
@@ -99,7 +96,14 @@
             color: #2563eb;
         }
 
-        /* COLLAPSE */
+        .step.damage {
+            color: #dc2626;
+        }
+
+        .step.damage .step-circle {
+            background: #dc2626;
+        }
+
         .card-toggle {
             cursor: pointer;
         }
@@ -110,7 +114,6 @@
 
 <div class="container py-5">
 
-    <!-- HEADER -->
     <div class="d-flex justify-content-between align-items-center mb-4">
         <h2 class="fw-bold">My Bookings</h2>
         <a href="{% url 'home' %}" class="btn btn-secondary">← Back</a>
@@ -125,56 +128,64 @@
     <div class="col-md-6">
         <div class="card booking-card p-3">
 
-            <!-- HEADER -->
-            <div class="card-toggle"
-                 data-bs-toggle="collapse"
-                 data-bs-target="#active{{ booking.id }}">
+            <div class="card-toggle" data-bs-toggle="collapse" data-bs-target="#active{{ booking.id }}">
                 <div class="d-flex justify-content-between align-items-center">
                     <h6 class="mb-0">{{ booking.vehicle.vehicle_name }}</h6>
                     <button class="btn btn-outline-primary btn-sm"
-                        data-bs-toggle="modal"
-                        data-bs-target="#vehicleModal{{ booking.id }}">
-                    View Vehicle
+                            data-bs-toggle="modal"
+                            data-bs-target="#vehicleModal{{ booking.id }}">
+                        View Vehicle
                     </button>
                 </div>
             </div>
 
-            <!-- STEPPER -->
+            <!-- 🔥 STEPPER -->
             <div class="booking-stepper">
 
-                <div class="step
-                    {% if booking.status != 'pending' %}done
-                    {% elif booking.status == 'pending' %}active{% endif %}">
-                    <div class="step-circle">
-                        {% if booking.status != 'pending' %}✓{% endif %}
-                    </div>
+                <!-- Pending -->
+                <div class="step {% if booking.status != 'pending' %}done{% elif booking.status == 'pending' %}active{% endif %}">
+                    <div class="step-circle">{% if booking.status != 'pending' %}✓{% endif %}</div>
                     <div class="step-label">Pending</div>
                 </div>
 
-                <div class="step
-                    {% if booking.status in 'in_use returned' %}done
-                    {% elif booking.status == 'confirmed' %}active{% endif %}">
-                    <div class="step-circle">
-                        {% if booking.status in 'in_use returned' %}✓{% endif %}
-                    </div>
+                <!-- Confirmed -->
+                <div class="step {% if booking.status in 'in_use returned' %}done{% elif booking.status == 'confirmed' %}active{% endif %}">
+                    <div class="step-circle">{% if booking.status in 'in_use returned' %}✓{% endif %}</div>
                     <div class="step-label">Confirmed</div>
                 </div>
 
-                <div class="step
-                    {% if booking.status == 'returned' %}done
-                    {% elif booking.status == 'in_use' %}active{% endif %}">
-                    <div class="step-circle">
-                        {% if booking.status == 'returned' %}✓{% endif %}
-                    </div>
+                <!-- In Use -->
+                <div class="step {% if booking.status == 'returned' or booking.damage_report %}done{% elif booking.status == 'in_use' %}active{% endif %}">
+                    <div class="step-circle">{% if booking.status == 'returned' or booking.damage_report %}✓{% endif %}</div>
                     <div class="step-label">In Use</div>
                 </div>
 
-                <div class="step {% if booking.status == 'returned' %}done{% endif %}">
-                    <div class="step-circle">
-                        {% if booking.status == 'returned' %}✓{% endif %}
+                {% if booking.damage_report %}
+                    <!-- Damage Reported -->
+                    <div class="step done damage">
+                        <div class="step-circle">!</div>
+                        <div class="step-label">Damage Reported</div>
                     </div>
-                    <div class="step-label">Returned</div>
-                </div>
+
+                    <!-- Damage Unpaid / Paid -->
+                    {% if booking.damage_report.is_paid %}
+                        <div class="step done">
+                            <div class="step-circle">✓</div>
+                            <div class="step-label">Damage Paid</div>
+                        </div>
+                    {% else %}
+                        <div class="step active damage">
+                            <div class="step-circle">!</div>
+                            <div class="step-label">Damage Unpaid</div>
+                        </div>
+                    {% endif %}
+                {% else %}
+                    <!-- Returned -->
+                    <div class="step {% if booking.status == 'returned' %}done{% endif %}">
+                        <div class="step-circle">{% if booking.status == 'returned' %}✓{% endif %}</div>
+                        <div class="step-label">Returned</div>
+                    </div>
+                {% endif %}
 
             </div>
 
@@ -186,12 +197,6 @@
                 <p class="fw-bold text-success">₹{{ booking.total_price }}</p>
 
                 <div class="d-flex gap-2 flex-wrap">
-                    {% if booking.status == "confirmed" %}
-                        <a href="{% url 'mark_in_use' booking.id %}" class="btn btn-sm btn-primary">
-                            Start Journey
-                        </a>
-                    {% endif %}
-
                     {% if booking.status == "pending" %}
                         <a href="{% url 'cancel_booking' booking.id %}"
                            class="btn btn-sm btn-danger"
@@ -224,36 +229,34 @@
     <div class="col-md-6">
         <div class="card booking-card completed p-3">
 
-            <div class="card-toggle"
-                 data-bs-toggle="collapse"
-                 data-bs-target="#completed{{ booking.id }}">
+            <div class="card-toggle" data-bs-toggle="collapse" data-bs-target="#completed{{ booking.id }}">
                 <div class="d-flex justify-content-between align-items-center">
                     <h6 class="mb-0">{{ booking.vehicle.vehicle_name }}</h6>
                     <span class="text-muted">Completed</span>
                 </div>
             </div>
 
-            <!-- FULL STEPPER -->
+            <!-- COMPLETED STEPPER -->
             <div class="booking-stepper">
                 <div class="step done"><div class="step-circle">✓</div><div class="step-label">Pending</div></div>
                 <div class="step done"><div class="step-circle">✓</div><div class="step-label">Confirmed</div></div>
                 <div class="step done"><div class="step-circle">✓</div><div class="step-label">In Use</div></div>
-                <div class="step done"><div class="step-circle">✓</div><div class="step-label">Returned</div></div>
+                {% if booking.damage_report %}
+                    <div class="step done damage"><div class="step-circle">✓</div><div class="step-label">Damage Paid</div></div>
+                {% else %}
+                    <div class="step done"><div class="step-circle">✓</div><div class="step-label">Returned</div></div>
+                {% endif %}
             </div>
 
             <div id="completed{{ booking.id }}" class="collapse">
                 <p class="text-muted">Journey completed successfully.</p>
-
-                {% if booking.damage_report and booking.damage_report.is_paid %}
-                    <p class="text-success">🛠 Damage resolved</p>
-                {% endif %}
-
                 <button class="btn btn-outline-primary btn-sm"
                         data-bs-toggle="modal"
                         data-bs-target="#vehicleModal{{ booking.id }}">
                     View Details
                 </button>
             </div>
+
         </div>
     </div>
     {% endif %}

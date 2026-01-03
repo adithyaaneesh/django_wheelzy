@@ -3,7 +3,11 @@
 <head>
     <title>Upload Vehicle Photos</title>
     <style>
-        body { font-family: Segoe UI; background:#f4f6fb; padding:30px; }
+        body { 
+            font-family: Segoe UI; 
+            background:#f4f6fb; 
+            padding:30px; 
+        }
         .card {
             background:#fff;
             padding:30px;
@@ -12,7 +16,10 @@
             border-radius:14px;
             box-shadow:0 15px 30px rgba(0,0,0,.1);
         }
-        h2 { color:#1e40ff; text-align:center; }
+        h2 { 
+            color:#1e40ff; 
+            text-align:center; 
+        }
         input, button {
             width:100%;
             margin-top:15px;
@@ -25,6 +32,14 @@
             color:white;
             font-weight:600;
             cursor:pointer;
+        }
+        .back-btn {
+            background:#e5e7eb;
+            color:#111827;
+            font-weight:600;
+        }
+        .back-btn:hover {
+            background:#d1d5db;
         }
     </style>
 </head>
@@ -39,6 +54,9 @@
         <input type="file" name="photos" multiple required>
         <button type="submit">Upload Photos</button>
     </form>
+
+    <!-- Back Button -->
+    <button class="back-btn" onclick="history.back()">⬅ Back</button>
 </div>
 
 </body>
