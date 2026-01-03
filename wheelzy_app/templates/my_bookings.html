@@ -224,36 +224,41 @@
     <h5 class="fw-bold mt-5 mb-3">🏁 Completed Bookings</h5>
     <div class="row g-4">
 
+    <!-- 🔥 DAMAGE PAID COMPLETED (FIRST) -->
     {% for booking in bookings %}
-    {% if booking.status == "returned" or booking.damage_report.is_paid %}
+    {% if booking.damage_report and booking.damage_report.is_paid %}
     <div class="col-md-6">
         <div class="card booking-card completed p-3">
 
-            <div class="card-toggle" data-bs-toggle="collapse" data-bs-target="#completed{{ booking.id }}">
+            <div class="card-toggle"
+                data-bs-toggle="collapse"
+                data-bs-target="#completed{{ booking.id }}">
                 <div class="d-flex justify-content-between align-items-center">
                     <h6 class="mb-0">{{ booking.vehicle.vehicle_name }}</h6>
-                    <span class="text-muted">Completed</span>
+                    <span class="text-success fw-semibold">Damage Paid</span>
                 </div>
             </div>
 
-            <!-- COMPLETED STEPPER -->
+            <!-- STEPPER -->
             <div class="booking-stepper">
                 <div class="step done"><div class="step-circle">✓</div><div class="step-label">Pending</div></div>
                 <div class="step done"><div class="step-circle">✓</div><div class="step-label">Confirmed</div></div>
-                <div class="step done"><div class="step-circle">✓</div><div class="step-label">In Use</div></div>
-                {% if booking.damage_report %}
-                    <div class="step done damage"><div class="step-circle">✓</div><div class="step-label">Damage Paid</div></div>
-                {% else %}
-                    <div class="step done"><div class="step-circle">✓</div><div class="step-label">Returned</div></div>
-                {% endif %}
+                <div class="step done damage"><div class="step-circle">✓</div><div class="step-label">Damage Reported</div></div>
+                <div class="step done damage"><div class="step-circle">✓</div><div class="step-label">Damage Unpaid</div></div>
+                <div class="step done"><div class="step-circle">✓</div><div class="step-label">Damage Paid</div></div>
             </div>
 
+            <!-- DETAILS (EXPANDABLE) -->
             <div id="completed{{ booking.id }}" class="collapse">
-                <p class="text-muted">Journey completed successfully.</p>
+                <p class="text-muted mb-1"><strong>Number Plate:</strong> {{ booking.vehicle.number_plate }}</p>
+                <p class="mb-1"><strong>From:</strong> {{ booking.start_time|date:"d M Y, h:i A" }}</p>
+                <p class="mb-1"><strong>To:</strong> {{ booking.end_time|date:"d M Y, h:i A" }}</p>
+                <p class="fw-bold text-success">₹{{ booking.total_price }}</p>
+
                 <button class="btn btn-outline-primary btn-sm"
                         data-bs-toggle="modal"
                         data-bs-target="#vehicleModal{{ booking.id }}">
-                    View Details
+                    View Vehicle
                 </button>
             </div>
 
@@ -261,7 +266,51 @@
     </div>
     {% endif %}
     {% endfor %}
+
+    <!-- ✅ NORMAL COMPLETED JOURNEYS -->
+    {% for booking in bookings %}
+    {% if booking.status == "returned" and not booking.damage_report %}
+    <div class="col-md-6">
+        <div class="card booking-card completed p-3">
+
+            <div class="card-toggle"
+                data-bs-toggle="collapse"
+                data-bs-target="#completed{{ booking.id }}">
+                <div class="d-flex justify-content-between align-items-center">
+                    <h6 class="mb-0">{{ booking.vehicle.vehicle_name }}</h6>
+                    <span class="text-muted">Journey Completed</span>
+                </div>
+            </div>
+
+            <!-- STEPPER -->
+            <div class="booking-stepper">
+                <div class="step done"><div class="step-circle">✓</div><div class="step-label">Pending</div></div>
+                <div class="step done"><div class="step-circle">✓</div><div class="step-label">Confirmed</div></div>
+                <div class="step done"><div class="step-circle">✓</div><div class="step-label">In Use</div></div>
+                <div class="step done"><div class="step-circle">✓</div><div class="step-label">Returned</div></div>
+            </div>
+
+            <!-- DETAILS (EXPANDABLE) -->
+            <div id="completed{{ booking.id }}" class="collapse">
+                <p class="text-muted mb-1"><strong>Number Plate:</strong> {{ booking.vehicle.number_plate }}</p>
+                <p class="mb-1"><strong>From:</strong> {{ booking.start_time|date:"d M Y, h:i A" }}</p>
+                <p class="mb-1"><strong>To:</strong> {{ booking.end_time|date:"d M Y, h:i A" }}</p>
+                <p class="fw-bold text-success">₹{{ booking.total_price }}</p>
+
+                <button class="btn btn-outline-primary btn-sm"
+                        data-bs-toggle="modal"
+                        data-bs-target="#vehicleModal{{ booking.id }}">
+                    View Vehicle
+                </button>
+            </div>
+
+        </div>
     </div>
+    {% endif %}
+    {% endfor %}
+
+    </div>
+
 
 </div>
 
