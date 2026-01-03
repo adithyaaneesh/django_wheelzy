@@ -3,50 +3,86 @@
 <head>
     <title>Notifications | Wheelzy</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.0.1/css/all.min.css" integrity="sha512-2SwdPD6INVrV/lHTZbO2nodKhrnDdJK9/kg2XD1r9uGqPo1cUbujc+IYdlYdEErWNu69gVcYgdxlmVmzTWnetw==" crossorigin="anonymous" referrerpolicy="no-referrer" />
 
     <style>
         body {
-            font-family: "Segoe UI", Tahoma, sans-serif;
-            background: #f4f6fb;
+            font-family: "Inter", "Segoe UI", Tahoma, sans-serif;
+            background: linear-gradient(180deg, #f4f6fb, #eef1f7);
             padding: 30px;
         }
 
         .page-header {
-            max-width: 800px;
+            max-width: 820px;
             margin: auto;
-            margin-bottom: 24px;
+            margin-bottom: 22px;
         }
 
         .page-header h2 {
-            margin: 0;
+            margin: 8px 0 14px;
+            font-size: 26px;
+        }
+
+        .actions {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+
+        .action-btn {
+            padding: 10px 16px;
+            border-radius: 10px;
+            border: none;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform .15s ease, box-shadow .15s ease;
+            box-shadow: 0 6px 16px rgba(0,0,0,.12);
+        }
+
+        .action-btn:hover {
+            transform: translateY(-1px);
+        }
+
+        .mark-all {
+            background: linear-gradient(135deg,#2563eb,#1d4ed8);
+            color: white;
+        }
+
+        .clear-read {
+            background: linear-gradient(135deg,#ef4444,#dc2626);
+            color: white;
         }
 
         .notification-list {
-            max-width: 800px;
+            max-width: 820px;
             margin: auto;
         }
 
         .note {
             background: white;
-            padding: 16px 18px;
-            margin-bottom: 14px;
-            border-radius: 14px;
-            box-shadow: 0 6px 18px rgba(0,0,0,0.08);
+            padding: 18px 20px;
+            margin-bottom: 16px;
+            border-radius: 16px;
+            box-shadow: 0 8px 24px rgba(0,0,0,0.08);
             cursor: pointer;
-            position: relative;
-            transition: background 0.3s ease, font-weight 0.3s ease;
+            transition: all .25s ease;
+        }
 
+        .note:hover {
+            transform: translateY(-2px);
         }
 
         .note.unread {
             background: #eef4ff;
+            border-left: 5px solid #2563eb;
             font-weight: 600;
         }
 
         .note-time {
             font-size: 12px;
             color: #6b7280;
-            margin-top: 4px;
+            margin-top: 6px;
         }
 
         .modal {
@@ -54,28 +90,41 @@
             position: fixed;
             inset: 0;
             background: rgba(0,0,0,0.45);
+            backdrop-filter: blur(4px);
             justify-content: center;
             align-items: center;
+            z-index: 1000;
         }
 
         .modal-content {
             background: white;
             width: 95%;
             max-width: 420px;
-            border-radius: 16px;
-            padding: 22px;
+            border-radius: 18px;
+            padding: 24px;
+            animation: pop .25s ease;
+        }
+
+        @keyframes pop {
+            from { transform: scale(.95); opacity: 0 }
+            to { transform: scale(1); opacity: 1 }
         }
 
         .btn {
             width: 100%;
-            padding: 12px;
-            border: none;
-            border-radius: 10px;
+            padding: 13px;
+            border-radius: 12px;
             background: #2563eb;
             color: white;
             font-weight: 600;
-            cursor: pointer;
+            border: none;
             margin-top: 16px;
+            cursor: pointer;
+        }
+
+        .btn.secondary {
+            background: #e5e7eb;
+            color: #111;
         }
 
         .back-btn {
@@ -84,7 +133,11 @@
             color: #2563eb;
             font-weight: 600;
             cursor: pointer;
-            margin-bottom: 10px;
+        }
+
+        #confirmModal .modal-content {
+            max-width: 380px;
+            text-align: center;
         }
     </style>
 </head>
@@ -96,6 +149,11 @@
 <div class="page-header">
     <button class="back-btn" onclick="history.back()">← Back</button>
     <h2>🔔 Notifications</h2>
+
+    <div class="actions">
+        <button class="action-btn mark-all" onclick="confirmMarkAllRead()"><i class="fa-regular fa-envelope-open"></i></button>
+        <button class="action-btn clear-read" onclick="confirmClearRead()"><i class="fa-solid fa-trash-can"></i></button>
+    </div>
 </div>
 
 <div class="notification-list">
@@ -105,7 +163,6 @@
      data-message="{{ note.message|escapejs }}"
      data-time="{{ note.created_at|date:'d M Y, H:i' }}"
      onclick="openModal(this)">
-
     {{ note.message|truncatechars:70 }}
     <div class="note-time">{{ note.created_at|date:"d M Y, H:i" }}</div>
 </div>
@@ -114,111 +171,110 @@
 {% endfor %}
 </div>
 
+<!-- VIEW MODAL -->
 <div class="modal" id="notifModal">
     <div class="modal-content">
         <h3>Notification</h3>
         <p id="modalMessage"></p>
         <small id="modalTime"></small>
+        <button class="btn" onclick="markReadAndClose()">Mark as read & Close</button>
+    </div>
+</div>
 
-        <button class="btn" onclick="markReadAndClose()">
-            Mark as read & Close
-        </button>
+<!-- CONFIRM MODAL -->
+<div class="modal" id="confirmModal">
+    <div class="modal-content">
+        <h3 id="confirmTitle"></h3>
+        <p id="confirmMessage"></p>
+        <button class="btn" id="confirmYesBtn">Yes, Continue</button>
+        <button class="btn secondary" onclick="closeConfirmModal()">Cancel</button>
     </div>
 </div>
 
 <script>
 let currentNotifId = null;
 let currentNotifElement = null;
-let pollingPaused = true;
+let confirmAction = null;
 
 function openModal(el) {
     currentNotifId = el.dataset.id;
     currentNotifElement = el;
-    document.getElementById("modalMessage").innerText = el.dataset.message;
-    document.getElementById("modalTime").innerText = el.dataset.time;
-    document.getElementById("notifModal").style.display = "flex";
+    modalMessage.innerText = el.dataset.message;
+    modalTime.innerText = el.dataset.time;
+    notifModal.style.display = "flex";
 }
 
 function markReadAndClose() {
     fetch("{% url 'mark_notification_read' %}", {
         method: "POST",
-        headers: {
-            "X-CSRFToken": "{{ csrf_token }}"
-        },
+        headers: { "X-CSRFToken": "{{ csrf_token }}" },
         body: new URLSearchParams({ id: currentNotifId })
     }).then(() => {
-
-        // ✅ remove unread UI immediately
-        if (currentNotifElement) {
-            currentNotifElement.classList.remove("unread");
-        }
-
-        // ✅ update bell count LOCALLY (no race)
-        const badge = document.querySelector(".notif-count");
-        if (badge) {
-            let count = parseInt(badge.innerText);
-            count = Math.max(0, count - 1);
-
-            if (count === 0) {
-                badge.remove();
-            } else {
-                badge.innerText = count;
-            }
-        }
-
-        document.getElementById("notifModal").style.display = "none";
+        currentNotifElement.classList.remove("unread");
+        updateBadge(-1);
+        notifModal.style.display = "none";
     });
 }
 
-
-function updateBellCount() {
-    fetch("{% url 'unread_notification_count' %}")
-        .then(res => res.json())
-        .then(data => {
-            const badge = document.querySelector(".notif-count");
-            const bell = document.querySelector(".notification-bell");
-
-            if (!bell) return;
-
-            if (data.count > 0) {
-                if (badge) {
-                    badge.innerText = data.count;
-                } else {
-                    const span = document.createElement("span");
-                    span.className = "notif-count";
-                    span.innerText = data.count;
-                    bell.appendChild(span);
-                }
-            } else if (badge) {
-                badge.remove();
-            }
-        });
+function markAllRead() {
+    fetch("{% url 'mark_all_notifications_read' %}", {
+        method: "POST",
+        headers: { "X-CSRFToken": "{{ csrf_token }}" }
+    }).then(() => {
+        document.querySelectorAll(".note.unread").forEach(n => n.classList.remove("unread"));
+        removeBadge();
+    });
 }
 
-function refreshUnreadCount() {
-    if (window.pollingPaused) return; // ✅ SAFETY
-
-    fetch("{% url 'unread_notification_count' %}")
-        .then(res => res.json())
-        .then(data => {
-            const bell = document.querySelector(".notification-bell");
-            if (!bell) return;
-
-            let badge = bell.querySelector(".notif-count");
-
-            if (data.count > 0) {
-                if (!badge) {
-                    badge = document.createElement("span");
-                    badge.className = "badge notif-count";
-                    bell.appendChild(badge);
-                }
-                badge.innerText = data.count;
-            } else if (badge) {
-                badge.remove();
-            }
-        });
+function clearReadNotifications() {
+    fetch("{% url 'clear_read_notifications' %}", {
+        method: "POST",
+        headers: { "X-CSRFToken": "{{ csrf_token }}" }
+    }).then(() => {
+        document.querySelectorAll(".note:not(.unread)").forEach(n => n.remove());
+    });
 }
 
+function updateBadge(delta) {
+    const badge = document.querySelector(".notif-count");
+    if (!badge) return;
+    const count = Math.max(0, parseInt(badge.innerText) + delta);
+    count ? badge.innerText = count : badge.remove();
+}
+
+function removeBadge() {
+    const badge = document.querySelector(".notif-count");
+    if (badge) badge.remove();
+}
+
+function openConfirmModal(title, message, action) {
+    confirmTitle.innerText = title;
+    confirmMessage.innerText = message;
+    confirmAction = action;
+    confirmModal.style.display = "flex";
+}
+
+function closeConfirmModal() {
+    confirmAction = null;
+    confirmModal.style.display = "none";
+}
+
+function confirmMarkAllRead() {
+    openConfirmModal("Mark all as read?",
+        "All unread notifications will be marked as read.",
+        markAllRead);
+}
+
+function confirmClearRead() {
+    openConfirmModal("Clear read notifications?",
+        "All read notifications will be permanently removed.",
+        clearReadNotifications);
+}
+
+confirmYesBtn.onclick = () => {
+    if (confirmAction) confirmAction();
+    closeConfirmModal();
+};
 </script>
 
 </body>

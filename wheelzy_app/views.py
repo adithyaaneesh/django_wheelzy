@@ -889,3 +889,20 @@ def get_unread_notification_count(user):
 def unread_notification_count(request):
     count = get_unread_notification_count(request.user)
     return JsonResponse({"count": count})
+
+@login_required
+def mark_all_notifications_read(request):
+    Notification.objects.filter(
+        user=request.user,
+        is_read=False
+    ).update(is_read=True)
+    return JsonResponse({"status": "ok"})
+
+
+@login_required
+def clear_read_notifications(request):
+    Notification.objects.filter(
+        user=request.user,
+        is_read=True
+    ).delete()
+    return JsonResponse({"status": "ok"})

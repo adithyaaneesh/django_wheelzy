@@ -65,7 +65,8 @@ urlpatterns = [
 
     # ================= NOTIFICATIONS =================
     path("notifications/", views.notifications_view, name="notifications"),
-    # path("notifications/read/<int:pk>/", views.mark_notification_read, name="mark_notification_read"),
+    path("notifications/mark-all-read/", views.mark_all_notifications_read, name="mark_all_notifications_read"),
+    path("notifications/clear-read/", views.clear_read_notifications, name="clear_read_notifications"),
     path("notifications/mark-read/", views.mark_notification_read, name="mark_notification_read"),
     path("notifications/unread-count/", views.unread_notification_count, name="unread_notification_count"),
 
