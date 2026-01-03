@@ -5,33 +5,45 @@
     <title>Admin Dashboard | Wheelzy</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-    <!-- Google Font -->
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
-
-    <!-- Font Awesome (FOR BELL ICON) -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Poppins:wght@600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
 
     <style>
+        :root {
+            --primary: #0f172a;
+            --accent: #2563eb;
+            --danger: #ef4444;
+            --success: #10b981;
+            --bg: #f8fafc;
+            --card-bg: #ffffff;
+            --text-main: #1e293b;
+            --text-muted: #64748b;
+        }
+
         * {
             box-sizing: border-box;
+            transition: all 0.2s ease;
         }
 
         body {
             margin: 0;
-            font-family: 'Poppins', sans-serif;
-            background: #f4f6fb;
+            font-family: 'Inter', sans-serif;
+            background: var(--bg);
+            color: var(--text-main);
         }
 
         /* ================= HEADER ================= */
         .header {
-            background: linear-gradient(135deg, #111827, #1f2933);
+            background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
             color: white;
-            padding: 22px 30px;
+            padding: 30px 0;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
         }
 
         .header-content {
             max-width: 1200px;
             margin: auto;
+            padding: 0 30px;
             display: flex;
             align-items: center;
             justify-content: space-between;
@@ -39,154 +51,204 @@
 
         .header h2 {
             margin: 0;
-            font-size: 26px;
+            font-family: 'Poppins', sans-serif;
+            font-size: 28px;
+            letter-spacing: -0.5px;
         }
 
         .header p {
-            margin-top: 6px;
-            opacity: 0.85;
+            margin: 5px 0 0;
+            opacity: 0.7;
             font-size: 14px;
+            font-weight: 300;
         }
 
         .admin-actions {
             display: flex;
             align-items: center;
-            gap: 16px;
+            gap: 24px;
         }
 
         .notification-bell {
             position: relative;
-            font-size: 20px;
-            color: white;
+            font-size: 22px;
+            color: rgba(255,255,255,0.8);
             text-decoration: none;
+            display: flex;
+            align-items: center;
         }
 
         .notification-bell:hover {
-            color: #facc15;
+            color: #fbbf24;
+            transform: rotate(15deg);
         }
 
         .notification-bell .badge {
             position: absolute;
-            top: -6px;
+            top: -5px;
             right: -8px;
-            background: #ef4444;
+            background: var(--danger);
             color: white;
-            font-size: 11px;
-            padding: 2px 6px;
-            border-radius: 50%;
-            font-weight: 600;
+            font-size: 10px;
+            min-width: 18px;
+            height: 18px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 10px;
+            font-weight: 700;
+            border: 2px solid #1e293b;
         }
 
-        .admin-icon {
-            width: 44px;
-            height: 44px;
-            background: #fff;
-            color: #111827;
-            border-radius: 50%;
+        .admin-profile {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding-left: 20px;
+            border-left: 1px solid rgba(255,255,255,0.1);
+        }
+
+        .admin-avatar {
+            width: 40px;
+            height: 40px;
+            background: var(--accent);
+            color: white;
+            border-radius: 12px;
             display: flex;
             align-items: center;
             justify-content: center;
             font-weight: 700;
-            font-size: 18px;
+            box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3);
         }
 
         .logout-btn {
-            padding: 8px 16px;
-            background: #ef4444;
-            color: white;
+            padding: 10px 18px;
+            background: rgba(239, 68, 68, 0.1);
+            color: #fca5a5;
+            border: 1px solid rgba(239, 68, 68, 0.2);
             border-radius: 10px;
             text-decoration: none;
             font-weight: 600;
-            font-size: 14px;
+            font-size: 13px;
         }
 
         .logout-btn:hover {
-            background: #dc2626;
+            background: var(--danger);
+            color: white;
         }
 
         /* ================= CONTAINER ================= */
         .container {
             max-width: 1200px;
             margin: auto;
-            padding: 30px;
+            padding: 40px 30px;
         }
 
         /* ================= DASHBOARD GRID ================= */
         .card-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-            gap: 22px;
+            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+            gap: 25px;
         }
 
         .card {
-            background: white;
-            padding: 24px;
-            border-radius: 18px;
-            box-shadow: 0 12px 28px rgba(0,0,0,0.1);
-            transition: transform 0.25s ease, box-shadow 0.25s ease;
+            background: var(--card-bg);
+            padding: 30px;
+            border-radius: 24px;
+            border: 1px solid #eef2f6;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.03);
+            display: flex;
+            flex-direction: column;
+            position: relative;
+            overflow: hidden;
         }
 
         .card:hover {
-            transform: translateY(-6px);
-            box-shadow: 0 18px 35px rgba(0,0,0,0.15);
+            transform: translateY(-8px);
+            box-shadow: 0 20px 40px rgba(0,0,0,0.08);
+            border-color: var(--accent);
         }
 
-        .card span {
-            font-size: 36px;
-            display: block;
-            margin-bottom: 12px;
+        .icon-box {
+            width: 55px;
+            height: 55px;
+            border-radius: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            margin-bottom: 20px;
         }
+
+        /* Icon Variants */
+        .bg-blue { background: #eff6ff; color: #2563eb; }
+        .bg-orange { background: #fff7ed; color: #f97316; }
+        .bg-purple { background: #faf5ff; color: #a855f7; }
+        .bg-red { background: #fef2f2; color: #ef4444; }
+        .bg-green { background: #ecfdf5; color: #10b981; }
+        .bg-cyan { background: #ecfeff; color: #0891b2; }
 
         .card h3 {
-            margin: 0 0 6px;
-            color: #111827;
-            font-size: 18px;
+            margin: 0 0 10px;
+            color: var(--primary);
+            font-family: 'Poppins', sans-serif;
+            font-size: 19px;
         }
 
         .card p {
-            color: #6b7280;
+            color: var(--text-muted);
             font-size: 14px;
+            line-height: 1.6;
+            margin-bottom: 20px;
+            flex-grow: 1;
         }
 
         .card a {
-            display: inline-block;
-            margin-top: 14px;
-            padding: 10px 16px;
-            background: #111827;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            padding: 12px 20px;
+            background: var(--primary);
             color: white;
             text-decoration: none;
-            border-radius: 10px;
+            border-radius: 12px;
             font-size: 14px;
             font-weight: 600;
         }
 
         .card a:hover {
-            background: #000;
+            background: var(--accent);
+            padding-right: 25px;
+        }
+
+        .card a::after {
+            content: '→';
+            font-size: 16px;
         }
 
         /* ================= FOOTER ================= */
         .footer {
             text-align: center;
-            margin-top: 40px;
+            margin-top: 60px;
+            padding: 20px;
             font-size: 13px;
-            color: #6b7280;
+            color: var(--text-muted);
+            border-top: 1px solid #e2e8f0;
         }
     </style>
 </head>
 
 <body>
 
-<!-- ================= HEADER ================= -->
 <div class="header">
     <div class="header-content">
         <div>
-            <h2>Admin Dashboard</h2>
-            <p>Manage users, vehicles, bookings & reports</p>
+            <h2>Admin Portal</h2>
+            <p>Welcome back, Oversight is key to success.</p>
         </div>
 
         <div class="admin-actions">
-
-            <!-- 🔔 Notification Bell -->
             <a href="{% url 'notifications' %}" class="notification-bell">
                 <i class="fa-solid fa-bell"></i>
                 {% if unread_notification_count > 0 %}
@@ -194,66 +256,66 @@
                 {% endif %}
             </a>
 
-            <div class="admin-icon">A</div>
-            <a href="{% url 'logout' %}" class="logout-btn">Logout</a>
+            <div class="admin-profile">
+                <div class="admin-avatar">A</div>
+                <a href="{% url 'logout' %}" class="logout-btn">Logout</a>
+            </div>
         </div>
     </div>
 </div>
 
-<!-- ================= CONTENT ================= -->
 <div class="container">
     <div class="card-grid">
 
         <div class="card">
-            <span>👥</span>
-            <h3>Users</h3>
-            <p>View all customers and owners registered on the platform.</p>
-            <a href="{% url 'admin_users' %}">View Users</a>
+            <div class="icon-box bg-blue"><i class="fa-solid fa-users"></i></div>
+            <h3>User Management</h3>
+            <p>Review and manage profiles for both customers and vehicle owners across the platform.</p>
+            <a href="{% url 'admin_users' %}">Manage Users</a>
         </div>
 
         <div class="card">
-            <span>🚗</span>
-            <h3>All Vehicles</h3>
-            <p>View, verify, or remove vehicles added by owners.</p>
-            <a href="{% url 'admin_vehicles' %}">View Vehicles</a>
+            <div class="icon-box bg-orange"><i class="fa-solid fa-car"></i></div>
+            <h3>Vehicle Inventory</h3>
+            <p>Verify documentations, approve new listings, or manage current fleet availability.</p>
+            <a href="{% url 'admin_vehicles' %}">Inspect Fleet</a>
         </div>
 
         <div class="card">
-            <span>📦</span>
-            <h3>All Bookings</h3>
-            <p>Monitor bookings, status, and rental history.</p>
+            <div class="icon-box bg-purple"><i class="fa-solid fa-calendar-check"></i></div>
+            <h3>Booking Control</h3>
+            <p>Real-time monitoring of active rentals, upcoming bookings, and historical logs.</p>
             <a href="{% url 'admin_bookings' %}">View Bookings</a>
         </div>
 
         <div class="card">
-            <span>⚠️</span>
+            <div class="icon-box bg-red"><i class="fa-solid fa-triangle-exclamation"></i></div>
             <h3>Damage Reports</h3>
-            <p>Review damages and security deposit deductions.</p>
-            <a href="{% url 'admin_damage_report_list' %}">View Reports</a>
+            <p>Address damage claims, review uploaded evidence, and manage security deposits.</p>
+            <a href="{% url 'admin_damage_report_list' %}">Review Reports</a>
         </div>
 
         <div class="card">
-            <span>💰</span>
-            <h3>Revenue</h3>
-            <p>Track platform earnings and owner payouts.</p>
-            <a href="{% url 'admin_revenue' %}">View Revenue</a>
+            <div class="icon-box bg-green"><i class="fa-solid fa-wallet"></i></div>
+            <h3>Financials</h3>
+            <p>Track gross revenue, platform commissions, and pending payouts to owners.</p>
+            <a href="{% url 'admin_revenue' %}">Financial Overview</a>
         </div>
 
         <div class="card">
-            <span>📊</span>
-            <h3>Analytics</h3>
-            <p>Platform usage statistics and growth insights.</p>
-            <a href="{% url 'admin_analytics' %}">View Analytics</a>
+            <div class="icon-box bg-cyan"><i class="fa-solid fa-chart-line"></i></div>
+            <h3>System Analytics</h3>
+            <p>Deep dive into growth metrics, popular vehicles, and user behavior statistics.</p>
+            <a href="{% url 'admin_analytics' %}">Growth Data</a>
         </div>
 
     </div>
 
     <div class="footer">
-        © 2025 Wheelzy Admin Panel • Secure Access
+        &copy; 2026 Wheelzy • Global Admin Console • Version 2.4.0
     </div>
 </div>
 
-</body>
 <script>
 function refreshAdminBell() {
     fetch("{% url 'unread_notification_count' %}")
@@ -274,10 +336,13 @@ function refreshAdminBell() {
             } else if (badge) {
                 badge.remove();
             }
-        });
+        })
+        .catch(err => console.log("Refresh failed"));
 }
 
+// Keeping your interval as requested
 setInterval(refreshAdminBell, 100);
 </script>
 
+</body>
 </html>
