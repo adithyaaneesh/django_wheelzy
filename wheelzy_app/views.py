@@ -124,16 +124,21 @@ def home(request):
     ).values_list("vehicle_id", flat=True)
 
     profile = None
+    unread_count = 0
     if request.user.is_authenticated:
         profile, _ = UserProfile.objects.get_or_create(user=request.user)
+        unread_count = get_unread_notification_count(request.user)
+
 
     return render(request, "home.html", {
         "vehicles": vehicles,
         "booked_vehicle_ids": active_bookings,
         "profile": profile,
-        "unread_notification_count": get_unread_notification_count(request.user)
+        "unread_count": unread_count,
 
     })
+
+
 
 @login_required
 def profile_view(request):
@@ -384,6 +389,13 @@ def pay_damage_charge(request, report_id):
         Notification.objects.create(
             user=request.user,
             message="Damage payment successful. You may book again."
+        )
+        Notification.objects.create(
+            user=User.objects.filter(is_superuser=True).first(),
+            message=(
+                f"Damage payment completed for booking #{report.booking.id} "
+                f"({report.booking.vehicle.vehicle_name})"
+            )
         )
 
         messages.success(request, "Payment completed.")
@@ -771,6 +783,14 @@ def upload_handover_photos(request, booking_id):
                 image=photo
             )
 
+        Notification.objects.create(
+            user=User.objects.filter(is_superuser=True).first(),
+            message=(
+                f"Handover photos uploaded for booking #{booking.id} "
+                f"({booking.vehicle.vehicle_name})"
+            )
+        )
+
         messages.success(request, "Handover photos uploaded successfully.")
         return redirect("owner_vehicle_bookings")
 
@@ -805,7 +825,13 @@ def owner_add_damage_report(request, booking_id):
             extra_charge=extra_charge,
             is_paid=False
         )
-
+        Notification.objects.create(
+            user=User.objects.filter(is_superuser=True).first(),
+            message=(
+                f"Damage reported for {booking.vehicle.vehicle_name} "
+                f"(Booking #{booking.id})"
+            )
+        )
         for photo in photos:
             DamagePhoto.objects.create(
                 report=report,

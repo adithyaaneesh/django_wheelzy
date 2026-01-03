@@ -54,7 +54,6 @@
             gap: 16px;
         }
 
-        /* 🔔 NOTIFICATION BELL */
         .notification-bell {
             position: relative;
             font-size: 20px;
@@ -191,7 +190,7 @@
             <a href="{% url 'notifications' %}" class="notification-bell">
                 <i class="fa-solid fa-bell"></i>
                 {% if unread_notification_count > 0 %}
-                    <span class="badge">{{ unread_notification_count }}</span>
+                    <span class="badge notif-count">{{ unread_notification_count }}</span>
                 {% endif %}
             </a>
 
@@ -255,4 +254,30 @@
 </div>
 
 </body>
+<script>
+function refreshAdminBell() {
+    fetch("{% url 'unread_notification_count' %}")
+        .then(res => res.json())
+        .then(data => {
+            const bell = document.querySelector(".notification-bell");
+            if (!bell) return;
+
+            let badge = bell.querySelector(".notif-count");
+
+            if (data.count > 0) {
+                if (!badge) {
+                    badge = document.createElement("span");
+                    badge.className = "badge notif-count";
+                    bell.appendChild(badge);
+                }
+                badge.innerText = data.count;
+            } else if (badge) {
+                badge.remove();
+            }
+        });
+}
+
+setInterval(refreshAdminBell, 100);
+</script>
+
 </html>

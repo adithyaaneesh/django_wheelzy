@@ -34,6 +34,8 @@
             box-shadow: 0 6px 18px rgba(0,0,0,0.08);
             cursor: pointer;
             position: relative;
+            transition: background 0.3s ease, font-weight 0.3s ease;
+
         }
 
         .note.unread {
@@ -126,9 +128,12 @@
 
 <script>
 let currentNotifId = null;
+let currentNotifElement = null;
+let pollingPaused = true;
 
 function openModal(el) {
     currentNotifId = el.dataset.id;
+    currentNotifElement = el;
     document.getElementById("modalMessage").innerText = el.dataset.message;
     document.getElementById("modalTime").innerText = el.dataset.time;
     document.getElementById("notifModal").style.display = "flex";
@@ -142,10 +147,29 @@ function markReadAndClose() {
         },
         body: new URLSearchParams({ id: currentNotifId })
     }).then(() => {
-        updateBellCount();
+
+        // ✅ remove unread UI immediately
+        if (currentNotifElement) {
+            currentNotifElement.classList.remove("unread");
+        }
+
+        // ✅ update bell count LOCALLY (no race)
+        const badge = document.querySelector(".notif-count");
+        if (badge) {
+            let count = parseInt(badge.innerText);
+            count = Math.max(0, count - 1);
+
+            if (count === 0) {
+                badge.remove();
+            } else {
+                badge.innerText = count;
+            }
+        }
+
         document.getElementById("notifModal").style.display = "none";
     });
 }
+
 
 function updateBellCount() {
     fetch("{% url 'unread_notification_count' %}")
@@ -170,6 +194,31 @@ function updateBellCount() {
             }
         });
 }
+
+function refreshUnreadCount() {
+    if (window.pollingPaused) return; // ✅ SAFETY
+
+    fetch("{% url 'unread_notification_count' %}")
+        .then(res => res.json())
+        .then(data => {
+            const bell = document.querySelector(".notification-bell");
+            if (!bell) return;
+
+            let badge = bell.querySelector(".notif-count");
+
+            if (data.count > 0) {
+                if (!badge) {
+                    badge = document.createElement("span");
+                    badge.className = "badge notif-count";
+                    bell.appendChild(badge);
+                }
+                badge.innerText = data.count;
+            } else if (badge) {
+                badge.remove();
+            }
+        });
+}
+
 </script>
 
 </body>
