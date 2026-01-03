@@ -5,107 +5,165 @@
     <title>My Bookings | Wheelzy</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-    <!-- Bootstrap -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
 
     <style>
-        body {
-            background: #f4f6fb;
-            font-family: "Segoe UI", Tahoma, sans-serif;
+        :root {
+            --primary: #2563eb;
+            --success: #10b981;
+            --warning: #f59e0b;
+            --danger: #ef4444;
+            --bg: #f8fafc;
+            --card-border: #e2e8f0;
         }
 
+        body {
+            background-color: var(--bg);
+            font-family: 'Inter', sans-serif;
+            color: #1e293b;
+        }
+
+        .section-title {
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: #334155;
+            margin-bottom: 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        /* ================= BOOKING CARD ================= */
         .booking-card {
-            border-radius: 16px;
-            box-shadow: 0 10px 25px rgba(0,0,0,0.08);
-            transition: 0.3s;
+            background: white;
+            border: 1px solid var(--card-border);
+            border-radius: 20px;
+            padding: 1.5rem;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .booking-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 30px -10px rgba(0,0,0,0.05);
+            border-color: var(--primary);
         }
 
         .booking-card.completed {
-            opacity: 0.65;
+            background: #fcfcfd;
+            border-style: dashed;
         }
 
         /* ================= STEPPER ================= */
         .booking-stepper {
             display: flex;
             justify-content: space-between;
-            margin: 20px 0;
+            padding: 25px 0 10px;
+            position: relative;
+        }
+
+        /* The background line */
+        .booking-stepper::before {
+            content: "";
+            position: absolute;
+            top: 36px;
+            left: 10%;
+            right: 10%;
+            height: 2px;
+            background: #e2e8f0;
+            z-index: 0;
         }
 
         .step {
             flex: 1;
             text-align: center;
             position: relative;
-            font-size: 12px;
-            color: #9ca3af;
-        }
-
-        .step::after {
-            content: "";
-            position: absolute;
-            top: 18px;
-            right: -50%;
-            width: 100%;
-            height: 3px;
-            background: #e5e7eb;
-            z-index: 0;
-        }
-
-        .step:last-child::after {
-            display: none;
-        }
-
-        .step-circle {
-            width: 32px;
-            height: 32px;
-            margin: auto;
-            border-radius: 50%;
-            background: #e5e7eb;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-weight: 700;
-            color: white;
-            position: relative;
             z-index: 1;
         }
 
+        .step-dot {
+            width: 24px;
+            height: 24px;
+            margin: 0 auto 8px;
+            background: white;
+            border: 2px solid #cbd5e1;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 10px;
+            color: transparent;
+            transition: all 0.3s ease;
+        }
+
         .step-label {
-            margin-top: 6px;
+            font-size: 11px;
+            font-weight: 600;
+            color: #94a3b8;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        /* Active State */
+        .step.active .step-dot {
+            border-color: var(--primary);
+            box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.1);
+            background: var(--primary);
+            color: white;
+        }
+        .step.active .step-label { color: var(--primary); }
+
+        /* Done State */
+        .step.done .step-dot {
+            background: var(--success);
+            border-color: var(--success);
+            color: white;
+        }
+        .step.done .step-label { color: var(--success); }
+
+        /* Damage State */
+        .step.damage .step-dot {
+            background: var(--danger);
+            border-color: var(--danger);
+            color: white;
+        }
+        .step.damage .step-label { color: var(--danger); }
+
+        /* ================= UTILS ================= */
+        .price-tag {
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: #0f172a;
+        }
+
+        .btn-view {
+            background: #f1f5f9;
+            border: none;
+            color: #475569;
+            font-weight: 600;
+            border-radius: 10px;
+            padding: 6px 14px;
+        }
+        
+        .btn-view:hover { background: #e2e8f0; }
+
+        .status-badge {
+            font-size: 0.75rem;
+            padding: 4px 12px;
+            border-radius: 50px;
             font-weight: 600;
         }
 
-        .step.done {
-            color: #16a34a;
-        }
-
-        .step.done .step-circle {
-            background: #16a34a;
-        }
-
-        .step.done::after {
-            background: #16a34a;
-        }
-
-        .step.active {
-            color: #2563eb;
-        }
-
-        .step.active .step-circle {
-            background: white;
-            border: 3px solid #2563eb;
-            color: #2563eb;
-        }
-
-        .step.damage {
-            color: #dc2626;
-        }
-
-        .step.damage .step-circle {
-            background: #dc2626;
-        }
-
-        .card-toggle {
-            cursor: pointer;
+        .collapse-btn {
+            border: none;
+            background: none;
+            color: var(--primary);
+            font-weight: 600;
+            font-size: 13px;
+            padding: 0;
         }
     </style>
 </head>
@@ -113,222 +171,148 @@
 <body>
 
 <div class="container py-5">
-
-    <div class="d-flex justify-content-between align-items-center mb-4">
-        <h2 class="fw-bold">My Bookings</h2>
-        <a href="{% url 'home' %}" class="btn btn-secondary">← Back</a>
+    <div class="d-flex justify-content-between align-items-center mb-5">
+        <div>
+            <h1 class="fw-bold h3 mb-1">Booking Dashboard</h1>
+            <p class="text-muted small mb-0">Track and manage your vehicle rentals</p>
+        </div>
+        <a href="{% url 'home' %}" class="btn btn-white border shadow-sm rounded-pill px-4">
+            <i class="fa-solid fa-arrow-left me-2"></i> Home
+        </a>
     </div>
 
-    <!-- ================= ACTIVE BOOKINGS ================= -->
-    <h5 class="fw-bold mb-3">🚗 Active Bookings</h5>
-    <div class="row g-4">
-
-    {% for booking in bookings %}
-    {% if booking.status != "returned" and not booking.damage_report.is_paid %}
-    <div class="col-md-6">
-        <div class="card booking-card p-3">
-
-            <div class="card-toggle" data-bs-toggle="collapse" data-bs-target="#active{{ booking.id }}">
-                <div class="d-flex justify-content-between align-items-center">
-                    <h6 class="mb-0">{{ booking.vehicle.vehicle_name }}</h6>
-                    <button class="btn btn-outline-primary btn-sm"
-                            data-bs-toggle="modal"
-                            data-bs-target="#vehicleModal{{ booking.id }}">
-                        View Vehicle
+    <div class="section-title">
+        <i class="fa-solid fa-circle-play text-primary"></i> Active Journeys
+    </div>
+    
+    <div class="row g-4 mb-5">
+        {% for booking in bookings %}
+        {% if booking.status != "returned" and not booking.damage_report.is_paid %}
+        <div class="col-lg-6">
+            <div class="booking-card">
+                <div class="d-flex justify-content-between align-items-start mb-3">
+                    <div>
+                        <h5 class="fw-bold mb-0">{{ booking.vehicle.vehicle_name }}</h5>
+                        <span class="text-muted small">{{ booking.vehicle.number_plate }}</span>
+                    </div>
+                    <button class="btn btn-view" data-bs-toggle="modal" data-bs-target="#vehicleModal{{ booking.id }}">
+                        <i class="fa-solid fa-car me-2"></i>Details
                     </button>
                 </div>
-            </div>
 
-            <!-- 🔥 STEPPER -->
-            <div class="booking-stepper">
-
-                <!-- Pending -->
-                <div class="step {% if booking.status != 'pending' %}done{% elif booking.status == 'pending' %}active{% endif %}">
-                    <div class="step-circle">{% if booking.status != 'pending' %}✓{% endif %}</div>
-                    <div class="step-label">Pending</div>
-                </div>
-
-                <!-- Confirmed -->
-                <div class="step {% if booking.status in 'in_use returned' %}done{% elif booking.status == 'confirmed' %}active{% endif %}">
-                    <div class="step-circle">{% if booking.status in 'in_use returned' %}✓{% endif %}</div>
-                    <div class="step-label">Confirmed</div>
-                </div>
-
-                <!-- In Use -->
-                <div class="step {% if booking.status == 'returned' or booking.damage_report %}done{% elif booking.status == 'in_use' %}active{% endif %}">
-                    <div class="step-circle">{% if booking.status == 'returned' or booking.damage_report %}✓{% endif %}</div>
-                    <div class="step-label">In Use</div>
-                </div>
-
-                {% if booking.damage_report %}
-                    <!-- Damage Reported -->
-                    <div class="step done damage">
-                        <div class="step-circle">!</div>
-                        <div class="step-label">Damage Reported</div>
+                <div class="booking-stepper">
+                    <div class="step {% if booking.status != 'pending' %}done{% else %}active{% endif %}">
+                        <div class="step-dot"><i class="fa-solid fa-check"></i></div>
+                        <div class="step-label">Booking</div>
                     </div>
 
-                    <!-- Damage Unpaid / Paid -->
-                    {% if booking.damage_report.is_paid %}
-                        <div class="step done">
-                            <div class="step-circle">✓</div>
-                            <div class="step-label">Damage Paid</div>
-                        </div>
+                    <div class="step {% if booking.status in 'in_use returned' %}done{% elif booking.status == 'confirmed' %}active{% endif %}">
+                        <div class="step-dot"><i class="fa-solid fa-check"></i></div>
+                        <div class="step-label">Confirmed</div>
+                    </div>
+
+                    <div class="step {% if booking.status == 'returned' or booking.damage_report %}done{% elif booking.status == 'in_use' %}active{% endif %}">
+                        <div class="step-dot"><i class="fa-solid fa-check"></i></div>
+                        <div class="step-label">Driving</div>
+                    </div>
+
+                    {% if booking.damage_report %}
+                    <div class="step active damage">
+                        <div class="step-dot">!</div>
+                        <div class="step-label">Issue</div>
+                    </div>
                     {% else %}
-                        <div class="step active damage">
-                            <div class="step-circle">!</div>
-                            <div class="step-label">Damage Unpaid</div>
-                        </div>
-                    {% endif %}
-                {% else %}
-                    <!-- Returned -->
                     <div class="step {% if booking.status == 'returned' %}done{% endif %}">
-                        <div class="step-circle">{% if booking.status == 'returned' %}✓{% endif %}</div>
-                        <div class="step-label">Returned</div>
+                        <div class="step-dot"><i class="fa-solid fa-check"></i></div>
+                        <div class="step-label">Return</div>
                     </div>
-                {% endif %}
-
-            </div>
-
-            <!-- DETAILS -->
-            <div id="active{{ booking.id }}" class="collapse show">
-                <p class="text-muted mb-1"><strong>Number Plate:</strong> {{ booking.vehicle.number_plate }}</p>
-                <p class="mb-1"><strong>From:</strong> {{ booking.start_time|date:"d M Y, h:i A" }}</p>
-                <p class="mb-1"><strong>To:</strong> {{ booking.end_time|date:"d M Y, h:i A" }}</p>
-                <p class="fw-bold text-success">₹{{ booking.total_price }}</p>
-
-                <div class="d-flex gap-2 flex-wrap">
-                    {% if booking.status == "pending" %}
-                        <a href="{% url 'cancel_booking' booking.id %}"
-                           class="btn btn-sm btn-danger"
-                           onclick="return confirm('Cancel booking?')">
-                            Cancel
-                        </a>
-                    {% endif %}
-
-                    {% if booking.damage_report and not booking.damage_report.is_paid %}
-                        <a href="{% url 'customer_damage_detail' booking.id %}"
-                           class="btn btn-sm btn-warning">
-                            Pay Damage
-                        </a>
                     {% endif %}
                 </div>
+
+                <hr class="my-4" style="opacity: 0.05;">
+
+                <div class="row align-items-center">
+                    <div class="col-sm-7">
+                        <div class="d-flex align-items-center mb-2">
+                            <i class="fa-regular fa-calendar text-muted me-2"></i>
+                            <span class="small">{{ booking.start_time|date:"d M" }} - {{ booking.end_time|date:"d M Y" }}</span>
+                        </div>
+                        <div class="price-tag">₹{{ booking.total_price }}</div>
+                    </div>
+                    <div class="col-sm-5 text-sm-end mt-3 mt-sm-0">
+                        {% if booking.status == "pending" %}
+                            <a href="{% url 'cancel_booking' booking.id %}" class="btn btn-sm btn-outline-danger rounded-pill px-3">Cancel</a>
+                        {% endif %}
+                        {% if booking.damage_report and not booking.damage_report.is_paid %}
+                            <a href="{% url 'customer_damage_detail' booking.id %}" class="btn btn-sm btn-warning rounded-pill px-3">Pay Fine</a>
+                        {% endif %}
+                    </div>
+                </div>
             </div>
-
         </div>
-    </div>
-    {% endif %}
-    {% endfor %}
+        {% endif %}
+        {% endfor %}
     </div>
 
-    <!-- ================= COMPLETED BOOKINGS ================= -->
-    <h5 class="fw-bold mt-5 mb-3">🏁 Completed Bookings</h5>
+    <div class="section-title">
+        <i class="fa-solid fa-circle-check text-success"></i> Past Rentals
+    </div>
+
     <div class="row g-4">
-
-    <!-- 🔥 DAMAGE PAID COMPLETED (FIRST) -->
-    {% for booking in bookings %}
-    {% if booking.damage_report and booking.damage_report.is_paid %}
-    <div class="col-md-6">
-        <div class="card booking-card completed p-3">
-
-            <div class="card-toggle"
-                data-bs-toggle="collapse"
-                data-bs-target="#completed{{ booking.id }}">
-                <div class="d-flex justify-content-between align-items-center">
-                    <h6 class="mb-0">{{ booking.vehicle.vehicle_name }}</h6>
-                    <span class="text-success fw-semibold">Damage Paid</span>
+        {% for booking in bookings %}
+        {% if booking.status == "returned" or booking.damage_report.is_paid %}
+        <div class="col-md-6 col-xl-4">
+            <div class="booking-card completed p-3">
+                <div class="d-flex justify-content-between">
+                    <h6 class="fw-bold mb-1">{{ booking.vehicle.vehicle_name }}</h6>
+                    {% if booking.damage_report.is_paid %}
+                        <span class="status-badge bg-success-subtle text-success">Fine Settled</span>
+                    {% else %}
+                        <span class="status-badge bg-secondary-subtle text-secondary">Completed</span>
+                    {% endif %}
                 </div>
-            </div>
-
-            <!-- STEPPER -->
-            <div class="booking-stepper">
-                <div class="step done"><div class="step-circle">✓</div><div class="step-label">Pending</div></div>
-                <div class="step done"><div class="step-circle">✓</div><div class="step-label">Confirmed</div></div>
-                <div class="step done damage"><div class="step-circle">✓</div><div class="step-label">Damage Reported</div></div>
-                <div class="step done damage"><div class="step-circle">✓</div><div class="step-label">Damage Unpaid</div></div>
-                <div class="step done"><div class="step-circle">✓</div><div class="step-label">Damage Paid</div></div>
-            </div>
-
-            <!-- DETAILS (EXPANDABLE) -->
-            <div id="completed{{ booking.id }}" class="collapse">
-                <p class="text-muted mb-1"><strong>Number Plate:</strong> {{ booking.vehicle.number_plate }}</p>
-                <p class="mb-1"><strong>From:</strong> {{ booking.start_time|date:"d M Y, h:i A" }}</p>
-                <p class="mb-1"><strong>To:</strong> {{ booking.end_time|date:"d M Y, h:i A" }}</p>
-                <p class="fw-bold text-success">₹{{ booking.total_price }}</p>
-
-                <button class="btn btn-outline-primary btn-sm"
-                        data-bs-toggle="modal"
-                        data-bs-target="#vehicleModal{{ booking.id }}">
-                    View Vehicle
+                <p class="small text-muted mb-3">{{ booking.start_time|date:"d M" }} • ₹{{ booking.total_price }}</p>
+                
+                <div class="collapse" id="completed{{ booking.id }}">
+                    <div class="pt-2 border-top mt-2 small">
+                        <p class="mb-1"><strong>Plate:</strong> {{ booking.vehicle.number_plate }}</p>
+                        <p class="mb-2"><strong>Time:</strong> {{ booking.start_time|date:"h:i A" }} to {{ booking.end_time|date:"h:i A" }}</p>
+                        <button class="btn btn-sm btn-link p-0 text-decoration-none" data-bs-toggle="modal" data-bs-target="#vehicleModal{{ booking.id }}">View Vehicle Details</button>
+                    </div>
+                </div>
+                
+                <button class="collapse-btn mt-2" type="button" data-bs-toggle="collapse" data-bs-target="#completed{{ booking.id }}">
+                    Details <i class="fa-solid fa-chevron-down ms-1" style="font-size: 10px;"></i>
                 </button>
             </div>
-
         </div>
+        {% endif %}
+        {% endfor %}
     </div>
-    {% endif %}
-    {% endfor %}
-
-    <!-- ✅ NORMAL COMPLETED JOURNEYS -->
-    {% for booking in bookings %}
-    {% if booking.status == "returned" and not booking.damage_report %}
-    <div class="col-md-6">
-        <div class="card booking-card completed p-3">
-
-            <div class="card-toggle"
-                data-bs-toggle="collapse"
-                data-bs-target="#completed{{ booking.id }}">
-                <div class="d-flex justify-content-between align-items-center">
-                    <h6 class="mb-0">{{ booking.vehicle.vehicle_name }}</h6>
-                    <span class="text-muted">Journey Completed</span>
-                </div>
-            </div>
-
-            <!-- STEPPER -->
-            <div class="booking-stepper">
-                <div class="step done"><div class="step-circle">✓</div><div class="step-label">Pending</div></div>
-                <div class="step done"><div class="step-circle">✓</div><div class="step-label">Confirmed</div></div>
-                <div class="step done"><div class="step-circle">✓</div><div class="step-label">In Use</div></div>
-                <div class="step done"><div class="step-circle">✓</div><div class="step-label">Returned</div></div>
-            </div>
-
-            <!-- DETAILS (EXPANDABLE) -->
-            <div id="completed{{ booking.id }}" class="collapse">
-                <p class="text-muted mb-1"><strong>Number Plate:</strong> {{ booking.vehicle.number_plate }}</p>
-                <p class="mb-1"><strong>From:</strong> {{ booking.start_time|date:"d M Y, h:i A" }}</p>
-                <p class="mb-1"><strong>To:</strong> {{ booking.end_time|date:"d M Y, h:i A" }}</p>
-                <p class="fw-bold text-success">₹{{ booking.total_price }}</p>
-
-                <button class="btn btn-outline-primary btn-sm"
-                        data-bs-toggle="modal"
-                        data-bs-target="#vehicleModal{{ booking.id }}">
-                    View Vehicle
-                </button>
-            </div>
-
-        </div>
-    </div>
-    {% endif %}
-    {% endfor %}
-
-    </div>
-
-
 </div>
 
-<!-- VEHICLE MODALS -->
 {% for booking in bookings %}
-<div class="modal fade" id="vehicleModal{{ booking.id }}" tabindex="-1">
-    <div class="modal-dialog modal-dialog-centered modal-lg">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title">{{ booking.vehicle.vehicle_name }}</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+<div class="modal fade" id="vehicleModal{{ booking.id }}" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-0 shadow" style="border-radius: 24px;">
+            <div class="modal-header border-0 pb-0">
+                <h5 class="fw-bold px-2">{{ booking.vehicle.vehicle_name }}</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
-            <div class="modal-body text-center">
+            <div class="modal-body p-4 text-center">
                 {% if booking.vehicle.image %}
-                    <img src="{{ booking.vehicle.image.url }}"
-                         class="img-fluid rounded"
-                         style="max-height:220px; object-fit:contain;">
+                    <img src="{{ booking.vehicle.image.url }}" class="img-fluid rounded-4 mb-3" style="max-height: 250px; width: 100%; object-fit: cover;">
                 {% endif %}
+                <div class="row g-3 text-start">
+                    <div class="col-6">
+                        <label class="text-muted small d-block">Number Plate</label>
+                        <span class="fw-600">{{ booking.vehicle.number_plate }}</span>
+                    </div>
+                    <div class="col-6 text-end">
+                        <label class="text-muted small d-block">Booking ID</label>
+                        <span class="fw-600">#WZY-{{ booking.id }}</span>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
