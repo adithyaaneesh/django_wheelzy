@@ -714,11 +714,14 @@ def owner_dashboard(request):
     if not request.user.groups.filter(name="owner").exists():
         return redirect("home")
 
+    UserProfile.objects.get_or_create(user=request.user)
+
     context = {
         "unread_count": get_unread_notification_count(request.user)
     }
 
     return render(request, "owner_dashboard.html", context)
+
 
 @login_required
 def add_vehicle(request):

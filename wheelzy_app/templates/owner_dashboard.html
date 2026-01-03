@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Owner Dashboard | Wheelzy</title>
-    
+
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Poppins:wght@600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
 
@@ -13,319 +13,247 @@
             --primary: #2563eb;
             --primary-dark: #0f172a;
             --accent: #60a5fa;
-            --bg-main: #f8fafc;
-            --glass: rgba(255, 255, 255, 0.95);
-            --card-shadow: 0 10px 30px -5px rgba(0, 0, 0, 0.04);
-            --text-dark: #0f172a;
+            --bg-main: #fcf1f4;
+            --glass: rgba(255, 255, 255, 0.7);
+            --card-shadow: 0 20px 40px -15px rgba(0, 0, 0, 0.05);
+            --text-dark: #1e293b;
             --text-light: #64748b;
             --danger: #ef4444;
         }
 
-        * { 
-            box-sizing: border-box; 
-            transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1); 
+        * {
+            box-sizing: border-box;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
         }
 
         body {
             margin: 0;
             font-family: 'Inter', sans-serif;
-            background: var(--bg-main);
+            background: linear-gradient(135deg, #fdf2f8 0%, #f3f4f6 100%);
             color: var(--text-dark);
             min-height: 100vh;
             overflow-x: hidden;
         }
 
-        /* --- DASHBOARD WRAPPER --- */
         .dashboard-wrapper {
-            max-width: 1200px;
+            max-width: 1300px;
             margin: auto;
             padding: 40px 20px;
         }
 
-        /* --- FLOATING COMMAND HEADER --- */
+        /* ===== HEADER ===== */
+        .header-container {
+            position: relative;
+            z-index: 1000;
+            margin-bottom: 40px;
+        }
+
         .floating-nav {
-            background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
-            border-radius: 28px;
-            padding: 24px 40px;
+            background: var(--glass);
+            backdrop-filter: blur(12px);
+            border-radius: 30px;
+            padding: 15px 40px;
             display: flex;
             justify-content: space-between;
             align-items: center;
-            color: white;
-            margin-bottom: 40px;
-            box-shadow: 0 20px 40px -10px rgba(15, 23, 42, 0.3);
-            position: relative;
+            border: 1px solid rgba(255,255,255,0.4);
+            box-shadow: var(--card-shadow);
         }
 
         .header-text h2 {
             margin: 0;
             font-family: 'Poppins', sans-serif;
-            font-size: 24px;
-            letter-spacing: -0.5px;
+            font-size: 22px;
+            color: var(--primary-dark);
         }
 
-        .header-text p {
-            margin: 4px 0 0;
-            font-size: 14px;
-            opacity: 0.6;
-            font-weight: 300;
-        }
-
-        .nav-controls {
-            display: flex;
-            align-items: center;
-            gap: 20px;
-        }
-
-        /* --- NOTIFICATION BELL --- */
-        .notification-bell {
+        /* ===== PROFILE ===== */
+        .profile-area {
             position: relative;
-            color: white;
-            font-size: 20px;
-            text-decoration: none;
-            width: 48px;
-            height: 48px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            background: rgba(255,255,255,0.08);
-            border-radius: 14px;
         }
 
-        .notification-bell:hover {
-            background: rgba(255,255,255,0.15);
-            color: var(--accent);
-            transform: translateY(-2px);
-        }
-
-        .notif-count {
-            position: absolute;
-            top: -4px;
-            right: -4px;
-            background: var(--danger);
-            color: white;
-            font-size: 10px;
-            min-width: 18px;
-            height: 18px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            border-radius: 50%;
-            font-weight: 700;
-            border: 2px solid #0f172a;
-        }
-
-        /* --- PROFILE TRIGGER --- */
         .profile-trigger {
             display: flex;
             align-items: center;
-            gap: 12px;
+            gap: 10px;
             cursor: pointer;
-            padding: 6px 14px 6px 6px;
-            background: rgba(255,255,255,0.08);
-            border-radius: 16px;
-            border: 1px solid rgba(255,255,255,0.1);
+            padding: 5px 12px 5px 5px;
+            border-radius: 50px;
+            background: #f1f5f9;
         }
 
-        .profile-trigger:hover {
-            background: rgba(255,255,255,0.15);
-        }
-
-        .profile-icon-box {
-            width: 36px;
-            height: 36px;
-            background: white;
-            color: var(--primary-dark);
-            border-radius: 10px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-weight: 700;
-            overflow: hidden;
-        }
-
-        .profile-icon-box img {
-            width: 100%;
-            height: 100%;
+        .profile-img {
+            width: 35px;
+            height: 35px;
+            border-radius: 50%;
             object-fit: cover;
+            border: 2px solid white;
         }
 
-        /* --- GLASS PROFILE POPUP --- */
         .glass-popup {
             position: absolute;
-            top: 100px;
+            top: 55px;
             right: 0;
-            width: 300px;
-            background: var(--glass);
-            backdrop-filter: blur(15px);
-            border: 1px solid rgba(255,255,255,0.4);
+            width: 280px;
+            background: white;
             border-radius: 24px;
             padding: 24px;
-            box-shadow: 0 25px 50px -12px rgba(0,0,0,0.15);
+            box-shadow: 0 20px 50px rgba(0,0,0,0.15);
             display: none;
-            z-index: 1000;
-            color: var(--text-dark);
-            animation: popupIn 0.3s ease-out;
+            z-index: 2000;
+            border: 1px solid #f1f5f9;
+            animation: slideDown 0.2s ease-out;
         }
 
-        @keyframes popupIn {
+        @keyframes slideDown {
             from { opacity: 0; transform: translateY(-10px); }
             to { opacity: 1; transform: translateY(0); }
         }
 
-        .glass-popup h4 { margin: 0 0 12px; font-family: 'Poppins', sans-serif; font-size: 18px; }
-        .glass-popup p { font-size: 13px; margin: 8px 0; color: var(--text-light); display: flex; align-items: center; gap: 10px; }
-        .glass-popup hr { border: 0; border-top: 1px solid rgba(0,0,0,0.06); margin: 18px 0; }
-
-        .logout-link-btn {
-            display: block;
-            text-align: center;
-            background: #fee2e2;
-            color: #dc2626;
-            padding: 12px;
-            border-radius: 14px;
-            text-decoration: none;
-            font-weight: 600;
-            font-size: 14px;
-        }
-
-        .logout-link-btn:hover { background: #fca5a5; }
-
-        /* --- ACTION CARDS GRID --- */
-        .card-grid {
+        /* ===== ANALYTICS ===== */
+        .analytics-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-            gap: 25px;
+            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+            gap: 28px;
+            margin-bottom: 40px;
         }
 
-        .card {
-            background: white;
-            border-radius: 32px;
-            padding: 35px;
-            border: 1px solid #f1f5f9;
-            box-shadow: var(--card-shadow);
+        /* Base Card */
+        .stat-card {
+            height: 220px;
+            border-radius: 42px;
+            padding: 34px;
+            color: white;
+            position: relative;
+            overflow: hidden;
             display: flex;
             flex-direction: column;
             justify-content: space-between;
-            position: relative;
+            box-shadow: 0 25px 60px rgba(0,0,0,0.18);
         }
 
-        .card:hover {
-            transform: translateY(-8px);
-            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.06);
-            border-color: var(--accent);
+        /* Icon bubble */
+        .icon-wrap {
+            width: 54px;
+            height: 54px;
+            border-radius: 18px;
+            background: rgba(255,255,255,0.25);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 22px;
         }
 
-        .icon-circle {
-            width: 60px;
-            height: 60px;
-            background: #eff6ff;
-            color: var(--primary);
+        /* Text */
+        .label {
+            margin: 20px 0 6px;
+            font-size: 15px;
+            opacity: 0.9;
+        }
+
+        .value {
+            margin: 0;
+            font-size: 40px;
+            font-weight: 700;
+            letter-spacing: -0.5px;
+        }
+
+        .sub {
+            font-size: 13px;
+            opacity: 0.85;
+        }
+
+        /* Color Variants (Matched to Image) */
+        .card-red {
+            background: linear-gradient(135deg, #ff7a8a, #f43f5e);
+        }
+
+        .card-purple {
+            background: linear-gradient(135deg, #9f7aea, #7c3aed);
+        }
+
+        .card-blue {
+            background: linear-gradient(135deg, #38bdf8, #2563eb);
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .stat-card {
+                height: auto;
+                padding: 28px;
+            }
+            .value {
+                font-size: 34px;
+            }
+        }
+
+        /* ===== ACTION GRID ===== */
+        .action-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+            gap: 20px;
+        }
+
+        .action-card {
+            background: white;
+            border-radius: 28px;
+            padding: 30px;
+            text-align: center;
+            box-shadow: var(--card-shadow);
+        }
+
+        .action-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 30px 50px -15px rgba(0,0,0,0.1);
+        }
+
+        .icon-box {
+            width: 65px;
+            height: 65px;
+            margin: 0 auto 20px;
+            background: #f8fafc;
             border-radius: 20px;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 24px;
-            margin-bottom: 25px;
+            font-size: 22px;
+            color: var(--primary);
         }
 
-        .card h3 { font-family: 'Poppins', sans-serif; font-size: 20px; margin: 0 0 12px; }
-        .card p { font-size: 14px; color: var(--text-light); line-height: 1.6; margin-bottom: 30px; }
-
-        .btn-modern {
+        .btn-action {
+            display: block;
+            width: 100%;
+            padding: 12px;
             background: var(--primary-dark);
             color: white;
             text-decoration: none;
-            padding: 14px 24px;
-            border-radius: 16px;
-            font-size: 14px;
+            border-radius: 15px;
             font-weight: 600;
-            display: inline-flex;
-            align-items: center;
-            gap: 10px;
+            font-size: 14px;
+            margin-top: 15px;
         }
 
-        .btn-modern:hover {
-            background: var(--primary);
-            padding-right: 30px;
-        }
-
-        /* --- LOGOUT MODAL OVERLAY --- */
+        /* ===== MODAL ===== */
         .modal-overlay {
             position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(15, 23, 42, 0.7);
+            inset: 0;
+            background: rgba(15, 23, 42, 0.6);
             backdrop-filter: blur(8px);
             display: none;
             align-items: center;
             justify-content: center;
             z-index: 9999;
-            padding: 20px;
         }
 
         .modal-overlay.active { display: flex; }
 
         .modal-content {
             background: white;
+            padding: 40px;
+            border-radius: 30px;
+            text-align: center;
             max-width: 400px;
             width: 100%;
-            padding: 40px;
-            border-radius: 35px;
-            text-align: center;
-            box-shadow: 0 30px 60px -12px rgba(0, 0, 0, 0.4);
-            transform: scale(0.85);
-            transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
-        }
-
-        .modal-overlay.active .modal-content { transform: scale(1); }
-
-        .modal-icon {
-            width: 80px;
-            height: 80px;
-            background: #fee2e2;
-            color: var(--danger);
-            border-radius: 28px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 32px;
-            margin: 0 auto 25px;
-        }
-
-        .modal-actions {
-            display: flex;
-            flex-direction: column;
-            gap: 12px;
-            margin-top: 30px;
-        }
-
-        .btn-confirm {
-            background: var(--danger);
-            color: white;
-            text-decoration: none;
-            padding: 16px;
-            border-radius: 18px;
-            font-weight: 600;
-        }
-
-        .btn-cancel {
-            background: #f1f5f9;
-            color: var(--text-light);
-            border: none;
-            padding: 16px;
-            border-radius: 18px;
-            font-weight: 600;
-            cursor: pointer;
-        }
-
-        .btn-cancel:hover { background: #e2e8f0; color: var(--text-dark); }
-
-        /* --- RESPONSIVE --- */
-        @media (max-width: 768px) {
-            .floating-nav { flex-direction: column; text-align: center; gap: 20px; padding: 30px; }
-            .nav-controls { width: 100%; justify-content: center; }
         }
     </style>
 </head>
@@ -333,156 +261,160 @@
 <body>
 
 <div class="dashboard-wrapper">
-    <header class="floating-nav">
-        <div class="header-text">
-            <h2>Welcome, {{ request.user.username }} 👋</h2>
-            <p>Ready to manage your fleet performance?</p>
-        </div>
 
-        <div class="nav-controls">
-            <a href="{% url 'notifications' %}" class="notification-bell">
-                <i class="fa-solid fa-bell"></i>
-                {% if unread_count > 0 %}
-                    <span class="notif-count">{{ unread_count }}</span>
-                {% endif %}
-            </a>
-
-            <div class="profile-trigger" onclick="toggleProfile()">
-                <div class="profile-icon-box">
-                    {% if request.user.profile.photo %}
-                        <img src="{{ request.user.profile.photo.url }}">
-                    {% else %}
-                        {{ request.user.username|slice:":1"|upper }}
-                    {% endif %}
-                </div>
-                <i class="fa-solid fa-chevron-down" style="font-size: 11px; opacity: 0.5;"></i>
+    <div class="header-container">
+        <header class="floating-nav">
+            <div class="header-text">
+                <h2>Welcome, {{ request.user.username }}! 👋</h2>
             </div>
 
-            <div class="glass-popup" id="profilePopup">
-                <h4>Admin Profile</h4>
-                <p><i class="fa-regular fa-user"></i> {{ request.user.username }}</p>
-                <p><i class="fa-regular fa-envelope"></i> {{ request.user.email }}</p>
-                <p><i class="fa-solid fa-phone"></i> {{ request.user.profile.phone_number|default:"N/A" }}</p>
-                <hr>
-                <a href="javascript:void(0)" onclick="openLogoutModal()" class="logout-link-btn">
-                    <i class="fa-solid fa-power-off"></i> &nbsp; Secure Logout
+            <div style="display:flex;align-items:center;gap:20px;">
+                <a href="{% url 'notifications' %}" style="color:#1e293b;font-size:18px;">
+                    <i class="fa-solid fa-bell"></i>
                 </a>
+
+                <div class="profile-area">
+                    <div class="profile-trigger" onclick="toggleProfile()">
+                        {% if request.user.profile.photo %}
+                            <img src="{{ request.user.profile.photo.url }}" class="profile-img">
+                        {% else %}
+                            <div class="profile-img" style="background:var(--primary);color:white;display:flex;align-items:center;justify-content:center;font-weight:bold;">
+                                {{ request.user.username|slice:":1"|upper }}
+                            </div>
+                        {% endif %}
+                        <i class="fa-solid fa-chevron-down" style="font-size:10px;"></i>
+                    </div>
+
+                    <div class="glass-popup" id="profilePopup">
+                        <h4 style="margin:0;font-family:'Poppins';">Account</h4>
+
+                        <p style="margin:6px 0;font-weight:600;">{{ request.user.username }}</p>
+
+                        <p style="margin:0;font-size:12px;color:var(--text-light);">{{ request.user.email }}</p>
+
+                        <hr style="opacity:.1;margin:16px 0;">
+
+                        <p style="margin:6px 0;font-size:13px;"><strong>Phone:</strong>{{ request.user.profile.phone_number|default:"N/A" }}</p>
+
+                        <p style="margin:6px 0;font-size:13px;"><strong>Place:</strong>{{ request.user.profile.address|default:"N/A" }}</p>
+
+                        <hr style="opacity:.1;margin:16px 0;">
+
+                        <a href="javascript:void(0)" onclick="openLogoutModal()" class="btn-action"
+                        style="background:#fee2e2;color:#dc2626;text-align:center;">
+                            Log Out
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </header>
+    </div>
+
+    <section class="analytics-grid">
+
+        <!-- Income Balance -->
+        <div class="stat-card card-red">
+            <div class="icon-wrap">
+                <i class="fa-solid fa-wallet"></i>
+            </div>
+
+            <div class="content">
+                <p class="label">Income Balance</p>
+                <h2 class="value">₹{{ total_earnings|default:"14,250" }}</h2>
+                <p class="sub">+12% from last month</p>
             </div>
         </div>
-    </header>
 
-    <main class="card-grid">
-        <div class="card">
-            <div>
-                <div class="icon-circle"><i class="fa-solid fa-plus-circle"></i></div>
-                <h3>Expansion</h3>
-                <p>Onboard new vehicles to your fleet and increase your daily earning potential.</p>
+        <!-- Active Vehicles -->
+        <div class="stat-card card-purple">
+            <div class="icon-wrap">
+                <i class="fa-solid fa-car"></i>
             </div>
-            <a href="{% url 'add_vehicle' %}" class="btn-modern">Add Vehicle <i class="fa-solid fa-arrow-right"></i></a>
+
+            <div class="content">
+                <p class="label">Active Vehicles</p>
+                <h2 class="value">12</h2>
+                <p class="sub">Fleet Utilization: 85%</p>
+            </div>
         </div>
 
-        <div class="card">
-            <div>
-                <div class="icon-circle"><i class="fa-solid fa-car"></i></div>
-                <h3>My Garage</h3>
-                <p>Maintain your listings, update pricing, and monitor the health of your registered vehicles.</p>
+        <!-- Next Payout -->
+        <div class="stat-card card-blue">
+            <div class="icon-wrap">
+                <i class="fa-solid fa-calendar-check"></i>
             </div>
-            <a href="{% url 'owner_vehicle_list' %}" class="btn-modern">View Fleet <i class="fa-solid fa-arrow-right"></i></a>
+
+            <div class="content">
+                <p class="label">Next Payout In</p>
+                <h2 class="value">06 Days</h2>
+                <p class="sub">Expected: ₹8,400</p>
+            </div>
         </div>
 
-        <div class="card">
-            <div>
-                <div class="icon-circle"><i class="fa-solid fa-receipt"></i></div>
-                <h3>Bookings</h3>
-                <p>Check active rentals, review historical data, and manage upcoming customer schedules.</p>
-            </div>
-            <a href="{% url 'owner_vehicle_bookings' %}" class="btn-modern">Reservations <i class="fa-solid fa-arrow-right"></i></a>
+    </section>
+
+
+    <main class="action-grid">
+        <div class="action-card">
+            <div class="icon-box"><i class="fa-solid fa-plus-circle"></i></div>
+            <h3>Expansion</h3>
+            <p>Add vehicles to your fleet.</p>
+            <a href="{% url 'add_vehicle' %}" class="btn-action">Add Vehicle</a>
         </div>
 
-        <div class="card">
-            <div>
-                <div class="icon-circle"><i class="fa-solid fa-shield-virus"></i></div>
-                <h3>Incident Hub</h3>
-                <p>Report vehicle damages, upload claim evidence, and manage security deposit resolutions.</p>
-            </div>
-            <a href="{% url 'owner_vehicle_bookings' %}" class="btn-modern">File Report <i class="fa-solid fa-arrow-right"></i></a>
+        <div class="action-card">
+            <div class="icon-box"><i class="fa-solid fa-warehouse"></i></div>
+            <h3>My Garage</h3>
+            <p>Manage listings and pricing.</p>
+            <a href="{% url 'owner_vehicle_list' %}" class="btn-action">View Fleet</a>
+        </div>
+
+        <div class="action-card">
+            <div class="icon-box"><i class="fa-solid fa-receipt"></i></div>
+            <h3>Bookings</h3>
+            <p>Track active rentals.</p>
+            <a href="{% url 'owner_vehicle_bookings' %}" class="btn-action">Reservations</a>
+        </div>
+
+        <div class="action-card">
+            <div class="icon-box"><i class="fa-solid fa-shield-virus"></i></div>
+            <h3>Incidents</h3>
+            <p>Report damages or claims.</p>
+            <a href="{% url 'owner_vehicle_bookings' %}" class="btn-action">File Report</a>
         </div>
     </main>
 </div>
 
 <div id="logoutModal" class="modal-overlay">
     <div class="modal-content">
-        <div class="modal-icon">
-            <i class="fa-solid fa-arrow-right-from-bracket"></i>
-        </div>
+        <i class="fa-solid fa-circle-exclamation" style="font-size:40px;color:#ef4444;"></i>
         <h3>Confirm Logout</h3>
-        <p>Are you sure you want to log out? Any unsaved changes to your vehicle listings might be lost.</p>
-        <div class="modal-actions">
-            <a href="{% url 'logout' %}" class="btn-confirm">Yes, Logout Now</a>
-            <button class="btn-cancel" onclick="closeLogoutModal()">Cancel</button>
+        <p style="color:#64748b;">Are you sure you want to end your session?</p>
+        <div style="display:flex;gap:10px;margin-top:30px;">
+            <button onclick="closeLogoutModal()" style="flex:1;padding:12px;border:none;border-radius:12px;">Cancel</button>
+            <a href="{% url 'logout' %}" style="flex:1;padding:12px;background:#ef4444;color:white;border-radius:12px;text-decoration:none;">Log Out</a>
         </div>
     </div>
 </div>
 
 <script>
-    // Toggle Profile Popup
-    function toggleProfile() {
-        const popup = document.getElementById("profilePopup");
-        const isOpen = popup.style.display === "block";
-        popup.style.display = isOpen ? "none" : "block";
-    }
+function toggleProfile() {
+    const p = document.getElementById("profilePopup");
+    p.style.display = p.style.display === "block" ? "none" : "block";
+}
 
-    // Modal Controls
-    function openLogoutModal() {
-        document.getElementById("profilePopup").style.display = "none";
-        document.getElementById("logoutModal").classList.add("active");
-        document.body.style.overflow = "hidden"; // Disable background scroll
-    }
+function openLogoutModal() {
+    document.getElementById("profilePopup").style.display = "none";
+    document.getElementById("logoutModal").classList.add("active");
+}
 
-    function closeLogoutModal() {
-        document.getElementById("logoutModal").classList.remove("active");
-        document.body.style.overflow = "auto"; // Re-enable scroll
-    }
+function closeLogoutModal() {
+    document.getElementById("logoutModal").classList.remove("active");
+}
 
-    // Global Click Listener
-    document.addEventListener("click", function (event) {
-        const popup = document.getElementById("profilePopup");
-        const trigger = document.querySelector(".profile-trigger");
-        const modal = document.getElementById("logoutModal");
-
-        // Close popup if clicking outside
-        if (popup.style.display === "block" && !popup.contains(event.target) && !trigger.contains(event.target)) {
-            popup.style.display = "none";
-        }
-        
-        // Close modal if clicking on backdrop
-        if (event.target === modal) {
-            closeLogoutModal();
-        }
-    });
-
-    // Real-time Notification logic (optimized to 3s)
-    function refreshUnreadCount() {
-        fetch("{% url 'unread_notification_count' %}")
-            .then(res => res.json())
-            .then(data => {
-                const bell = document.querySelector(".notification-bell");
-                if (!bell) return;
-                let badge = bell.querySelector(".notif-count");
-                if (data.count > 0) {
-                    if (!badge) {
-                        badge = document.createElement("span");
-                        badge.className = "notif-count";
-                        bell.appendChild(badge);
-                    }
-                    badge.innerText = data.count;
-                } else if (badge) {
-                    badge.remove();
-                }
-            })
-            .catch(() => console.log("Notification check paused..."));
-    }
-    setInterval(refreshUnreadCount, 3000);
+window.onclick = function(e) {
+    if (e.target.classList.contains('modal-overlay')) closeLogoutModal();
+}
 </script>
 
 </body>

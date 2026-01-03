@@ -2,96 +2,271 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>My Vehicles</title>
+    <title>My Garage | Wheelzy</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-    <!-- Bootstrap -->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Fonts & Icons -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Poppins:wght@600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
 
     <style>
-        body {
-            background: #f4f6f9;
-            font-family: 'Segoe UI', Tahoma, sans-serif;
+        :root {
+            --primary: #2563eb;
+            --primary-dark: #0f172a;
+            --bg: linear-gradient(135deg, #fdf2f8 0%, #f3f4f6 100%);
+            --card: rgba(255,255,255,0.85);
+            --border: rgba(255,255,255,0.6);
+            --shadow: 0 25px 60px rgba(0,0,0,0.15);
+            --text-dark: #1e293b;
+            --text-light: #64748b;
+            --danger: #ef4444;
+            --warning: #f59e0b;
         }
 
+        * { box-sizing: border-box; }
+
+        body {
+            margin: 0;
+            font-family: 'Inter', sans-serif;
+            background: var(--bg);
+            min-height: 100vh;
+            color: var(--text-dark);
+        }
+
+        /* ===== PAGE WRAPPER ===== */
+        .page-wrapper {
+            max-width: 1300px;
+            margin: auto;
+            padding: 40px 20px;
+        }
+
+        /* ===== HEADER ===== */
+        .page-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+        }
+
+        .page-header h2 {
+            margin: 0;
+            font-family: 'Poppins', sans-serif;
+            font-size: 24px;
+        }
+
+        .header-actions {
+            display: flex;
+            gap: 14px;
+        }
+
+        .btn {
+            padding: 12px 18px;
+            border-radius: 14px;
+            text-decoration: none;
+            font-size: 14px;
+            font-weight: 600;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn-primary {
+            background: var(--primary-dark);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: var(--primary);
+        }
+
+        .btn-secondary {
+            background: #f1f5f9;
+            color: var(--text-dark);
+        }
+
+        /* ===== GRID ===== */
+        .vehicle-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 26px;
+        }
+
+        /* ===== CARD ===== */
         .vehicle-card {
-            border-radius: 16px;
-            transition: 0.3s;
+            background: var(--card);
+            backdrop-filter: blur(14px);
+            border-radius: 28px;
+            border: 1px solid var(--border);
+            box-shadow: var(--shadow);
+            overflow: hidden;
+            transition: 0.35s;
         }
 
         .vehicle-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 15px 30px rgba(0,0,0,0.15);
+            transform: translateY(-10px);
+            box-shadow: 0 35px 70px rgba(0,0,0,0.18);
         }
 
         .vehicle-img {
             height: 180px;
+            background: #f8fafc;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .vehicle-img img {
+            max-width: 100%;
+            max-height: 100%;
             object-fit: contain;
-            background: #f8f9fa;
-            border-top-left-radius: 16px;
-            border-top-right-radius: 16px;
+        }
+
+        .vehicle-body {
+            padding: 22px;
+        }
+
+        .vehicle-body h5 {
+            margin: 0 0 10px;
+            font-size: 18px;
+        }
+
+        .meta {
+            font-size: 13px;
+            color: var(--text-light);
+            margin-bottom: 4px;
+        }
+
+        .price {
+            font-weight: 700;
+            color: #16a34a;
+            margin: 12px 0;
+        }
+
+        /* ===== ACTIONS ===== */
+        .actions {
+            display: flex;
+            gap: 10px;
+            margin-top: 14px;
+        }
+
+        .btn-outline {
+            flex: 1;
+            padding: 10px;
+            border-radius: 12px;
+            font-size: 13px;
+            font-weight: 600;
+            text-align: center;
+            text-decoration: none;
+            border: 1px solid;
+        }
+
+        .edit {
+            color: var(--warning);
+            border-color: var(--warning);
+        }
+
+        .edit:hover {
+            background: var(--warning);
+            color: white;
+        }
+
+        .delete {
+            color: var(--danger);
+            border-color: var(--danger);
+        }
+
+        .delete:hover {
+            background: var(--danger);
+            color: white;
+        }
+
+        /* ===== EMPTY STATE ===== */
+        .empty {
+            background: white;
+            padding: 40px;
+            border-radius: 26px;
+            text-align: center;
+            box-shadow: var(--shadow);
+        }
+
+        .empty i {
+            font-size: 40px;
+            color: var(--text-light);
+            margin-bottom: 14px;
+        }
+
+        /* ===== RESPONSIVE ===== */
+        @media (max-width: 768px) {
+            .page-header {
+                flex-direction: column;
+                gap: 14px;
+                align-items: flex-start;
+            }
         }
     </style>
 </head>
 
 <body>
 
-<div class="container py-5">
-    <a href="{% url 'owner_dashboard' %}" class="btn btn-secondary">
-        Go Back
-    </a>
-    <div class="d-flex justify-content-between align-items-center mb-4">
-        <h2 class="fw-bold">My Vehicles</h2>
-        
-        <a href="{% url 'add_vehicle' %}" class="btn btn-dark">
-            + Add Vehicle
-        </a>
+<div class="page-wrapper">
+
+    <div class="page-header">
+        <h2>My Garage</h2>
+
+        <div class="header-actions">
+            <a href="{% url 'owner_dashboard' %}" class="btn btn-secondary">
+                ← Dashboard
+            </a>
+            <a href="{% url 'add_vehicle' %}" class="btn btn-primary">
+                <i class="fa-solid fa-plus"></i> Add Vehicle
+            </a>
+        </div>
     </div>
 
     {% if vehicles %}
-        <div class="row g-4">
+        <section class="vehicle-grid">
             {% for vehicle in vehicles %}
-                <div class="col-md-4">
-                    <div class="card vehicle-card">
+                <div class="vehicle-card">
 
+                    <div class="vehicle-img">
                         {% if vehicle.image %}
-                            <img src="{{ vehicle.image.url }}" class="vehicle-img" alt="Vehicle">
+                            <img src="{{ vehicle.image.url }}">
+                        {% else %}
+                            <i class="fa-solid fa-car fa-3x text-secondary"></i>
                         {% endif %}
+                    </div>
 
-                        <div class="card-body">
-                            <h5 class="card-title">{{ vehicle.vehicle_name }}</h5>
+                    <div class="vehicle-body">
+                        <h5>{{ vehicle.vehicle_name }}</h5>
 
-                            <p class="mb-1">
-                                <strong>Type:</strong> {{ vehicle.vehicle_type|title }}
-                            </p>
-                            <p class="mb-1">
-                                <strong>Seats:</strong> {{ vehicle.seats }}
-                            </p>
-                            <p class="mb-1">
-                                <strong>Number Plate:</strong> {{ vehicle.number_plate }}
-                            </p>
-                            <p class="fw-bold text-success">
-                                ₹{{ vehicle.price_per_hour }} / hour
-                            </p>
+                        <div class="meta">Type: {{ vehicle.vehicle_type|title }}</div>
+                        <div class="meta">Seats: {{ vehicle.seats }}</div>
+                        <div class="meta">Plate: {{ vehicle.number_plate }}</div>
 
-                            <div class="d-flex gap-2 mt-3">
-                                <a href="{% url 'update_vehicle' vehicle.id %}" class="btn btn-outline-warning btn-sm">
-                                    Edit
-                                </a>
-
-                                <a href="{% url 'delete_vehicle' vehicle.id %}" class="btn btn-outline-danger btn-sm"
-                                   onclick="return confirm('Delete this vehicle?')">
-                                    Delete
-                                </a>
-                            </div>
+                        <div class="price">
+                            ₹{{ vehicle.price_per_hour }} / hour
                         </div>
 
+                        <div class="actions">
+                            <a href="{% url 'update_vehicle' vehicle.id %}" class="btn-outline edit">
+                                Edit
+                            </a>
+                            <a href="{% url 'delete_vehicle' vehicle.id %}"
+                               class="btn-outline delete"
+                               onclick="return confirm('Delete this vehicle?')">
+                                Delete
+                            </a>
+                        </div>
                     </div>
+
                 </div>
             {% endfor %}
-        </div>
+        </section>
     {% else %}
-        <div class="alert alert-info">
-            You haven’t added any vehicles yet.
+        <div class="empty">
+            <i class="fa-solid fa-car"></i>
+            <h4>No Vehicles Added</h4>
+            <p>You haven’t added any vehicles yet.</p>
         </div>
     {% endif %}
 

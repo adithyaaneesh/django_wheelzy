@@ -5,137 +5,226 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Add Vehicle | Wheelzy</title>
 
-    <!-- Bootstrap -->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
-
-    <!-- Google Font -->
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <!-- Fonts & Icons -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Poppins:wght@600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
 
     <style>
+        :root {
+            --primary: #2563eb;
+            --primary-dark: #0f172a;
+            --bg: linear-gradient(135deg, #fdf2f8 0%, #f3f4f6 100%);
+            --card: rgba(255,255,255,0.88);
+            --border: rgba(255,255,255,0.6);
+            --shadow: 0 25px 60px rgba(0,0,0,0.15);
+            --text-dark: #1e293b;
+            --text-light: #64748b;
+        }
+
+        * { box-sizing: border-box; }
+
         body {
-            font-family: 'Poppins', sans-serif;
-            background: linear-gradient(135deg, #f8f9fa, #e3f2fd);
+            margin: 0;
+            font-family: 'Inter', sans-serif;
+            background: var(--bg);
             min-height: 100vh;
             display: flex;
             align-items: center;
             justify-content: center;
+            color: var(--text-dark);
         }
 
-        /* 🔹 SMALLER CARD */
-        .form-card {
+        /* ===== FORM CARD ===== */
+        .form-wrapper {
             width: 100%;
-            max-width: 420px;   /* reduced */
-            background: #fff;
-            padding: 26px;      /* reduced */
-            border-radius: 16px;
-            box-shadow: 0 12px 28px rgba(0,0,0,0.15);
+            max-width: 760px;
+            background: var(--card);
+            backdrop-filter: blur(14px);
+            border-radius: 30px;
+            padding: 36px;
+            border: 1px solid var(--border);
+            box-shadow: var(--shadow);
         }
 
-        .form-card h1 {
+        .form-header {
             text-align: center;
-            font-weight: 700;
-            margin-bottom: 22px;
-            color: #000;
-            font-size: 22px;   /* smaller */
+            margin-bottom: 30px;
+        }
+
+        .form-header .icon {
+            width: 68px;
+            height: 68px;
+            border-radius: 22px;
+            background: #eff6ff;
+            color: var(--primary);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 28px;
+            margin: 0 auto 16px;
+        }
+
+        .form-header h1 {
+            margin: 0;
+            font-family: 'Poppins', sans-serif;
+            font-size: 24px;
+        }
+
+        .form-header p {
+            font-size: 13px;
+            color: var(--text-light);
+            margin-top: 6px;
+        }
+
+        /* ===== GRID ===== */
+        .form-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px 24px;
+        }
+
+        .field {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .field.full {
+            grid-column: span 2;
         }
 
         label {
+            font-size: 13px;
             font-weight: 500;
-            margin-bottom: 4px;
-            font-size: 13px;   /* smaller */
+            margin-bottom: 6px;
         }
 
-        .form-control,
-        .form-select {
-            border-radius: 10px;
-            padding: 8px 12px; /* smaller */
+        .input,
+        select {
+            width: 100%;
+            padding: 11px 14px;
             font-size: 14px;
+            border-radius: 12px;
+            border: 1px solid #e2e8f0;
+            outline: none;
+            background: white;
         }
 
-        .form-control:focus,
-        .form-select:focus {
-            box-shadow: none;
-            border-color: #1e88e5;
+        .input:focus,
+        select:focus {
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(37,99,235,0.12);
         }
 
+        /* ===== BUTTON ===== */
         .btn-submit {
-            background: #000;
-            color: #fff;
-            border-radius: 24px;
-            padding: 10px;
-            font-weight: 500;
-            font-size: 14px;
+            margin-top: 26px;
+            width: 100%;
+            padding: 14px;
+            border-radius: 18px;
+            border: none;
+            background: var(--primary-dark);
+            color: white;
+            font-weight: 600;
+            font-size: 15px;
+            cursor: pointer;
             transition: 0.3s;
         }
 
         .btn-submit:hover {
-            background: #333;
-            color: #fff;
+            background: var(--primary);
         }
 
+        /* ===== BACK LINK ===== */
         .back-link {
             display: block;
             text-align: center;
-            margin-top: 14px;
-            text-decoration: none;
-            color: #1e88e5;
-            font-weight: 500;
+            margin-top: 20px;
             font-size: 13px;
+            color: var(--primary);
+            text-decoration: none;
+            font-weight: 500;
         }
 
         .back-link:hover {
             text-decoration: underline;
+        }
+
+        /* ===== RESPONSIVE ===== */
+        @media (max-width: 720px) {
+            .form-wrapper {
+                margin: 20px;
+                padding: 28px;
+            }
+
+            .form-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .field.full {
+                grid-column: span 1;
+            }
         }
     </style>
 </head>
 
 <body>
 
-<div class="form-card">
-    <h1>Add Vehicle</h1>
+<div class="form-wrapper">
+
+    <div class="form-header">
+        <div class="icon">
+            <i class="fa-solid fa-car"></i>
+        </div>
+        <h1>Add New Vehicle</h1>
+        <p>Enter vehicle details to list it on Wheelzy</p>
+    </div>
 
     <form method="post" enctype="multipart/form-data">
         {% csrf_token %}
 
-        <div class="mb-2">
-            <label class="form-label">Vehicle Name</label>
-            <input type="text" name="vehicle_name" class="form-control"
-                   placeholder="Eg: Hyundai i20" required>
+        <div class="form-grid">
+
+            <div class="field">
+                <label>Vehicle Name</label>
+                <input type="text" name="vehicle_name" class="input"
+                       placeholder="Eg: Hyundai i20" required>
+            </div>
+
+            <div class="field">
+                <label>Vehicle Type</label>
+                <select name="vehicle_type" required>
+                    <option value="" disabled selected>Select type</option>
+                    <option value="car">Car</option>
+                    <option value="bike">Bike</option>
+                </select>
+            </div>
+
+            <div class="field">
+                <label>Number Plate</label>
+                <input type="text" name="number_plate" class="input"
+                       placeholder="TN 09 AB 1234" required>
+            </div>
+
+            <div class="field">
+                <label>No. of Seats</label>
+                <input type="number" name="number_of_seats" class="input"
+                       placeholder="4" required>
+            </div>
+
+            <div class="field">
+                <label>Price per Hour (₹)</label>
+                <input type="number" name="price_per_hour" class="input"
+                       placeholder="Eg: 299" required>
+            </div>
+
+            <div class="field">
+                <label>Vehicle Image</label>
+                <input type="file" name="image" class="input">
+            </div>
+
         </div>
 
-        <div class="mb-2">
-            <label class="form-label">Vehicle Type</label>
-            <select name="vehicle_type" class="form-select" required>
-                <option value="" disabled selected>Select type</option>
-                <option value="car">Car</option>
-                <option value="bike">Bike</option>
-            </select>
-        </div>
-
-        <div class="mb-2">
-            <label class="form-label">Number Plate</label>
-            <input type="text" name="number_plate" class="form-control"
-                   placeholder="TN 09 AB 1234" required>
-        </div>
-
-        <div class="mb-2">
-            <label class="form-label">No. of Seats</label>
-            <input type="number" name="number_of_seats" class="form-control"
-                   placeholder="2" required>
-        </div>
-
-        <div class="mb-2">
-            <label class="form-label">Price per Hour (₹)</label>
-            <input type="number" name="price_per_hour" class="form-control"
-                   placeholder="Eg: 299" required>
-        </div>
-
-        <div class="mb-3">
-            <label class="form-label">Vehicle Image</label>
-            <input type="file" name="image" class="form-control">
-        </div>
-
-        <button type="submit" class="btn btn-submit w-100">
+        <button type="submit" class="btn-submit">
             Add Vehicle
         </button>
     </form>
@@ -143,6 +232,7 @@
     <a href="{% url 'owner_dashboard' %}" class="back-link">
         ← Back to Dashboard
     </a>
+
 </div>
 
 </body>
