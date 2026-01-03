@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Reported Damages | Wheelzy</title>
+
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Poppins:wght@600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+
+    <style>
+        :root {
+            --danger: #ef4444;
+            --success: #10b981;
+            --warning: #f59e0b;
+            --primary: #2563eb;
+            --bg-gradient: linear-gradient(135deg, #fff1f2 0%, #f3f4f6 100%);
+            --glass: rgba(255, 255, 255, 0.85);
+            --radius: 20px;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: var(--bg-gradient);
+            min-height: 100vh;
+            color: #1e293b;
+            padding-bottom: 50px;
+        }
+
+        .top-nav { padding: 30px 0; }
+        .page-title { font-family: 'Poppins', sans-serif; font-weight: 700; color: #0f172a; }
+
+        .btn-back-pill {
+            background: white;
+            border: 1px solid rgba(0,0,0,0.05);
+            padding: 8px 18px;
+            border-radius: 50px;
+            color: #1e293b;
+            text-decoration: none;
+            font-weight: 600;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.03);
+            transition: 0.3s;
+        }
+
+        .damage-card {
+            background: var(--glass);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.7);
+            border-radius: var(--radius);
+            padding: 20px;
+            margin-bottom: 24px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.04);
+            transition: 0.3s;
+        }
+
+        .damage-card:hover { transform: translateY(-5px); }
+
+        .status-pill {
+            padding: 5px 14px;
+            border-radius: 50px;
+            font-size: 11px;
+            font-weight: 700;
+            text-transform: uppercase;
+        }
+
+        .sp-unpaid { background: #fee2e2; color: #b91c1c; }
+        .sp-paid { background: #d1fae5; color: #047857; }
+
+        .vehicle-info h6 { font-weight: 700; margin-bottom: 2px; }
+        .cost-box {
+            background: rgba(0,0,0,0.03);
+            border-radius: 12px;
+            padding: 12px;
+            text-align: center;
+        }
+
+        .damage-desc {
+            font-size: 13px;
+            color: #64748b;
+            background: white;
+            padding: 10px;
+            border-radius: 10px;
+            border-left: 4px solid var(--danger);
+        }
+
+        .empty-state { text-align: center; padding: 100px 0; color: #94a3b8; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <header class="top-nav d-flex justify-content-between align-items-center">
+        <div>
+            <h2 class="page-title"><i class="fa-solid fa-car-burst text-danger me-2"></i>Damage Incidents</h2>
+            <p class="text-muted small mb-0">Track vehicle damages and repair settlements.</p>
+        </div>
+        <a href="{% url 'owner_dashboard' %}" class="btn-back-pill">
+            <i class="fa-solid fa-arrow-left me-2"></i> Dashboard
+        </a>
+    </header>
+
+    {% if damages %}
+    <div class="row">
+        {% for booking in damages %}
+        <div class="col-lg-6">
+            <div class="damage-card">
+                <div class="d-flex justify-content-between align-items-start mb-3">
+                    <div class="vehicle-info">
+                        <h6>{{ booking.vehicle.vehicle_name }}</h6>
+                        <span class="badge bg-dark rounded-pill">{{ booking.vehicle.number_plate }}</span>
+                    </div>
+                    <span class="status-pill {% if booking.damage_report.is_paid %}sp-paid{% else %}sp-unpaid{% endif %}">
+                        {% if booking.damage_report.is_paid %}Settled{% else %}Pending Payment{% endif %}
+                    </span>
+                </div>
+
+                <div class="row g-3 mb-3">
+                    <div class="col-sm-7">
+                        <small class="text-muted d-block mb-1">Incident Report</small>
+                        <div class="damage-desc">
+                            {{ booking.damage_report.description|default:"No detailed description provided." }}
+                        </div>
+                    </div>
+                    <div class="col-sm-5">
+                        <div class="cost-box">
+                            <small class="text-muted d-block">Estimated Cost</small>
+                            <h4 class="mb-0 text-danger fw-bold">₹{{ booking.damage_report.extra_charge }}</h4>
+                        </div>
+                    </div>
+                </div>
+
+                <hr class="my-3 opacity-50">
+
+                <div class="d-flex justify-content-between align-items-center">
+                    <div class="d-flex align-items-center">
+                        <div class="bg-primary text-white rounded-circle d-flex align-items-center justify-content-center me-2" style="width: 32px; height: 32px; font-size: 12px;">
+                            {{ booking.user.username|slice:":1"|upper }}
+                        </div>
+                        <div>
+                            <small class="text-muted d-block" style="font-size: 10px;">Responsible User</small>
+                            <span class="fw-semibold" style="font-size: 13px;">{{ booking.user.username }}</span>
+                        </div>
+                    </div>
+                    
+                    <div class="text-end">
+                        <small class="text-muted d-block" style="font-size: 10px;">Reported On</small>
+                        <span class="fw-semibold" style="font-size: 12px;">{{ booking.damage_report.created_at|date:"d M, Y" }}</span>
+                    </div>
+                </div>
+
+                {% if not booking.damage_report.is_paid %}
+                <div class="mt-3">
+                    <a href="mailto:{{ booking.user.email }}?subject=Damage Settlement: {{ booking.vehicle.vehicle_name }}" class="btn btn-outline-primary btn-sm w-100 rounded-pill">
+                        <i class="fa-solid fa-envelope me-2"></i> Contact Customer
+                    </a>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    {% else %}
+    <div class="empty-state">
+        <i class="fa-solid fa-shield-check fa-4x mb-3 opacity-20"></i>
+        <h4>All Clear!</h4>
+        <p>No damages have been reported for your fleet.</p>
+    </div>
+    {% endif %}
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

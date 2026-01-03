@@ -57,14 +57,13 @@
             transform: translateX(-5px);
         }
 
-        /* Smaller Card Styling */
         .booking-card {
             background: var(--glass);
             backdrop-filter: blur(10px);
             border: 1px solid rgba(255, 255, 255, 0.7);
             border-radius: var(--radius);
             box-shadow: var(--card-shadow);
-            padding: 18px; /* Reduced padding */
+            padding: 18px;
             margin-bottom: 20px;
             transition: transform 0.3s ease;
             position: relative;
@@ -74,7 +73,7 @@
         .booking-card:hover { transform: translateY(-4px); }
 
         .vehicle-icon-bg {
-            width: 40px; /* Smaller icon bg */
+            width: 40px;
             height: 40px;
             background: var(--primary-light);
             color: var(--primary);
@@ -128,13 +127,21 @@
         .avatar-circle {
             width: 30px;
             height: 30px;
-            background: #e2e8f0;
+            background: var(--primary);
+            color: white;
             border-radius: 50%;
             display: flex;
             align-items: center;
             justify-content: center;
             font-weight: bold;
             font-size: 11px;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+
+        .avatar-circle:hover {
+            transform: scale(1.1);
+            box-shadow: 0 4px 10px rgba(37, 99, 235, 0.3);
         }
 
         .btn-action-card {
@@ -151,11 +158,20 @@
             transition: 0.2s;
         }
 
+        /* Modal Design Styling */
+        .modal-content {
+            border-radius: 24px;
+            border: none;
+            box-shadow: 0 25px 50px -12px rgba(0,0,0,0.2);
+        }
+        .modal-header {
+            border-bottom: none;
+            padding: 25px 25px 10px;
+        }
+        .modal-body { padding: 10px 25px 30px; }
+
         .empty-container { text-align: center; padding: 80px 20px; }
         .empty-icon { font-size: 50px; color: #cbd5e1; margin-bottom: 15px; }
-
-        /* Alert styling */
-        .messages-container { margin-top: 10px; }
     </style>
 </head>
 <body>
@@ -172,10 +188,10 @@
     </header>
 
     {% if messages %}
-    <div class="messages-container">
+    <div class="mt-2">
         {% for message in messages %}
         <div class="alert alert-{{ message.tags }} alert-dismissible fade show rounded-pill px-4 shadow-sm" role="alert">
-            <small><strong>{% if message.tags == 'success' %}<i class="fa-solid fa-circle-check me-2"></i>{% endif %}</strong> {{ message }}</small>
+            <small>{{ message }}</small>
             <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
         </div>
         {% endfor %}
@@ -185,7 +201,8 @@
     {% if bookings %}
     <div class="row mt-3">
         {% for booking in bookings %}
-        <div class="col-xl-3 col-lg-4 col-md-6"> <div class="booking-card">
+        <div class="col-xl-3 col-lg-4 col-md-6">
+            <div class="booking-card">
                 <span class="status-badge 
                     {% if booking.status == 'pending' %}st-pending
                     {% elif booking.status == 'confirmed' %}st-confirmed
@@ -205,11 +222,11 @@
                 <div class="row g-2">
                     <div class="col-6 border-end">
                         <span class="info-label">Pick Up</span>
-                        <span class="info-value" style="font-size: 13px;">{{ booking.start_time|date:"d M" }}</span>
+                        <span class="info-value">{{ booking.start_time|date:"d M" }}</span>
                     </div>
                     <div class="col-6 ps-2">
                         <span class="info-label">Return</span>
-                        <span class="info-value" style="font-size: 13px;">{{ booking.end_time|date:"d M" }}</span>
+                        <span class="info-value">{{ booking.end_time|date:"d M" }}</span>
                     </div>
                 </div>
 
@@ -219,9 +236,13 @@
                 </div>
 
                 <div class="customer-meta">
-                    <div class="avatar-circle">{{ booking.user.username|slice:":1"|upper }}</div>
+                    <div class="avatar-circle" data-bs-toggle="modal" data-bs-target="#userModal{{ booking.id }}">
+                        {{ booking.user.username|slice:":1"|upper }}
+                    </div>
                     <div class="overflow-hidden">
-                        <div class="info-value text-truncate" style="font-size: 12px;">{{ booking.user.username }}</div>
+                        <div class="info-value text-truncate" style="font-size: 12px; cursor: pointer;" data-bs-toggle="modal" data-bs-target="#userModal{{ booking.id }}">
+                            {{ booking.user.username }}
+                        </div>
                     </div>
                 </div>
 
@@ -245,6 +266,37 @@
                             <i class="fa-solid fa-check-circle me-2"></i> Completed
                         </button>
                     {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <div class="modal fade" id="userModal{{ booking.id }}" tabindex="-1" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered modal-sm">
+                <div class="modal-content border-0">
+                    <div class="modal-header">
+                        <h6 class="modal-title fw-bold"><i class="fa-solid fa-user-tag me-2 text-primary"></i> Customer Details</h6>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body text-center">
+                        <div class="avatar-circle mx-auto mb-3" style="width: 60px; height: 60px; font-size: 20px;">
+                            {{ booking.user.username|slice:":1"|upper }}
+                        </div>
+                        <h5 class="fw-bold mb-1">{{ booking.user.get_full_name|default:booking.user.username }}</h5>
+                        <p class="text-muted small mb-3">{{ booking.user.email }}</p>
+                        
+                        <div class="text-start bg-light p-3 rounded-4">
+                            <div class="mb-2">
+                                <small class="info-label">Username</small>
+                                <div class="info-value">{{ booking.user.username }}</div>
+                            </div>
+                            <div>
+                                <small class="info-label">Contact</small>
+                                <div class="info-value">{{ booking.user.userprofile.phone|default:"No Phone Provided" }}</div>
+                            </div>
+                        </div>
+                        
+                        <button type="button" class="btn btn-primary w-100 mt-4 rounded-pill py-2 fw-bold" data-bs-dismiss="modal">Close</button>
+                    </div>
                 </div>
             </div>
         </div>

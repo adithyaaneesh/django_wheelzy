@@ -794,6 +794,16 @@ def owner_bookings(request):
     )
     return render(request,"owner_bookings.html",{"bookings": bookings})
 
+@login_required
+def owner_damage_list(request):
+
+    damages = Booking.objects.filter(
+        vehicle__owner=request.user, 
+        status="damage_reported"
+    ).select_related('vehicle', 'user', 'damage_report').order_by('-id')
+
+    return render(request, 'owner_damage_list.html', {'damages': damages})
+
 
 @login_required
 def upload_handover_photos(request, booking_id):

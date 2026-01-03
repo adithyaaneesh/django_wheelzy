@@ -28,7 +28,7 @@ urlpatterns = [
     path("owner_dashboard/", views.owner_dashboard, name="owner_dashboard"),
     path("owner_vehicle_list/", views.owner_vehicles, name="owner_vehicle_list"),
     path("owner_vehicle_bookings/", views.owner_bookings, name="owner_vehicle_bookings"),
-
+    path('my-vehicle-damages/', views.owner_damage_list, name='owner_damage_list'),
     path("vehicle/add/", views.add_vehicle, name="add_vehicle"),
     path("vehicle/update/<int:id>/", views.update_vehicle, name="update_vehicle"),
     path("vehicle/delete/<int:id>/", views.delete_vehicle, name="delete_vehicle"),
