@@ -2,7 +2,7 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.models import User, Group
 from django.contrib.auth import login, authenticate, logout
 from django.contrib import messages
-from .models import DamagePhoto, Vehicle, Booking, DamageReport, UserProfile, Notification, VehicleHandoverPhoto
+from .models import DamagePhoto, UserDocument, Vehicle, Booking, DamageReport, UserProfile, Notification, VehicleHandoverPhoto
 from datetime import datetime
 from django.utils import timezone
 from django.contrib.auth.decorators import login_required
@@ -141,10 +141,20 @@ def home(request):
 
 
 
-@login_required
 def profile_view(request):
-    profile, _ = UserProfile.objects.get_or_create(user=request.user)
-    return render(request, "profile.html", {"profile": profile})
+    profile = request.user.profile
+
+    latest_document = (
+        UserDocument.objects
+        .filter(user=request.user)
+        .order_by("-uploaded_at")
+        .first()
+    )
+
+    return render(request, "profile.html", {
+        "profile": profile,
+        "latest_document": latest_document,
+    })
 
 
 @login_required
@@ -218,6 +228,196 @@ def vehicle_details(request, id):
 
 @login_required
 def book_vehicle(request, vehicle_id):
+    vehicle = get_object_or_404(Vehicle, id=vehicle_id)
+    owner = vehicle.owner
+    owner_profile = UserProfile.objects.filter(user=owner).first()
+
+    if request.method == "POST":
+
+        # ================= BOOKING TIME =================
+        start_time_str = request.POST.get("start_time")
+        end_time_str = request.POST.get("end_time")
+
+        if not start_time_str or not end_time_str:
+            messages.error(request, "Start and End time required")
+            return redirect("book_vehicle", vehicle_id=vehicle.id)
+
+        start_time = timezone.make_aware(
+            datetime.strptime(start_time_str, "%Y-%m-%dT%H:%M")
+        )
+        end_time = timezone.make_aware(
+            datetime.strptime(end_time_str, "%Y-%m-%dT%H:%M")
+        )
+
+        if end_time <= start_time:
+            messages.error(request, "End time must be after start time")
+            return redirect("book_vehicle", vehicle_id=vehicle.id)
+
+        # ================= CREATE BOOKING =================
+        booking = Booking.objects.create(
+            user=request.user,
+            vehicle=vehicle,
+            start_time=start_time,
+            end_time=end_time,
+            status="confirmed"
+        )
+
+        # ================= DOCUMENT UPLOAD (MANDATORY) =================
+        aadhaar = request.FILES.get("aadhaar_photo")
+        license_photo = request.FILES.get("driving_license_photo")
+
+        if not aadhaar or not license_photo:
+            booking.delete()
+            messages.error(request, "Aadhaar & Driving License are required")
+            return redirect("book_vehicle", vehicle_id=vehicle.id)
+
+        UserDocument.objects.create(
+            user=request.user,
+            booking=booking,
+            aadhaar_photo=aadhaar,
+            driving_license_photo=license_photo
+        )
+
+        messages.success(request, "Booking confirmed & documents uploaded")
+        return redirect("my_bookings")
+
+    return render(
+        request,
+        "booking_form.html",
+        {
+            "vehicle": vehicle,
+            "owner": owner,
+            "owner_profile": owner_profile,
+        }
+    )
+    vehicle = get_object_or_404(Vehicle, id=vehicle_id)
+    owner = vehicle.owner
+    owner_profile = UserProfile.objects.filter(user=owner).first()
+
+    if request.method == "POST":
+
+        # ================= DOCUMENTS (FORCED) =================
+        aadhaar = request.FILES.get("aadhaar_photo")
+        license_photo = request.FILES.get("driving_license_photo")
+
+        if not aadhaar or not license_photo:
+            messages.error(request, "Aadhaar & Driving License are mandatory")
+            return redirect("book_vehicle", vehicle_id=vehicle.id)
+
+        # ================= TIME =================
+        start_time_str = request.POST.get("start_time")
+        end_time_str = request.POST.get("end_time")
+
+        if not start_time_str or not end_time_str:
+            messages.error(request, "Start & End time required")
+            return redirect("book_vehicle", vehicle_id=vehicle.id)
+
+        start_time = timezone.make_aware(
+            datetime.strptime(start_time_str, "%Y-%m-%dT%H:%M")
+        )
+        end_time = timezone.make_aware(
+            datetime.strptime(end_time_str, "%Y-%m-%dT%H:%M")
+        )
+
+        if end_time <= start_time:
+            messages.error(request, "End time must be after start time")
+            return redirect("book_vehicle", vehicle_id=vehicle.id)
+
+        # ================= CREATE BOOKING =================
+        booking = Booking.objects.create(
+            user=request.user,
+            vehicle=vehicle,
+            start_time=start_time,
+            end_time=end_time,
+            status="confirmed"
+        )
+
+        # ================= SAVE DOCUMENTS =================
+        UserDocument.objects.create(
+            booking=booking,
+            aadhaar_photo=aadhaar,
+            driving_license_photo=license_photo
+        )
+
+        messages.success(request, "Booking confirmed with documents")
+        return redirect("my_bookings")
+
+    return render(
+        request,
+        "booking_form.html",
+        {
+            "vehicle": vehicle,
+            "owner": owner,
+            "owner_profile": owner_profile,
+        }
+    )
+    vehicle = get_object_or_404(Vehicle, id=vehicle_id)
+    owner = vehicle.owner
+    owner_profile = UserProfile.objects.filter(user=owner).first()
+    user_documents = UserDocument.objects.filter(user=request.user).first()
+
+    if request.method == "POST":
+
+        # ================= DOCUMENT UPLOAD =================
+        if not user_documents:
+            aadhaar = request.FILES.get("aadhaar_photo")
+            license_photo = request.FILES.get("driving_license_photo")
+
+            if not aadhaar or not license_photo:
+                messages.error(request, "Please upload Aadhaar & Driving License")
+                return redirect("book_vehicle", vehicle_id=vehicle.id)
+
+            UserDocument.objects.create(
+                user=request.user,
+                aadhaar_photo=aadhaar,
+                driving_license_photo=license_photo
+            )
+
+        # ================= BOOKING TIMES =================
+        start_time_str = request.POST.get("start_time")
+        end_time_str = request.POST.get("end_time")
+
+        if not start_time_str or not end_time_str:
+            messages.error(request, "Start and End time required")
+            return redirect("book_vehicle", vehicle_id=vehicle.id)
+
+        # ✅ CONVERT STRING → DATETIME
+        start_time = timezone.make_aware(
+            datetime.strptime(start_time_str, "%Y-%m-%dT%H:%M")
+        )
+        end_time = timezone.make_aware(
+            datetime.strptime(end_time_str, "%Y-%m-%dT%H:%M")
+        )
+
+        if end_time <= start_time:
+            messages.error(request, "End time must be after start time")
+            return redirect("book_vehicle", vehicle_id=vehicle.id)
+
+        booking = Booking.objects.create(
+            user=request.user,
+            vehicle=vehicle,
+            start_time=start_time,
+            end_time=end_time,
+            status="confirmed"
+        )
+
+        messages.success(request, "Booking confirmed successfully")
+        return redirect("my_bookings")
+
+    return render(
+        request,
+        "booking_form.html",
+        {
+            "vehicle": vehicle,
+            "owner": owner,
+            "owner_profile": owner_profile,
+            "user_documents": user_documents
+        }
+    )
+
+
+# @login_required
+# def book_vehicle(request, vehicle_id):
     if DamageReport.objects.filter(
         booking__user=request.user,
         is_paid=False
@@ -922,7 +1122,6 @@ def mark_notification_read(request):
         user=request.user
     ).update(is_read=True)
     return JsonResponse({"status": "ok"})
-
 
 def get_unread_notification_count(user):
     if user.is_authenticated:

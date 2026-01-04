@@ -14,28 +14,23 @@
             <!-- VEHICLE INFO -->
             <div class="card shadow mb-4">
                 <div class="card-body">
-                    <h4 class="mb-2">{{ vehicle.vehicle_name }}</h4>
-                    <p class="mb-1"><strong>Type:</strong> {{ vehicle.vehicle_type }}</p>
-                    <p class="mb-1"><strong>Seats:</strong> {{ vehicle.seats }}</p>
-                    <p class="mb-1 text-success fw-bold">
-                        ₹{{ vehicle.price_per_hour }} / hour
-                    </p>
+                    <h4>{{ vehicle.vehicle_name }}</h4>
+                    <p><strong>Type:</strong> {{ vehicle.vehicle_type }}</p>
+                    <p><strong>Seats:</strong> {{ vehicle.seats }}</p>
+                    <p class="text-success fw-bold">₹{{ vehicle.price_per_hour }} / hour</p>
                 </div>
             </div>
 
             <!-- OWNER INFO -->
             <div class="card shadow mb-4 border-primary">
                 <div class="card-body">
-                    <h5 class="text-primary mb-3">Vehicle Owner Details</h5>
-
+                    <h5 class="text-primary">Vehicle Owner Details</h5>
                     <p><strong>Name:</strong> {{ owner.username }}</p>
                     <p><strong>Email:</strong> {{ owner.email }}</p>
 
                     {% if owner_profile %}
                         <p><strong>Phone:</strong> {{ owner_profile.phone_number }}</p>
                         <p><strong>Address:</strong> {{ owner_profile.address }}</p>
-                    {% else %}
-                        <p class="text-muted">Owner contact details not available</p>
                     {% endif %}
                 </div>
             </div>
@@ -43,10 +38,23 @@
             <!-- BOOKING FORM -->
             <div class="card shadow">
                 <div class="card-body">
-                    <h5 class="mb-3">Booking Details</h5>
-
-                    <form method="POST">
+                    <h5>Booking Details</h5>
+                    <form method="POST" enctype="multipart/form-data">
                         {% csrf_token %}
+
+                        <div class="alert alert-warning">
+                            <strong>Important:</strong> Aadhaar & Driving License must be uploaded for every booking
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">Aadhaar Card</label>
+                            <input type="file" name="aadhaar_photo" class="form-control" required>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">Driving License</label>
+                            <input type="file" name="driving_license_photo" class="form-control" required>
+                        </div>
 
                         <div class="mb-3">
                             <label>Start Time</label>
@@ -58,15 +66,9 @@
                             <input type="datetime-local" name="end_time" class="form-control" required>
                         </div>
 
-                        <div class="d-flex gap-2">
-                            <button type="submit" class="btn btn-success">
-                                Confirm Booking
-                            </button>
-
-                            <a href="{% url 'vehicle_details' vehicle.id %}" class="btn btn-secondary">
-                                Cancel
-                            </a>
-                        </div>
+                        <button type="submit" class="btn btn-success">
+                            Confirm Booking
+                        </button>
                     </form>
                 </div>
             </div>
@@ -74,6 +76,40 @@
         </div>
     </div>
 </div>
+
+<!-- ================= MODALS ================= -->
+
+<!-- Aadhaar Modal -->
+<div class="modal fade" id="aadhaarModal" tabindex="-1">
+    <div class="modal-dialog modal-lg modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Aadhaar Card</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body text-center">
+                <img src="{{ user_documents.aadhaar_photo.url }}" class="img-fluid rounded">
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- License Modal -->
+<div class="modal fade" id="licenseModal" tabindex="-1">
+    <div class="modal-dialog modal-lg modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Driving License</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body text-center">
+                <img src="{{ user_documents.driving_license_photo.url }}" class="img-fluid rounded">
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 
 </body>
 </html>

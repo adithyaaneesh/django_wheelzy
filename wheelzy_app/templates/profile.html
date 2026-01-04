@@ -16,7 +16,6 @@
             font-family: "Segoe UI", sans-serif;
         }
 
-        /* MAIN CARD */
         .profile-card {
             max-width: 1000px;
             margin: 50px auto;
@@ -27,7 +26,6 @@
             position: relative;
         }
 
-        /* BACK BUTTON */
         .back-btn {
             position: absolute;
             top: 20px;
@@ -42,15 +40,8 @@
             align-items: center;
             gap: 6px;
             text-decoration: none;
-            transition: 0.2s ease;
         }
 
-        .back-btn:hover {
-            background: #e2e8f0;
-            transform: translateX(-2px);
-        }
-
-        /* LEFT */
         .profile-left {
             background: #1e88e5;
             color: #fff;
@@ -67,7 +58,6 @@
             padding: 6px;
         }
 
-        /* RIGHT */
         .profile-right {
             padding: 40px 30px;
         }
@@ -101,55 +91,21 @@
             font-weight: 600;
         }
 
-        /* EDIT PHOTO */
-        .edit-photo-wrapper {
-            position: relative;
-            width: 120px;
-            margin: auto;
-        }
-
-        .edit-profile-photo {
-            width: 120px;
-            height: 120px;
-            border-radius: 50%;
-            object-fit: cover;
-            border: 4px solid #1e88e5;
-        }
-
-        .edit-photo-fallback {
-            width: 120px;
-            height: 120px;
-            border-radius: 50%;
-            background: #1e88e5;
-            color: #fff;
-            font-size: 42px;
-            font-weight: bold;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-
-        .edit-photo-btn {
-            position: absolute;
-            bottom: 6px;
-            right: 6px;
-            width: 34px;
-            height: 34px;
-            background: #1e88e5;
-            color: #fff;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
+        /* DOCUMENT HELPERS */
+        .doc-helper {
+            font-size: 13px;
+            color: #2563eb;
             cursor: pointer;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            margin-top: 8px;
         }
 
-        .edit-photo-btn input {
-            display: none;
+        .doc-helper:hover {
+            text-decoration: underline;
         }
 
-        /* MOBILE */
         @media (max-width: 768px) {
             .profile-right {
                 padding: 30px 20px;
@@ -203,6 +159,45 @@
                     </div>
                 </div>
 
+                {% if latest_document %}
+                <hr class="my-4">
+                <h6 class="fw-bold mb-3">Recently Uploaded Documents</h6>
+
+                <div class="row text-center">
+
+                    <!-- Aadhaar -->
+                    <div class="col-md-6 mb-3">
+                        <label class="small text-muted">Aadhaar Card</label>
+                        <!-- <div class="mt-2">
+                            <img src="{{ latest_document.aadhaar_photo.url }}"
+                                 class="img-thumbnail"
+                                 style="height:160px;">
+                        </div> -->
+                        <div class="doc-helper"
+                             data-bs-toggle="modal"
+                             data-bs-target="#aadhaarPreviewModal">
+                            <i class="fa-solid fa-eye"></i> View document
+                        </div>
+                    </div>
+
+                    <!-- License -->
+                    <div class="col-md-6 mb-3">
+                        <label class="small text-muted">Driving License</label>
+                        <!-- <div class="mt-2">
+                            <img src="{{ latest_document.driving_license_photo.url }}"
+                                 class="img-thumbnail"
+                                 style="height:160px;">
+                        </div> -->
+                        <div class="doc-helper"
+                             data-bs-toggle="modal"
+                             data-bs-target="#licensePreviewModal">
+                            <i class="fa-solid fa-eye"></i> View document
+                        </div>
+                    </div>
+
+                </div>
+                {% endif %}
+
                 <button class="edit-btn" data-bs-toggle="modal" data-bs-target="#editProfileModal">
                     Edit Profile
                 </button>
@@ -211,70 +206,38 @@
     </div>
 </div>
 
-<!-- EDIT MODAL -->
-<div class="modal fade" id="editProfileModal">
-    <div class="modal-dialog modal-dialog-centered modal-md">
-        <div class="modal-content rounded-4 p-3">
-
-            <form method="post" action="{% url 'edit_profile' %}" enctype="multipart/form-data">
-                {% csrf_token %}
-
-                <div class="modal-header border-0">
-                    <h5>Edit Profile</h5>
-                    <button class="btn-close" data-bs-dismiss="modal"></button>
-                </div>
-
-                <div class="modal-body">
-
-                    <div class="edit-photo-wrapper mb-4">
-                        {% if profile.photo %}
-                            <img src="{{ profile.photo.url }}" id="editProfileImage" class="edit-profile-photo">
-                        {% else %}
-                            <div id="editProfileImage" class="edit-photo-fallback">
-                                {{ profile.user.username|slice:":1"|upper }}
-                            </div>
-                        {% endif %}
-
-                        <label class="edit-photo-btn">
-                            <i class="fa-solid fa-pen"></i>
-                            <input type="file" name="photo" accept="image/*" onchange="previewEditPhoto(event)">
-                        </label>
-                    </div>
-
-                    <input class="form-control mb-2" name="username" value="{{ profile.user.username }}" placeholder="Username">
-                    <input class="form-control mb-2" type="email" name="email" value="{{ profile.user.email }}" placeholder="Email">
-                    <input class="form-control mb-2" name="phone" value="{{ profile.phone_number }}" placeholder="Phone">
-                    <textarea class="form-control" name="address" rows="2" placeholder="Address">{{ profile.address }}</textarea>
-                </div>
-
-                <div class="modal-footer border-0 justify-content-center">
-                    <button class="btn btn-success px-4">Save Changes</button>
-                </div>
-            </form>
-
+{% if latest_document %}
+<!-- Aadhaar Modal -->
+<div class="modal fade" id="aadhaarPreviewModal" tabindex="-1">
+    <div class="modal-dialog modal-lg modal-dialog-centered">
+        <div class="modal-content rounded-4">
+            <div class="modal-header">
+                <h6 class="modal-title">Aadhaar Card</h6>
+                <button class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body text-center">
+                <img src="{{ latest_document.aadhaar_photo.url }}" class="img-fluid rounded">
+            </div>
         </div>
     </div>
 </div>
 
+<!-- License Modal -->
+<div class="modal fade" id="licensePreviewModal" tabindex="-1">
+    <div class="modal-dialog modal-lg modal-dialog-centered">
+        <div class="modal-content rounded-4">
+            <div class="modal-header">
+                <h6 class="modal-title">Driving License</h6>
+                <button class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body text-center">
+                <img src="{{ latest_document.driving_license_photo.url }}" class="img-fluid rounded">
+            </div>
+        </div>
+    </div>
+</div>
+{% endif %}
+
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
-
-<script>
-function previewEditPhoto(event) {
-    const file = event.target.files[0];
-    if (!file) return;
-
-    const reader = new FileReader();
-    reader.onload = () => {
-        const el = document.getElementById("editProfileImage");
-        const img = document.createElement("img");
-        img.src = reader.result;
-        img.id = "editProfileImage";
-        img.className = "edit-profile-photo";
-        el.replaceWith(img);
-    };
-    reader.readAsDataURL(file);
-}
-</script>
-
 </body>
 </html>

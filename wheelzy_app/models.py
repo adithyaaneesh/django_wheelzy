@@ -113,8 +113,12 @@ class Booking(models.Model):
 
 
     def calculate_price(self):
-        hours = (self.end_time - self.start_time).total_seconds() / 3600
+        if not self.vehicle:
+            return 0
+        duration = self.end_time - self.start_time
+        hours = max(duration.total_seconds() / 3600, 0)
         return round(hours * self.vehicle.price_per_hour, 2)
+
 
     def save(self, *args, **kwargs):
         # Calculate price ONLY on first creation
@@ -194,3 +198,26 @@ class DamagePhoto(models.Model):
 
     def __str__(self):
         return f"Damage Photo - Report #{self.report.id}"
+
+class UserDocument(models.Model):
+    user = models.ForeignKey(
+        User,
+        on_delete=models.CASCADE,
+        related_name="documents"
+    )
+    booking = models.OneToOneField(
+        Booking,
+        on_delete=models.CASCADE,
+        related_name="documents",
+        null=True,
+        blank=True
+    )
+    aadhaar_photo = models.ImageField(upload_to="documents/aadhaar/")
+    driving_license_photo = models.ImageField(upload_to="documents/driving_license/")
+    uploaded_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        if self.booking:
+            return f"Documents - {self.user.username} - Booking #{self.booking.id}"
+        return f"Documents - {self.user.username} (No Booking)"
+
