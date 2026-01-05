@@ -11,7 +11,9 @@ from . import models
 from django.db.models import Prefetch
 from django.http import JsonResponse
 from django.views.decorators.http import require_POST
-
+from django.core.paginator import Paginator
+from django.db.models import Prefetch
+from datetime import timedelta
 
 def register(request):
     if request.method == "POST":
@@ -226,252 +228,71 @@ def vehicle_details(request, id):
     })
 
 
+
 @login_required
 def book_vehicle(request, vehicle_id):
-    vehicle = get_object_or_404(Vehicle, id=vehicle_id)
-    owner = vehicle.owner
-    owner_profile = UserProfile.objects.filter(user=owner).first()
 
-    if request.method == "POST":
-
-        # ================= BOOKING TIME =================
-        start_time_str = request.POST.get("start_time")
-        end_time_str = request.POST.get("end_time")
-
-        if not start_time_str or not end_time_str:
-            messages.error(request, "Start and End time required")
-            return redirect("book_vehicle", vehicle_id=vehicle.id)
-
-        start_time = timezone.make_aware(
-            datetime.strptime(start_time_str, "%Y-%m-%dT%H:%M")
-        )
-        end_time = timezone.make_aware(
-            datetime.strptime(end_time_str, "%Y-%m-%dT%H:%M")
-        )
-
-        if end_time <= start_time:
-            messages.error(request, "End time must be after start time")
-            return redirect("book_vehicle", vehicle_id=vehicle.id)
-
-        # ================= CREATE BOOKING =================
-        booking = Booking.objects.create(
-            user=request.user,
-            vehicle=vehicle,
-            start_time=start_time,
-            end_time=end_time,
-            status="confirmed"
-        )
-
-        # ================= DOCUMENT UPLOAD (MANDATORY) =================
-        aadhaar = request.FILES.get("aadhaar_photo")
-        license_photo = request.FILES.get("driving_license_photo")
-
-        if not aadhaar or not license_photo:
-            booking.delete()
-            messages.error(request, "Aadhaar & Driving License are required")
-            return redirect("book_vehicle", vehicle_id=vehicle.id)
-
-        UserDocument.objects.create(
-            user=request.user,
-            booking=booking,
-            aadhaar_photo=aadhaar,
-            driving_license_photo=license_photo
-        )
-
-        messages.success(request, "Booking confirmed & documents uploaded")
-        return redirect("my_bookings")
-
-    return render(
-        request,
-        "booking_form.html",
-        {
-            "vehicle": vehicle,
-            "owner": owner,
-            "owner_profile": owner_profile,
-        }
-    )
-    vehicle = get_object_or_404(Vehicle, id=vehicle_id)
-    owner = vehicle.owner
-    owner_profile = UserProfile.objects.filter(user=owner).first()
-
-    if request.method == "POST":
-
-        # ================= DOCUMENTS (FORCED) =================
-        aadhaar = request.FILES.get("aadhaar_photo")
-        license_photo = request.FILES.get("driving_license_photo")
-
-        if not aadhaar or not license_photo:
-            messages.error(request, "Aadhaar & Driving License are mandatory")
-            return redirect("book_vehicle", vehicle_id=vehicle.id)
-
-        # ================= TIME =================
-        start_time_str = request.POST.get("start_time")
-        end_time_str = request.POST.get("end_time")
-
-        if not start_time_str or not end_time_str:
-            messages.error(request, "Start & End time required")
-            return redirect("book_vehicle", vehicle_id=vehicle.id)
-
-        start_time = timezone.make_aware(
-            datetime.strptime(start_time_str, "%Y-%m-%dT%H:%M")
-        )
-        end_time = timezone.make_aware(
-            datetime.strptime(end_time_str, "%Y-%m-%dT%H:%M")
-        )
-
-        if end_time <= start_time:
-            messages.error(request, "End time must be after start time")
-            return redirect("book_vehicle", vehicle_id=vehicle.id)
-
-        # ================= CREATE BOOKING =================
-        booking = Booking.objects.create(
-            user=request.user,
-            vehicle=vehicle,
-            start_time=start_time,
-            end_time=end_time,
-            status="confirmed"
-        )
-
-        # ================= SAVE DOCUMENTS =================
-        UserDocument.objects.create(
-            booking=booking,
-            aadhaar_photo=aadhaar,
-            driving_license_photo=license_photo
-        )
-
-        messages.success(request, "Booking confirmed with documents")
-        return redirect("my_bookings")
-
-    return render(
-        request,
-        "booking_form.html",
-        {
-            "vehicle": vehicle,
-            "owner": owner,
-            "owner_profile": owner_profile,
-        }
-    )
-    vehicle = get_object_or_404(Vehicle, id=vehicle_id)
-    owner = vehicle.owner
-    owner_profile = UserProfile.objects.filter(user=owner).first()
-    user_documents = UserDocument.objects.filter(user=request.user).first()
-
-    if request.method == "POST":
-
-        # ================= DOCUMENT UPLOAD =================
-        if not user_documents:
-            aadhaar = request.FILES.get("aadhaar_photo")
-            license_photo = request.FILES.get("driving_license_photo")
-
-            if not aadhaar or not license_photo:
-                messages.error(request, "Please upload Aadhaar & Driving License")
-                return redirect("book_vehicle", vehicle_id=vehicle.id)
-
-            UserDocument.objects.create(
-                user=request.user,
-                aadhaar_photo=aadhaar,
-                driving_license_photo=license_photo
-            )
-
-        # ================= BOOKING TIMES =================
-        start_time_str = request.POST.get("start_time")
-        end_time_str = request.POST.get("end_time")
-
-        if not start_time_str or not end_time_str:
-            messages.error(request, "Start and End time required")
-            return redirect("book_vehicle", vehicle_id=vehicle.id)
-
-        # ✅ CONVERT STRING → DATETIME
-        start_time = timezone.make_aware(
-            datetime.strptime(start_time_str, "%Y-%m-%dT%H:%M")
-        )
-        end_time = timezone.make_aware(
-            datetime.strptime(end_time_str, "%Y-%m-%dT%H:%M")
-        )
-
-        if end_time <= start_time:
-            messages.error(request, "End time must be after start time")
-            return redirect("book_vehicle", vehicle_id=vehicle.id)
-
-        booking = Booking.objects.create(
-            user=request.user,
-            vehicle=vehicle,
-            start_time=start_time,
-            end_time=end_time,
-            status="confirmed"
-        )
-
-        messages.success(request, "Booking confirmed successfully")
-        return redirect("my_bookings")
-
-    return render(
-        request,
-        "booking_form.html",
-        {
-            "vehicle": vehicle,
-            "owner": owner,
-            "owner_profile": owner_profile,
-            "user_documents": user_documents
-        }
-    )
-
-
-# @login_required
-# def book_vehicle(request, vehicle_id):
+    # ❌ Block booking if unpaid damage
     if DamageReport.objects.filter(
         booking__user=request.user,
         is_paid=False
     ).exists():
-        messages.error(
-            request,
-            "You have unpaid damage charges. Please complete payment before booking another vehicle."
-        )
+        messages.error(request, "Clear unpaid damage charges first.")
         return redirect("my_bookings")
+
     vehicle = get_object_or_404(Vehicle, id=vehicle_id)
-    owner = vehicle.owner
-    owner_profile = None
-    if owner:
-        owner_profile = getattr(owner, "profile", None)
+
     if vehicle.owner == request.user:
-        messages.error(request, "You cannot book your own vehicle")
+        messages.error(request, "You cannot book your own vehicle.")
         return redirect("vehicle_details", vehicle.id)
+
     if request.method == "POST":
-        start_time = request.POST.get("start_time")
-        end_time = request.POST.get("end_time")
-        start = datetime.fromisoformat(start_time)
-        end = datetime.fromisoformat(end_time)
-        if end <= start:
-            messages.error(request, "End time must be after start time")
-            return redirect("book_vehicle", vehicle.id)
-        if Booking.objects.filter(
-            vehicle=vehicle,
-            status__in=["pending", "confirmed", "in_use"]
-        ).exists():
-            messages.error(request, "This vehicle is already booked")
-            return redirect("vehicle_details", vehicle.id)
-        Booking.objects.create(
+        start_time = timezone.make_aware(
+            datetime.strptime(request.POST["start_time"], "%Y-%m-%dT%H:%M")
+        )
+        end_time = timezone.make_aware(
+            datetime.strptime(request.POST["end_time"], "%Y-%m-%dT%H:%M")
+        )
+
+        if end_time <= start_time:
+            messages.error(request, "Invalid time range.")
+            return redirect(request.path)
+
+        booking = Booking.objects.create(
             user=request.user,
             vehicle=vehicle,
-            start_time=start,
-            end_time=end,
+            start_time=start_time,
+            end_time=end_time,
             status="pending"
         )
-        if vehicle.owner:
-            Notification.objects.create(
-                user=vehicle.owner,
-                message=f"New booking request for {vehicle.vehicle_name}. Upload handover photos."
-            )
-        messages.success(request, "Booking created successfully!")
-        return redirect("home")
-    return render(
-        request,
-        "booking_form.html",
-        {
-            "vehicle": vehicle,
-            "owner": owner,
-            "owner_profile": owner_profile
-        }
-    )
+
+        # Mandatory documents
+        aadhaar = request.FILES.get("aadhaar_photo")
+        license = request.FILES.get("driving_license_photo")
+
+        if not aadhaar or not license:
+            booking.delete()
+            messages.error(request, "Documents required.")
+            return redirect(request.path)
+
+        UserDocument.objects.create(
+            user=request.user,
+            booking=booking,
+            aadhaar_photo=aadhaar,
+            driving_license_photo=license
+        )
+
+        # Notify owner
+        Notification.objects.create(
+            user=vehicle.owner,
+            message=f"New booking for {vehicle.vehicle_name}. Upload handover photos."
+        )
+
+        messages.success(request, "Booking created. Awaiting handover upload.")
+        return redirect("my_bookings")
+
+    return render(request, "booking_form.html", {"vehicle": vehicle})
+
 
 @login_required
 def my_bookings(request):
@@ -495,6 +316,7 @@ def my_bookings(request):
             "has_unpaid_damage": has_unpaid_damage
         }
     )
+
 
 
 @login_required
@@ -746,27 +568,34 @@ def admin_analytics(request):
 
     return render(request, "admin_analytics.html", data)
 
+
 @login_required
 def approve_booking(request, booking_id):
-    booking = get_object_or_404(Booking, id=booking_id)
+
+    booking = get_object_or_404(Booking, id=booking_id, status="pending")
+
     if not booking.handover_photos.exists():
-        messages.error(request, "Handover photos not uploaded yet.")
+        messages.error(request, "Upload handover photos first.")
         return redirect("admin_bookings")
+
     booking.status = "confirmed"
     booking.save()
+
     Notification.objects.create(
         user=booking.user,
-        message="Your booking has been confirmed."
+        message=f"Booking confirmed for {booking.vehicle.vehicle_name}."
     )
-    return redirect("admin_bookings")
 
+    Notification.objects.create(
+        user=booking.vehicle.owner,
+        message=f"Booking #{booking.id} confirmed."
+    )
+
+    return redirect("admin_bookings")
 
 @login_required
 def mark_in_use(request, booking_id):
-    booking = get_object_or_404(Booking, id=booking_id)
-    if booking.status != "confirmed":
-        messages.error(request, "Invalid action.")
-        return redirect("admin_bookings")
+    booking = get_object_or_404(Booking, id=booking_id, status="confirmed")
     booking.status = "in_use"
     booking.save()
     return redirect("admin_bookings")
@@ -774,15 +603,15 @@ def mark_in_use(request, booking_id):
 
 @login_required
 def mark_returned(request, booking_id):
-    booking = get_object_or_404(Booking, id=booking_id)
-    if booking.status != "in_use":
-        return redirect("admin_bookings")
+    booking = get_object_or_404(Booking, id=booking_id, status="in_use")
     booking.status = "returned"
     booking.save()
+
     Notification.objects.create(
-        user=booking.user,
-        message=f"{booking.vehicle.vehicle_name} returned successfully."
+        user=booking.vehicle.owner,
+        message=f"Vehicle returned. You may report damage if any."
     )
+
     return redirect("admin_bookings")
 
 
@@ -806,7 +635,6 @@ def admin_damage_review(request, booking_id):
         "booking": booking,
         "report": report
     })
-
 
 
 @login_required
@@ -909,6 +737,7 @@ def admin_damage_report_detail(request, report_id):
         }
     )
 
+
 @login_required
 def owner_dashboard(request):
     if not request.user.groups.filter(name="owner").exists():
@@ -978,21 +807,47 @@ def owner_vehicles(request):
         "vehicles": vehicles
     })
 
+
 @login_required
 def owner_bookings(request):
     if not request.user.groups.filter(name="owner").exists():
         messages.error(request, "Access denied")
         return redirect("home")
-    bookings = (
+
+    qs = (
         Booking.objects
         .filter(vehicle__owner=request.user)
         .select_related("vehicle", "user")
-        .prefetch_related("handover_photos",
+        .prefetch_related(
+            "handover_photos",
             Prefetch("damage_report", queryset=DamageReport.objects.all())
         )
-        .order_by("-ordered_at")
+        .order_by("-ordered_at")   # ✅ LATEST → OLDEST
     )
-    return render(request,"owner_bookings.html",{"bookings": bookings})
+
+    paginator = Paginator(qs, 10)
+    page_number = request.GET.get("page")
+    bookings = paginator.get_page(page_number)
+
+    today = timezone.now().date()
+    yesterday = today - timedelta(days=1)
+
+    # grouping label (safe)
+    for booking in bookings:
+        booking.booking_group = (
+            "Today" if booking.ordered_at.date() == today
+            else "Yesterday" if booking.ordered_at.date() == yesterday
+            else "Older"
+        )
+
+    return render(
+        request,
+        "owner_bookings.html",
+        {"bookings": bookings}
+    )
+
+
+
 
 @login_required
 def owner_damage_list(request):
@@ -1007,13 +862,16 @@ def owner_damage_list(request):
 
 @login_required
 def upload_handover_photos(request, booking_id):
+
     booking = get_object_or_404(
         Booking,
         id=booking_id,
-        vehicle__owner=request.user
+        vehicle__owner=request.user,
+        status="pending"
     )
+
     if booking.handover_photos.exists():
-        messages.warning(request, "Handover photos already uploaded.")
+        messages.warning(request, "Already uploaded.")
         return redirect("owner_vehicle_bookings")
 
     if request.method == "POST":
@@ -1031,13 +889,10 @@ def upload_handover_photos(request, booking_id):
 
         Notification.objects.create(
             user=User.objects.filter(is_superuser=True).first(),
-            message=(
-                f"Handover photos uploaded for booking #{booking.id} "
-                f"({booking.vehicle.vehicle_name})"
-            )
+            message=f"Handover uploaded for booking #{booking.id}"
         )
 
-        messages.success(request, "Handover photos uploaded successfully.")
+        messages.success(request, "Handover uploaded. Awaiting admin approval.")
         return redirect("owner_vehicle_bookings")
 
     return render(request, "upload_handover_photos.html", {"booking": booking})
@@ -1045,62 +900,42 @@ def upload_handover_photos(request, booking_id):
 
 @login_required
 def owner_add_damage_report(request, booking_id):
+
     booking = get_object_or_404(
         Booking,
         id=booking_id,
-        vehicle__owner=request.user
+        vehicle__owner=request.user,
+        status="returned"
     )
+
     if hasattr(booking, "damage_report"):
-        messages.error(request, "Damage report already exists for this booking.")
+        messages.error(request, "Damage already reported.")
         return redirect("owner_vehicle_bookings")
 
     if request.method == "POST":
-        description = request.POST.get("description")
-        extra_charge = request.POST.get("extra_charge")
-        photos = request.FILES.getlist("photos")
-
-        if not photos:
-            messages.error(request, "Upload at least one damage photo")
-            return redirect(request.path)
-
         report = DamageReport.objects.create(
             booking=booking,
             vehicle=booking.vehicle,
             reported_by=request.user,
-            description=description,
-            extra_charge=extra_charge,
-            is_paid=False
-        )
-        Notification.objects.create(
-            user=User.objects.filter(is_superuser=True).first(),
-            message=(
-                f"Damage reported for {booking.vehicle.vehicle_name} "
-                f"(Booking #{booking.id})"
-            )
-        )
-        for photo in photos:
-            DamagePhoto.objects.create(
-                report=report,
-                image=photo
-            )
-        booking.status = "damage_reported"
-        booking.save()
-        Notification.objects.create(
-            user=booking.user,
-            message=(
-                f"Damage reported for {booking.vehicle.vehicle_name}. "
-                f"Extra charge ₹{extra_charge}. Please pay to continue."
-            )
+            description=request.POST["description"],
+            extra_charge=request.POST["extra_charge"]
         )
 
-        messages.success(request, "Damage report submitted successfully")
+        for photo in request.FILES.getlist("photos"):
+            DamagePhoto.objects.create(report=report, image=photo)
+
+        booking.status = "damage_reported"
+        booking.save()
+
+        Notification.objects.create(
+            user=booking.user,
+            message=f"Damage reported. Pay ₹{report.extra_charge}."
+        )
+
         return redirect("owner_vehicle_bookings")
-    
-    return render(
-        request,
-        "owner_add_damage_report.html",
-        {"booking": booking}
-    )
+
+    return render(request, "owner_add_damage_report.html", {"booking": booking})
+
 
 @login_required
 def notifications_view(request):

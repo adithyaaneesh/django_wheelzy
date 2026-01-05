@@ -115,13 +115,6 @@
 
     <!-- ACTION BUTTONS -->
     <div class="section">
-        {% if damage_report and not damage_report.is_paid %}
-            <a href="{% url 'mark_damage_paid' damage_report.id %}"
-               class="btn btn-success">
-                Mark as Paid
-            </a>
-        {% endif %}
-
         <a href="{% url 'admin_bookings' %}" class="btn btn-secondary">
             Back to Bookings
         </a>

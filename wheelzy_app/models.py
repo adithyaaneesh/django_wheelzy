@@ -64,47 +64,27 @@ class Vehicle(models.Model):
 # BOOKING
 # =========================
 
-
 class Booking(models.Model):
     STATUS_CHOICES = (
-        ('pending', 'Pending'),
-        ('confirmed', 'Confirmed'),
-        ('in_use', 'In Use'),
-        ('returned', 'Completed'),
-        ('damage_reported', 'Damage Reported'),
-        ('cancelled', 'Cancelled'),
+        ("pending", "Pending"),
+        ("confirmed", "Confirmed"),
+        ("in_use", "In Use"),
+        ("returned", "Returned"),
+        ("damage_reported", "Damage Reported"),
+        ("completed", "Completed"),
+        ("cancelled", "Cancelled"),
     )
 
-
-
-    user = models.ForeignKey(
-        User,
-        on_delete=models.CASCADE,
-        related_name="bookings",null=True, blank=True
-    )
-
-    vehicle = models.ForeignKey(
-        Vehicle,
-        on_delete=models.CASCADE,
-        related_name="bookings", null=True, blank=True
-    )
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="bookings",null=True,blank=True)
+    vehicle = models.ForeignKey(Vehicle, on_delete=models.CASCADE, related_name="bookings",null=True,blank=True)
 
     start_time = models.DateTimeField()
     end_time = models.DateTimeField()
 
-    total_price = models.DecimalField(
-        max_digits=10,
-        decimal_places=2,
-        default=0
-    )
-
-    status = models.CharField(
-        max_length=20,
-        choices=STATUS_CHOICES,
-        default="pending"
-    )
-
+    total_price = models.DecimalField(max_digits=10, decimal_places=2, default=0)
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default="pending")
     ordered_at = models.DateTimeField(auto_now_add=True)
+
     def can_user_book(user):
         return not DamageReport.objects.filter(
             booking__user=user,
@@ -128,6 +108,7 @@ class Booking(models.Model):
 
     def __str__(self):
         return f"Booking #{self.id} - {self.vehicle.vehicle_name}"
+
 
 
 # =========================
