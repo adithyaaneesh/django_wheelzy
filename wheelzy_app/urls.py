@@ -75,6 +75,9 @@ urlpatterns = [
 
 
     path("admin_booking/<int:booking_id>/details/",views.admin_booking_details,name="admin_booking_details"),
+    path("payment/<int:booking_id>/", views.payment_page, name="payment_page"),
+    path("razorpay/verify/", views.razorpay_verify, name="razorpay_verify"),
+
 
 
 

@@ -5,69 +5,192 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Wheelzy | Vehicles</title>
 
-    <!-- Bootstrap -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
-
-    <!-- Google Font -->
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Poppins:wght@600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
 
     <style>
+        :root {
+            --primary: #2563eb;
+            --glass: rgba(255, 255, 255, 0.95);
+            --card-radius: 24px;
+        }
+
         body {
-            font-family: 'Poppins', sans-serif;
+            font-family: 'Inter', sans-serif;
             margin: 0;
+            background: #0f172a;
         }
 
         .bg-fixed {
-            background:
-                linear-gradient(rgba(0,0,0,0.65), rgba(0,0,0,0.65)),
+            background: 
+                linear-gradient(rgba(15, 23, 42, 0.7), rgba(15, 23, 42, 0.7)),
                 url("https://images.unsplash.com/photo-1503376780353-7e6692767b70");
             background-size: cover;
             background-position: center;
             background-attachment: fixed;
             min-height: 100vh;
-            padding: 60px 0;
+            padding: 80px 0;
         }
 
+        /* Professional Header */
         .section-title {
+            font-family: 'Poppins', sans-serif;
             color: #fff;
             font-weight: 700;
+            letter-spacing: -0.5px;
+            font-size: 2.2rem;
         }
 
+        .btn-back {
+            backdrop-filter: blur(10px);
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            color: white;
+            border-radius: 50px;
+            padding: 8px 24px;
+            font-weight: 500;
+            transition: 0.3s;
+        }
+
+        .btn-back:hover {
+            background: white;
+            color: #000;
+        }
+
+        /* Glass Filter Box */
+        .filter-box {
+            background: var(--glass);
+            backdrop-filter: blur(15px);
+            border-radius: var(--card-radius);
+            padding: 30px;
+            margin-bottom: 40px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.2);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+        }
+
+        /* Modern Vehicle Card */
         .vehicle-card {
             border: none;
-            border-radius: 16px;
-            transition: 0.3s;
-            background: #fff;
+            border-radius: var(--card-radius);
+            overflow: hidden;
+            background: white;
+            transition: all 0.4s cubic-bezier(0.165, 0.84, 0.44, 1);
+            position: relative;
         }
 
         .vehicle-card:hover {
-            transform: translateY(-8px);
-            box-shadow: 0 15px 30px rgba(0,0,0,0.25);
+            transform: translateY(-12px);
+            box-shadow: 0 30px 60px rgba(0,0,0,0.3);
+        }
+
+        .img-wrapper {
+            overflow: hidden;
+            height: 200px;
+            position: relative;
         }
 
         .vehicle-img {
-            height: 180px;
+            width: 100%;
+            height: 100%;
             object-fit: cover;
-            border-top-left-radius: 16px;
-            border-top-right-radius: 16px;
+            transition: 0.6s ease;
         }
 
-        .badge-type {
-            background: #1e88e5;
-            font-weight: 500;
+        .vehicle-card:hover .vehicle-img {
+            transform: scale(1.1);
         }
+
+        .badge-floating {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            backdrop-filter: blur(5px);
+            padding: 6px 14px;
+            border-radius: 50px;
+            font-size: 11px;
+            font-weight: 700;
+            text-transform: uppercase;
+        }
+
+        /* Typography & Details */
+        .card-body { padding: 20px; }
+        
+        .vehicle-name {
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: #1e293b;
+            margin-bottom: 5px;
+        }
+
+        .v-type {
+            font-size: 12px;
+            color: var(--primary);
+            text-transform: uppercase;
+            font-weight: 700;
+            letter-spacing: 1px;
+        }
+
+        .price-text {
+            font-size: 1.3rem;
+            font-weight: 800;
+            color: #0f172a;
+        }
+
+        .price-text span {
+            font-size: 0.9rem;
+            color: #64748b;
+            font-weight: 400;
+        }
+
+        .status-indicator {
+            display: inline-flex;
+            align-items: center;
+            font-size: 12px;
+            font-weight: 600;
+            padding: 4px 12px;
+            border-radius: 50px;
+        }
+        
+        .st-available { background: #dcfce7; color: #15803d; }
+        .st-booked { background: #fee2e2; color: #b91c1c; }
 
         .btn-view {
-            border-radius: 25px;
-            padding: 6px 22px;
+            background: #0f172a;
+            color: white;
+            border-radius: 12px;
+            padding: 10px 0;
+            width: 100%;
+            font-weight: 600;
+            border: none;
+            transition: 0.3s;
         }
 
-        .filter-box {
-            background: rgba(255,255,255,0.9);
-            border-radius: 16px;
-            padding: 20px;
-            margin-bottom: 30px;
+        .btn-view:hover {
+            background: var(--primary);
+            color: white;
+            box-shadow: 0 10px 20px rgba(37, 99, 235, 0.3);
         }
+
+        .feature-icon {
+            font-size: 13px;
+            color: #64748b;
+            margin-right: 15px;
+        }
+
+        /* Form styling */
+        .form-control, .form-select {
+            border-radius: 10px;
+            padding: 10px 15px;
+            border: 1px solid #e2e8f0;
+        }
+
+        .form-control:focus, .form-select:focus {
+            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+            border-color: var(--primary);
+        }
+
     </style>
 </head>
 
@@ -76,99 +199,97 @@
 <section class="bg-fixed">
     <div class="container">
 
-        <!-- HEADER -->
-        <div class="d-flex justify-content-between align-items-center mb-4">
-            <h2 class="section-title mb-0">Available Vehicles</h2>
-            <a href="{% url 'home' %}" class="btn btn-outline-light">
-                ← Back to Home
+        <div class="d-flex flex-column flex-md-row justify-content-between align-items-center mb-5" data-aos="fade-down">
+            <div>
+                <h2 class="section-title mb-1">Our Elite Fleet</h2>
+                <p class="text-light opacity-75">Premium rides for every journey</p>
+            </div>
+            <a href="{% url 'home' %}" class="btn btn-back mt-3 mt-md-0">
+                <i class="fa-solid fa-house me-2"></i> Back to Home
             </a>
         </div>
 
-        <!-- 🔍 SEARCH & FILTER -->
-        <form method="get" class="filter-box">
+        <form method="get" class="filter-box" data-aos="fade-up">
             <div class="row g-3 align-items-end">
 
-                <!-- Search -->
-                <div class="col-md-4">
-                    <label class="form-label fw-semibold">Search</label>
-                    <input type="text" name="q" class="form-control"
-                           placeholder="Vehicle name"
-                           value="{{ request.GET.q }}">
+                <div class="col-lg-4 col-md-6">
+                    <label class="form-label fw-bold text-dark small">SEARCH VEHICLE</label>
+                    <div class="input-group">
+                        <span class="input-group-text bg-white border-end-0"><i class="fa-solid fa-magnifying-glass text-muted"></i></span>
+                        <input type="text" name="q" class="form-control border-start-0" 
+                               placeholder="Model name (e.g. BMW, Tesla...)"
+                               value="{{ request.GET.q }}">
+                    </div>
                 </div>
 
-                <!-- Type -->
-                <div class="col-md-2">
-                    <label class="form-label fw-semibold">Type</label>
+                <div class="col-lg-2 col-md-3">
+                    <label class="form-label fw-bold text-dark small">CATEGORY</label>
                     <select name="type" class="form-select">
-                        <option value="">All</option>
-                        <option value="car" {% if request.GET.type == "car" %}selected{% endif %}>Car</option>
-                        <option value="bike" {% if request.GET.type == "bike" %}selected{% endif %}>Bike</option>
+                        <option value="">All Categories</option>
+                        <option value="car" {% if request.GET.type == "car" %}selected{% endif %}>Cars</option>
+                        <option value="bike" {% if request.GET.type == "bike" %}selected{% endif %}>Bikes</option>
                     </select>
                 </div>
 
-                <!-- Seats -->
-                <!-- <div class="col-md-2">
-                    <label class="form-label fw-semibold">Seats</label>
-                    <select name="seats" class="form-select">
-                        <option value="">Any</option>
-                        <option value="2" {% if request.GET.seats == "2" %}selected{% endif %}>2</option>
-                        <option value="4" {% if request.GET.seats == "4" %}selected{% endif %}>4</option>
-                    </select>
-                </div> -->
-
-                <!-- Availability -->
-                <div class="col-md-2">
-                    <div class="form-check mt-4">
+                <div class="col-lg-2 col-md-3">
+                    <div class="form-check mb-2">
                         <input class="form-check-input" type="checkbox"
-                               name="available" value="1"
+                               name="available" value="1" id="availCheck"
                                {% if request.GET.available %}checked{% endif %}>
-                        <label class="form-check-label fw-semibold">
-                            Available only
+                        <label class="form-check-label fw-semibold text-dark" for="availCheck">
+                            Available Now
                         </label>
                     </div>
                 </div>
 
-                <!-- Buttons -->
-                <div class="col-md-2 d-flex gap-2">
-                    <button type="submit" class="btn btn-dark w-100">Apply</button>
-                    <a href="{% url 'all_vehicles' %}" class="btn btn-outline-secondary w-100">Reset</a>
+                <div class="col-lg-4 d-flex gap-2 mt-4 mt-lg-0">
+                    <button type="submit" class="btn btn-primary w-100 fw-bold py-2 px-4 rounded-3">
+                        <i class="fa-solid fa-sliders me-2"></i> Apply Filters
+                    </button>
+                    <a href="{% url 'all_vehicles' %}" class="btn btn-outline-secondary px-4 py-2 rounded-3">
+                        Reset
+                    </a>
                 </div>
 
             </div>
         </form>
 
-        <!-- 🚗 VEHICLE LIST -->
         <div class="row g-4">
             {% for v in vehicles %}
-            <div class="col-sm-6 col-md-4 col-lg-3">
+            <div class="col-sm-6 col-md-4 col-lg-3" data-aos="fade-up" data-aos-delay="{{ forloop.counter0 }}00">
                 <div class="card vehicle-card h-100">
 
-                    {% if v.image %}
-                        <img src="{{ v.image.url }}" class="vehicle-img" alt="Vehicle">
-                    {% else %}
-                        <div class="vehicle-img d-flex align-items-center justify-content-center bg-light text-muted">
-                            No Image
-                        </div>
-                    {% endif %}
-
-                    <div class="card-body text-center">
-                        <h5 class="fw-semibold">{{ v.vehicle_name }}</h5>
-
-                        <span class="badge badge-type">{{ v.vehicle_type|title }}</span>
-
-                        <p class="mt-2 mb-1">Seats: <strong>{{ v.seats }}</strong></p>
-                        <p class="fw-bold mb-1">₹ {{ v.price_per_hour }} / hour</p>
-
-                        {% if v.id not in booked_vehicle_ids %}
-                            <span class="badge bg-success">Available</span>
+                    <div class="img-wrapper">
+                        {% if v.image %}
+                            <img src="{{ v.image.url }}" class="vehicle-img" alt="Vehicle">
                         {% else %}
-                            <span class="badge bg-danger">Booked</span>
+                            <div class="vehicle-img d-flex align-items-center justify-content-center bg-light text-muted">
+                                <i class="fa-solid fa-image fa-2x opacity-25"></i>
+                            </div>
                         {% endif %}
-
+                        
+                        <div class="badge-floating {% if v.id not in booked_vehicle_ids %}bg-white text-dark shadow-sm{% else %}bg-danger text-white{% endif %}">
+                            {% if v.id not in booked_vehicle_ids %}
+                                <i class="fa-solid fa-circle text-success me-1 small"></i> Ready
+                            {% else %}
+                                <i class="fa-solid fa-clock me-1 small"></i> Busy
+                            {% endif %}
+                        </div>
                     </div>
 
-                    <div class="card-footer bg-transparent border-0 text-center pb-3">
-                        <a href="{% url 'vehicle_details' v.id %}" class="btn btn-dark btn-view">
+                    <div class="card-body">
+                        <div class="v-type">{{ v.vehicle_type }}</div>
+                        <h5 class="vehicle-name text-truncate">{{ v.vehicle_name }}</h5>
+
+                        <div class="d-flex align-items-center my-3">
+                            <span class="feature-icon"><i class="fa-solid fa-user-group me-1"></i> {{ v.seats }} Seats</span>
+                        </div>
+
+                        <div class="price-text mb-3">
+                            ₹{{ v.price_per_hour }}<span>/hr</span>
+                        </div>
+
+                        <a href="{% url 'vehicle_details' v.id %}" class="btn btn-view">
                             View Details
                         </a>
                     </div>
@@ -176,14 +297,26 @@
                 </div>
             </div>
             {% empty %}
-            <div class="col-12 text-center text-white">
-                <h4>No vehicles found</h4>
+            <div class="col-12 text-center text-white py-5" data-aos="zoom-in">
+                <i class="fa-solid fa-car-rear fa-4x mb-4 opacity-25"></i>
+                <h4 class="fw-bold">No vehicles found matching your criteria</h4>
+                <p class="opacity-75">Try adjusting your filters or search term.</p>
             </div>
             {% endfor %}
         </div>
 
     </div>
 </section>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+<script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
+<script>
+    AOS.init({
+        duration: 800,
+        once: true,
+        easing: 'ease-out-quad'
+    });
+</script>
 
 </body>
 </html>

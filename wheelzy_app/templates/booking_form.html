@@ -1,109 +1,271 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <title>Book Vehicle</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Complete Your Booking | Wheelzy</title>
+    
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+
+    <style>
+        :root {
+            --primary: #2563eb;
+            --bg: #f8fafc;
+            --card-border: #e2e8f0;
+        }
+
+        body {
+            background-color: var(--bg);
+            font-family: 'Inter', sans-serif;
+            color: #1e293b;
+        }
+
+        /* Layout Enhancements */
+        .checkout-header {
+            padding: 40px 0;
+            background: white;
+            border-bottom: 1px solid var(--card-border);
+            margin-bottom: 40px;
+        }
+
+        .card {
+            border: 1px solid var(--card-border);
+            border-radius: 16px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+            overflow: hidden;
+        }
+
+        .card-header {
+            background: #fff;
+            border-bottom: 1px solid var(--card-border);
+            padding: 20px;
+            font-weight: 700;
+        }
+
+        /* Sidebar Styling */
+        .sticky-sidebar {
+            position: sticky;
+            top: 20px;
+        }
+
+        .owner-box {
+            background: #eff6ff;
+            border: 1px dashed var(--primary);
+            border-radius: 12px;
+            padding: 15px;
+        }
+
+        /* Form Styling */
+        .form-label {
+            font-weight: 600;
+            font-size: 14px;
+            color: #475569;
+        }
+
+        .input-group-text {
+            background-color: #f8fafc;
+            color: #94a3b8;
+        }
+
+        .form-control:focus {
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+        }
+
+        .file-upload-wrapper {
+            padding: 15px;
+            border: 2px dashed #cbd5e1;
+            border-radius: 12px;
+            text-align: center;
+            transition: 0.3s;
+        }
+
+        .file-upload-wrapper:hover {
+            border-color: var(--primary);
+            background: #f0f7ff;
+        }
+
+        /* Booking Details Summary */
+        .summary-item {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 10px;
+            font-size: 14px;
+        }
+
+        .btn-confirm {
+            padding: 14px;
+            border-radius: 12px;
+            font-weight: 700;
+            background: var(--primary);
+            border: none;
+            width: 100%;
+            transition: 0.3s;
+        }
+
+        .btn-confirm:hover {
+            background: #1d4ed8;
+            transform: translateY(-2px);
+        }
+
+        .step-badge {
+            width: 28px;
+            height: 28px;
+            background: var(--primary);
+            color: white;
+            border-radius: 50%;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 14px;
+            margin-right: 10px;
+        }
+    </style>
 </head>
 
-<body class="bg-light">
+<body>
 
-<div class="container mt-5">
-    <div class="row justify-content-center">
-        <div class="col-md-8">
-
-            <!-- VEHICLE INFO -->
-            <div class="card shadow mb-4">
-                <div class="card-body">
-                    <h4>{{ vehicle.vehicle_name }}</h4>
-                    <p><strong>Type:</strong> {{ vehicle.vehicle_type }}</p>
-                    <p><strong>Seats:</strong> {{ vehicle.seats }}</p>
-                    <p class="text-success fw-bold">₹{{ vehicle.price_per_hour }} / hour</p>
-                </div>
-            </div>
-
-            <!-- OWNER INFO -->
-            <div class="card shadow mb-4 border-primary">
-                <div class="card-body">
-                    <h5 class="text-primary">Vehicle Owner Details</h5>
-                    <p><strong>Name:</strong> {{ owner.username }}</p>
-                    <p><strong>Email:</strong> {{ owner.email }}</p>
-
-                    {% if owner_profile %}
-                        <p><strong>Phone:</strong> {{ owner_profile.phone_number }}</p>
-                        <p><strong>Address:</strong> {{ owner_profile.address }}</p>
-                    {% endif %}
-                </div>
-            </div>
-
-            <!-- BOOKING FORM -->
-            <div class="card shadow">
-                <div class="card-body">
-                    <h5>Booking Details</h5>
-                    <form method="POST" enctype="multipart/form-data">
-                        {% csrf_token %}
-
-                        <div class="alert alert-warning">
-                            <strong>Important:</strong> Aadhaar & Driving License must be uploaded for every booking
-                        </div>
-
-                        <div class="mb-3">
-                            <label class="form-label">Aadhaar Card</label>
-                            <input type="file" name="aadhaar_photo" class="form-control" required>
-                        </div>
-
-                        <div class="mb-3">
-                            <label class="form-label">Driving License</label>
-                            <input type="file" name="driving_license_photo" class="form-control" required>
-                        </div>
-
-                        <div class="mb-3">
-                            <label>Start Time</label>
-                            <input type="datetime-local" name="start_time" class="form-control" required>
-                        </div>
-
-                        <div class="mb-3">
-                            <label>End Time</label>
-                            <input type="datetime-local" name="end_time" class="form-control" required>
-                        </div>
-
-                        <button type="submit" class="btn btn-success">
-                            Confirm Booking
-                        </button>
-                    </form>
-                </div>
-            </div>
-
+<header class="checkout-header">
+    <div class="container">
+        <div class="d-flex align-items-center">
+            <a href="{% url 'all_vehicles' %}" class="btn btn-link text-muted p-0 me-3">
+                <i class="fa-solid fa-arrow-left"></i>
+            </a>
+            <h3 class="mb-0 fw-bold">Secure Checkout</h3>
         </div>
+    </div>
+</header>
+
+<div class="container mb-5">
+    <div class="row g-4">
+        
+        <div class="col-lg-8">
+            <form method="POST" enctype="multipart/form-data">
+                {% csrf_token %}
+
+                <div class="card mb-4">
+                    <div class="card-header">
+                        <span class="step-badge">1</span> Verification Documents
+                    </div>
+                    <div class="card-body">
+                        <div class="alert alert-info border-0 shadow-sm rounded-4 d-flex align-items-center">
+                            <i class="fa-solid fa-shield-halved fa-2x me-3 text-primary"></i>
+                            <small>To ensure safety, we require a valid Aadhaar Card and Driving License. Your data is encrypted and secure.</small>
+                        </div>
+
+                        <div class="row mt-4">
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Aadhaar Card (Front/Back)</label>
+                                <div class="file-upload-wrapper">
+                                    <i class="fa-solid fa-id-card mb-2 text-muted"></i>
+                                    <input type="file" name="aadhaar_photo" class="form-control form-control-sm" required>
+                                </div>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Driving License</label>
+                                <div class="file-upload-wrapper">
+                                    <i class="fa-solid fa-address-card mb-2 text-muted"></i>
+                                    <input type="file" name="driving_license_photo" class="form-control form-control-sm" required>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card mb-4">
+                    <div class="card-header">
+                        <span class="step-badge">2</span> Booking Duration
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Pick-up Date & Time</label>
+                                <div class="input-group">
+                                    <span class="input-group-text"><i class="fa-regular fa-calendar"></i></span>
+                                    <input type="datetime-local" name="start_time" class="form-control" required>
+                                </div>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Drop-off Date & Time</label>
+                                <div class="input-group">
+                                    <span class="input-group-text"><i class="fa-solid fa-calendar-check"></i></span>
+                                    <input type="datetime-local" name="end_time" class="form-control" required>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <button type="submit" class="btn btn-primary btn-confirm shadow">
+                    Complete Booking Request <i class="fa-solid fa-chevron-right ms-2"></i>
+                </button>
+            </form>
+        </div>
+
+        <div class="col-lg-4">
+            <div class="sticky-sidebar">
+                
+                <div class="card mb-4 shadow-sm">
+                    <div class="card-body">
+                        <h6 class="text-muted text-uppercase fw-bold mb-3 small">Vehicle Summary</h6>
+                        <div class="d-flex align-items-center mb-3">
+                            <div class="bg-light rounded p-2 me-3">
+                                <i class="fa-solid fa-car-side fa-2x text-primary"></i>
+                            </div>
+                            <div>
+                                <h5 class="mb-0 fw-bold">{{ vehicle.vehicle_name }}</h5>
+                                <span class="badge bg-primary-subtle text-primary small">{{ vehicle.vehicle_type }}</span>
+                            </div>
+                        </div>
+                        
+                        <div class="summary-item border-top pt-3">
+                            <span>Capacity</span>
+                            <span class="fw-bold">{{ vehicle.seats }} Seats</span>
+                        </div>
+                        <div class="summary-item">
+                            <span>Rate</span>
+                            <span class="fw-bold text-success">₹{{ vehicle.price_per_hour }} / hr</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card shadow-sm">
+                    <div class="card-body">
+                        <h6 class="text-muted text-uppercase fw-bold mb-3 small">Host Information</h6>
+                        <div class="owner-box">
+                            <div class="d-flex align-items-center mb-2">
+                                <div class="avatar-sm bg-white rounded-circle d-flex align-items-center justify-content-center me-2" style="width:30px; height:30px;">
+                                    <i class="fa-solid fa-user-check text-primary small"></i>
+                                </div>
+                                <span class="fw-bold">{{ owner.username }}</span>
+                            </div>
+                            <p class="mb-1 small text-muted"><i class="fa-solid fa-envelope me-2"></i> {{ owner.email }}</p>
+                            
+                            {% if owner_profile %}
+                                <p class="mb-1 small text-muted"><i class="fa-solid fa-phone me-2"></i> {{ owner_profile.phone_number }}</p>
+                                <p class="mb-0 small text-muted"><i class="fa-solid fa-location-dot me-2"></i> {{ owner_profile.address }}</p>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
     </div>
 </div>
 
-<!-- ================= MODALS ================= -->
-
-<!-- Aadhaar Modal -->
 <div class="modal fade" id="aadhaarModal" tabindex="-1">
     <div class="modal-dialog modal-lg modal-dialog-centered">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title">Aadhaar Card</h5>
+        <div class="modal-content border-0 rounded-4">
+            <div class="modal-header border-0">
+                <h5 class="modal-title fw-bold">Aadhaar Card Preview</h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
             </div>
-            <div class="modal-body text-center">
-                <img src="{{ user_documents.aadhaar_photo.url }}" class="img-fluid rounded">
-            </div>
-        </div>
-    </div>
-</div>
-
-<!-- License Modal -->
-<div class="modal fade" id="licenseModal" tabindex="-1">
-    <div class="modal-dialog modal-lg modal-dialog-centered">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title">Driving License</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-            </div>
-            <div class="modal-body text-center">
-                <img src="{{ user_documents.driving_license_photo.url }}" class="img-fluid rounded">
+            <div class="modal-body text-center p-4">
+                <img src="{{ user_documents.aadhaar_photo.url }}" class="img-fluid rounded-3 shadow">
             </div>
         </div>
     </div>

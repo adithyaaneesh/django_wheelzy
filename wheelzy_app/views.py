@@ -14,6 +14,9 @@ from django.views.decorators.http import require_POST
 from django.core.paginator import Paginator
 from django.db.models import Prefetch
 from datetime import timedelta
+import razorpay
+from django.conf import settings
+from django.views.decorators.csrf import csrf_exempt
 
 def register(request):
     if request.method == "POST":
@@ -262,7 +265,7 @@ def book_vehicle(request, vehicle_id):
             end_time=end_time,
             total_price=total_price,
             status="payment_pending",
-            is_paid=False
+            is_rent_paid=False
         )
 
         UserDocument.objects.create(
@@ -284,6 +287,7 @@ def book_vehicle(request, vehicle_id):
         }
     )
 
+
 @login_required
 def payment_page(request, booking_id):
     booking = get_object_or_404(
@@ -293,21 +297,30 @@ def payment_page(request, booking_id):
         status="payment_pending"
     )
 
-    if request.method == "POST":
-        # ✅ Correct field
-        booking.is_rent_paid = True
-        booking.status = "pending"
-        booking.save()
+    client = razorpay.Client(
+        auth=(settings.RAZORPAY_KEY_ID, settings.RAZORPAY_KEY_SECRET)
+    )
 
-        Notification.objects.create(
-            user=booking.vehicle.owner,
-            message=f"New booking for {booking.vehicle.vehicle_name}. Upload handover photos."
-        )
+    # Create Razorpay order (₹ → paise)
+    razorpay_order = client.order.create({
+        "amount": int(booking.total_price * 100),
+        "currency": "INR",
+        "payment_capture": 1
+    })
 
-        messages.success(request, "Payment successful! Booking confirmed.")
-        return redirect("my_bookings")
+    booking.razorpay_order_id = razorpay_order["id"]
+    booking.save()
 
-    return render(request, "payment.html", {"booking": booking})
+    context = {
+        "booking": booking,
+        "razorpay_key": settings.RAZORPAY_KEY_ID,
+        "order_id": razorpay_order["id"],
+        "amount": booking.total_price,
+        "user": request.user
+    }
+
+    return render(request, "payment.html", context)
+
 
 
 
@@ -602,26 +615,20 @@ def admin_analytics(request):
 
 @login_required
 def approve_booking(request, booking_id):
-
     booking = get_object_or_404(Booking, id=booking_id, status="pending")
-
     if not booking.handover_photos.exists():
         messages.error(request, "Upload handover photos first.")
         return redirect("admin_bookings")
-
     booking.status = "confirmed"
     booking.save()
-
     Notification.objects.create(
         user=booking.user,
         message=f"Booking confirmed for {booking.vehicle.vehicle_name}."
     )
-
     Notification.objects.create(
         user=booking.vehicle.owner,
         message=f"Booking #{booking.id} confirmed."
     )
-
     return redirect("admin_bookings")
 
 @login_required
@@ -637,12 +644,10 @@ def mark_returned(request, booking_id):
     booking = get_object_or_404(Booking, id=booking_id, status="in_use")
     booking.status = "returned"
     booking.save()
-
     Notification.objects.create(
         user=booking.vehicle.owner,
         message=f"Vehicle returned. You may report damage if any."
     )
-
     return redirect("admin_bookings")
 
 
@@ -650,18 +655,14 @@ def mark_returned(request, booking_id):
 def admin_damage_review(request, booking_id):
     booking = get_object_or_404(Booking, id=booking_id)
     report = get_object_or_404(DamageReport, booking=booking)
-
     if request.method == "POST":
         booking.damage_paid = False
         booking.save()
-
         Notification.objects.create(
             user=booking.user,
             message="Damage confirmed. Please complete payment."
         )
-
         return redirect("admin_bookings")
-
     return render(request, "admin_damage_review.html", {
         "booking": booking,
         "report": report
@@ -680,7 +681,6 @@ def admin_damage_details(request, booking_id):
         damage_photos = DamagePhoto.objects.filter(
             report=damage_report
         )
-
     return render(
         request,
         "admin_damage_details.html",
@@ -698,18 +698,14 @@ def admin_booking_details(request, booking_id):
         Booking.objects.select_related("user", "vehicle"),
         id=booking_id
     )
-
     damage_report = None
     damage_amount = None
     display_status = booking.get_status_display()
-
     if hasattr(booking, "damage_report"):
         damage_report = booking.damage_report
         damage_amount = damage_report.extra_charge
-
         if booking.status == "damage_reported" and damage_report.is_paid:
             display_status = "Completed"
-
     return render(
         request,
         "admin_booking_details.html",
@@ -726,7 +722,6 @@ def mark_damage_paid(request, damage_id):
     report = get_object_or_404(DamageReport, id=damage_id)
     report.is_paid = True
     report.save()
-
     messages.success(request, "Damage marked as paid.")
     return redirect("admin_damage_details", booking_id=report.booking.id)
 
@@ -736,7 +731,6 @@ def admin_damage_report_list(request):
     reports = DamageReport.objects.select_related(
         "vehicle", "booking", "booking__user"
     ).order_by("-created_at")
-
     return render(
         request,
         "damage_report_list.html",
@@ -751,7 +745,6 @@ def admin_damage_report_detail(request, report_id):
     handover_photos = VehicleHandoverPhoto.objects.filter(
         booking=report.booking
     )
-
     return render(
         request,
         "damage_report_detail.html",
@@ -767,13 +760,10 @@ def admin_damage_report_detail(request, report_id):
 def owner_dashboard(request):
     if not request.user.groups.filter(name="owner").exists():
         return redirect("home")
-
     UserProfile.objects.get_or_create(user=request.user)
-
     context = {
         "unread_count": get_unread_notification_count(request.user)
     }
-
     return render(request, "owner_dashboard.html", context)
 
 
@@ -825,9 +815,7 @@ def owner_vehicles(request):
     if not request.user.groups.filter(name="owner").exists():
         messages.error(request, "Access denied")
         return redirect("home")
-
     vehicles = Vehicle.objects.filter(owner=request.user)
-
     return render(request, "owner_vehicles_list.html", {
         "vehicles": vehicles
     })
@@ -838,7 +826,6 @@ def owner_bookings(request):
     if not request.user.groups.filter(name="owner").exists():
         messages.error(request, "Access denied")
         return redirect("home")
-
     qs = (
         Booking.objects
         .filter(vehicle__owner=request.user)
@@ -849,14 +836,11 @@ def owner_bookings(request):
         )
         .order_by("-ordered_at")   # ✅ LATEST → OLDEST
     )
-
     paginator = Paginator(qs, 10)
     page_number = request.GET.get("page")
     bookings = paginator.get_page(page_number)
-
     today = timezone.now().date()
     yesterday = today - timedelta(days=1)
-
     # grouping label (safe)
     for booking in bookings:
         booking.booking_group = (
@@ -864,7 +848,6 @@ def owner_bookings(request):
             else "Yesterday" if booking.ordered_at.date() == yesterday
             else "Older"
         )
-
     return render(
         request,
         "owner_bookings.html",
@@ -872,16 +855,12 @@ def owner_bookings(request):
     )
 
 
-
-
 @login_required
 def owner_damage_list(request):
-
     damages = Booking.objects.filter(
         vehicle__owner=request.user, 
         status="damage_reported"
     ).select_related('vehicle', 'user', 'damage_report').order_by('-id')
-
     return render(request, 'owner_damage_list.html', {'damages': damages})
 
 
@@ -925,7 +904,6 @@ def owner_damage_list(request):
 
 @login_required
 def upload_handover_photos(request, booking_id):
-
     booking = get_object_or_404(
         Booking,
         id=booking_id,
@@ -933,50 +911,39 @@ def upload_handover_photos(request, booking_id):
         status="pending",
         is_rent_paid=True
     )
-
     if booking.handover_photos.exists():
         messages.warning(request, "Already uploaded.")
         return redirect("owner_vehicle_bookings")
-
     if request.method == "POST":
         photos = request.FILES.getlist("photos")
-
         if not photos:
             messages.error(request, "Upload at least one photo.")
             return redirect(request.path)
-
         for photo in photos:
             VehicleHandoverPhoto.objects.create(
                 booking=booking,
                 image=photo
             )
-
         Notification.objects.create(
             user=User.objects.filter(is_superuser=True).first(),
             message=f"Handover uploaded for booking #{booking.id}"
         )
-
         messages.success(request, "Handover uploaded. Awaiting admin approval.")
         return redirect("owner_vehicle_bookings")
-
     return render(request, "upload_handover_photos.html", {"booking": booking})
-
 
 
 @login_required
 def owner_add_damage_report(request, booking_id):
-
     booking = get_object_or_404(
         Booking,
         id=booking_id,
         vehicle__owner=request.user,
         status="returned"
     )
-
     if hasattr(booking, "damage_report"):
         messages.error(request, "Damage already reported.")
         return redirect("owner_vehicle_bookings")
-
     if request.method == "POST":
         report = DamageReport.objects.create(
             booking=booking,
@@ -985,20 +952,15 @@ def owner_add_damage_report(request, booking_id):
             description=request.POST["description"],
             extra_charge=request.POST["extra_charge"]
         )
-
         for photo in request.FILES.getlist("photos"):
             DamagePhoto.objects.create(report=report, image=photo)
-
         booking.status = "damage_reported"
         booking.save()
-
         Notification.objects.create(
             user=booking.user,
             message=f"Damage reported. Pay ₹{report.extra_charge}."
         )
-
         return redirect("owner_vehicle_bookings")
-
     return render(request, "owner_add_damage_report.html", {"booking": booking})
 
 
@@ -1007,7 +969,6 @@ def notifications_view(request):
     notifications = Notification.objects.filter(
         user=request.user
     ).order_by("-created_at")
-
     return render(request, "notifications.html", {
         "notifications": notifications
     })
@@ -1052,3 +1013,41 @@ def clear_read_notifications(request):
         is_read=True
     ).delete()
     return JsonResponse({"status": "ok"})
+
+
+@csrf_exempt
+def razorpay_verify(request):
+    if request.method == "POST":
+        data = request.POST
+        try:
+            booking = Booking.objects.get(
+                razorpay_order_id=data.get("razorpay_order_id")
+            )
+
+            client = razorpay.Client(
+                auth=(settings.RAZORPAY_KEY_ID, settings.RAZORPAY_KEY_SECRET)
+            )
+
+            client.utility.verify_payment_signature({
+                "razorpay_order_id": data.get("razorpay_order_id"),
+                "razorpay_payment_id": data.get("razorpay_payment_id"),
+                "razorpay_signature": data.get("razorpay_signature"),
+            })
+
+            # ✅ Payment Success
+            booking.razorpay_payment_id = data.get("razorpay_payment_id")
+            booking.razorpay_signature = data.get("razorpay_signature")
+            booking.is_rent_paid = True
+            booking.status = "pending"
+            booking.save()
+
+            Notification.objects.create(
+                user=booking.vehicle.owner,
+                message=f"New booking for {booking.vehicle.vehicle_name}. Upload handover photos."
+            )
+
+            return redirect("my_bookings")
+
+        except Exception:
+            messages.error(request, "Payment verification failed")
+            return redirect("payment_page", booking_id=booking.id)

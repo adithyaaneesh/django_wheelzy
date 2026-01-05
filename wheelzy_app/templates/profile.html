@@ -6,110 +6,154 @@
     <title>My Profile | Wheelzy</title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
 
-    <!-- Bootstrap & Icons -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 
     <style>
+        :root {
+            --brand-primary: #0f172a;
+            --brand-accent: #2563eb;
+            --bg-body: #f1f5f9;
+            --text-main: #1e293b;
+            --text-muted: #64748b;
+        }
+
         body {
-            background: #f4f6fb;
-            font-family: "Segoe UI", sans-serif;
+            background-color: var(--bg-body);
+            font-family: 'Inter', sans-serif;
+            color: var(--text-main);
         }
 
         .profile-card {
             max-width: 1000px;
-            margin: 50px auto;
+            margin: 60px auto;
             background: #fff;
-            border-radius: 24px;
+            border-radius: 30px;
             overflow: hidden;
-            box-shadow: 0 25px 60px rgba(0,0,0,0.15);
+            box-shadow: 0 20px 50px rgba(0,0,0,0.08);
             position: relative;
         }
 
         .back-btn {
             position: absolute;
-            top: 20px;
-            right: 20px;
-            background: #f1f5f9;
-            color: #1e293b;
-            padding: 8px 14px;
-            border-radius: 20px;
+            top: 25px;
+            right: 25px;
+            background: white;
+            color: var(--text-main);
+            padding: 10px 18px;
+            border-radius: 14px;
             font-size: 13px;
             font-weight: 600;
             display: flex;
             align-items: center;
-            gap: 6px;
+            gap: 8px;
             text-decoration: none;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+            z-index: 10;
         }
 
         .profile-left {
-            background: #1e88e5;
+            background: var(--brand-primary);
+            background-image: radial-gradient(circle at top right, #1e293b, #0f172a);
             color: #fff;
-            padding: 40px 20px;
+            padding: 60px 30px;
             text-align: center;
         }
 
         .profile-left img {
-            width: 130px;
-            height: 130px;
-            border-radius: 50%;
+            width: 150px;
+            height: 150px;
+            border-radius: 40px;
             object-fit: cover;
+            border: 5px solid rgba(255,255,255,0.1);
             background: #fff;
-            padding: 6px;
         }
 
-        .profile-right {
-            padding: 40px 30px;
-        }
+        .profile-right { padding: 60px 50px; }
 
         .info-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-            gap: 20px;
-            margin-top: 25px;
-        }
-
-        .info-group label {
-            font-size: 13px;
-            color: #6b7280;
+            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+            gap: 25px;
         }
 
         .info-group .value {
-            background: #f9fafb;
-            padding: 12px 14px;
-            border-radius: 12px;
+            background: #f8fafc;
+            padding: 14px 18px;
+            border-radius: 16px;
             font-weight: 600;
+            border: 1px solid #e2e8f0;
         }
 
         .edit-btn {
-            margin-top: 35px;
-            background: linear-gradient(135deg, #22c55e, #4ade80);
+            margin-top: 40px;
+            background: var(--brand-primary);
             color: #fff;
             border: none;
-            padding: 12px 34px;
-            border-radius: 30px;
-            font-weight: 600;
+            padding: 14px 40px;
+            border-radius: 16px;
+            font-weight: 700;
         }
 
-        /* DOCUMENT HELPERS */
-        .doc-helper {
-            font-size: 13px;
-            color: #2563eb;
+        /* --- MODAL PHOTO STYLING --- */
+        .modal-photo-wrapper {
+            position: relative;
+            width: 120px;
+            margin: 0 auto 30px;
+        }
+
+        .modal-photo-preview {
+            width: 120px;
+            height: 120px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 4px solid #fff;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+        }
+
+        .photo-edit-badge {
+            position: absolute;
+            bottom: 5px;
+            right: 5px;
+            background: var(--brand-accent);
+            color: white;
+            width: 35px;
+            height: 35px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: 3px solid #fff;
             cursor: pointer;
+            transition: 0.2s;
+        }
+
+        .photo-edit-badge:hover {
+            transform: scale(1.1);
+            background: var(--brand-primary);
+        }
+
+        .doc-helper {
+            font-size: 14px;
+            color: var(--brand-accent);
+            cursor: pointer;
+            font-weight: 600;
             display: inline-flex;
             align-items: center;
-            gap: 6px;
-            margin-top: 8px;
+            gap: 8px;
+            padding: 8px 16px;
+            border-radius: 10px;
+            background: #eff6ff;
+            text-decoration: none;
         }
 
-        .doc-helper:hover {
-            text-decoration: underline;
-        }
-
-        @media (max-width: 768px) {
-            .profile-right {
-                padding: 30px 20px;
-            }
+        .doc-card {
+            background: white;
+            border: 1px solid #e2e8f0;
+            border-radius: 18px;
+            padding: 20px;
+            text-align: center;
         }
     </style>
 </head>
@@ -117,123 +161,150 @@
 
 <div class="container">
     <div class="profile-card">
-
         <a href="{% url 'home' %}" class="back-btn">
-            <i class="fa-solid fa-arrow-left"></i> Back
+            <i class="fa-solid fa-house"></i> Home
         </a>
 
         <div class="row g-0">
-            <!-- LEFT -->
             <div class="col-md-4 profile-left">
                 {% if profile.photo %}
                     <img src="{{ profile.photo.url }}">
                 {% else %}
-                    <img src="https://ui-avatars.com/api/?name={{ profile.user.username }}&background=ff6a00&color=fff">
+                    <img src="https://ui-avatars.com/api/?name={{ profile.user.username }}&background=2563eb&color=fff&size=150">
                 {% endif %}
-                <h4 class="mt-3 fw-bold">{{ profile.user.username }}</h4>
+                <h3 class="mt-4 fw-bold mb-1">{{ profile.user.username }}</h3>
+                <span class="badge bg-primary-subtle text-primary px-3 py-2 rounded-pill small">Verified Member</span>
             </div>
 
-            <!-- RIGHT -->
             <div class="col-md-8 profile-right">
-                <h5 class="fw-bold">Profile Information</h5>
-
+                <h2 class="fw-bold mb-4">General Information</h2>
                 <div class="info-grid">
                     <div class="info-group">
-                        <label>Username</label>
+                        <label class="small fw-bold text-muted text-uppercase mb-2 d-block">Username</label>
                         <div class="value">{{ profile.user.username }}</div>
                     </div>
-
                     <div class="info-group">
-                        <label>Email</label>
+                        <label class="small fw-bold text-muted text-uppercase mb-2 d-block">Email</label>
                         <div class="value">{{ profile.user.email }}</div>
                     </div>
-
                     <div class="info-group">
-                        <label>Phone</label>
+                        <label class="small fw-bold text-muted text-uppercase mb-2 d-block">Phone</label>
                         <div class="value">{{ profile.phone_number }}</div>
                     </div>
-
                     <div class="info-group">
-                        <label>Address</label>
+                        <label class="small fw-bold text-muted text-uppercase mb-2 d-block">Address</label>
                         <div class="value">{{ profile.address }}</div>
                     </div>
                 </div>
 
                 {% if latest_document %}
-                <hr class="my-4">
-                <h6 class="fw-bold mb-3">Recently Uploaded Documents</h6>
-
-                <div class="row text-center">
-
-                    <!-- Aadhaar -->
-                    <div class="col-md-6 mb-3">
-                        <label class="small text-muted">Aadhaar Card</label>
-                        <!-- <div class="mt-2">
-                            <img src="{{ latest_document.aadhaar_photo.url }}"
-                                 class="img-thumbnail"
-                                 style="height:160px;">
-                        </div> -->
-                        <div class="doc-helper"
-                             data-bs-toggle="modal"
-                             data-bs-target="#aadhaarPreviewModal">
-                            <i class="fa-solid fa-eye"></i> View document
+                <hr class="my-5 opacity-50">
+                <h5 class="fw-bold mb-4">Documents</h5>
+                <div class="row g-3">
+                    <div class="col-md-6">
+                        <div class="doc-card">
+                            <h6 class="small fw-bold text-uppercase mb-2">Aadhaar Card</h6>
+                            <div class="doc-helper" data-bs-toggle="modal" data-bs-target="#aadhaarPreviewModal">View</div>
                         </div>
                     </div>
-
-                    <!-- License -->
-                    <div class="col-md-6 mb-3">
-                        <label class="small text-muted">Driving License</label>
-                        <!-- <div class="mt-2">
-                            <img src="{{ latest_document.driving_license_photo.url }}"
-                                 class="img-thumbnail"
-                                 style="height:160px;">
-                        </div> -->
-                        <div class="doc-helper"
-                             data-bs-toggle="modal"
-                             data-bs-target="#licensePreviewModal">
-                            <i class="fa-solid fa-eye"></i> View document
+                    <div class="col-md-6">
+                        <div class="doc-card">
+                            <h6 class="small fw-bold text-uppercase mb-2">Driving License</h6>
+                            <div class="doc-helper" data-bs-toggle="modal" data-bs-target="#licensePreviewModal">View</div>
                         </div>
                     </div>
-
                 </div>
                 {% endif %}
 
                 <button class="edit-btn" data-bs-toggle="modal" data-bs-target="#editProfileModal">
-                    Edit Profile
+                    <i class="fa-solid fa-pen-to-square me-2"></i> Update Profile
                 </button>
             </div>
         </div>
     </div>
 </div>
 
-{% if latest_document %}
-<!-- Aadhaar Modal -->
-<div class="modal fade" id="aadhaarPreviewModal" tabindex="-1">
+<div class="modal fade" id="editProfileModal" tabindex="-1">
     <div class="modal-dialog modal-lg modal-dialog-centered">
-        <div class="modal-content rounded-4">
-            <div class="modal-header">
-                <h6 class="modal-title">Aadhaar Card</h6>
-                <button class="btn-close" data-bs-dismiss="modal"></button>
-            </div>
-            <div class="modal-body text-center">
-                <img src="{{ latest_document.aadhaar_photo.url }}" class="img-fluid rounded">
-            </div>
+        <div class="modal-content rounded-5 border-0 shadow-lg">
+            
+            <form method="POST" enctype="multipart/form-data" action="{% url 'edit_profile' %}">
+                {% csrf_token %}
+                
+                <div class="modal-header border-0 pb-0">
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+
+                <div class="modal-body px-5 pb-5">
+                    <div class="modal-photo-wrapper">
+                        {% if profile.photo %}
+                            <img src="{{ profile.photo.url }}" class="modal-photo-preview" id="modalPreview">
+                        {% else %}
+                            <img src="https://ui-avatars.com/api/?name={{ profile.user.username }}&background=2563eb&color=fff&size=120" class="modal-photo-preview" id="modalPreview">
+                        {% endif %}
+                        
+                        <label for="photo-upload" class="photo-edit-badge">
+                            <i class="fa-solid fa-camera"></i>
+                        </label>
+                        <input type="file" id="photo-upload" name="photo" style="display: none;" onchange="previewImage(this)">
+                    </div>
+
+                    <div class="text-center mb-4">
+                        <h4 class="fw-bold mb-1">Edit Profile</h4>
+                        <p class="text-muted small">Update your personal account details</p>
+                    </div>
+
+                    <div class="row g-4">
+                        <div class="col-md-6">
+                            <label class="form-label fw-bold small">Username</label>
+                            <input type="text" class="form-control bg-light opacity-75" value="{{ profile.user.username }}" disabled>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label fw-bold small">Email Address</label>
+                            <input type="email" class="form-control shadow-sm" name="email" value="{{ profile.user.email }}" required>
+                        </div>
+                        <div class="col-md-12">
+                            <label class="form-label fw-bold small">Phone Number</label>
+                            <input type="text" class="form-control shadow-sm" name="phone_number" value="{{ profile.phone_number }}" required>
+                        </div>
+                        <div class="col-12">
+                            <label class="form-label fw-bold small">Residential Address</label>
+                            <textarea class="form-control shadow-sm" name="address" rows="3" required>{{ profile.address }}</textarea>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="modal-footer border-0 px-5 pb-5">
+                    <button type="button" class="btn btn-light px-4 py-2 rounded-3 text-muted fw-bold" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-primary px-5 py-2 rounded-3 fw-bold shadow">Save Changes</button>
+                </div>
+            </form>
+
         </div>
     </div>
 </div>
 
-<!-- License Modal -->
+<script>
+    function previewImage(input) {
+        if (input.files && input.files[0]) {
+            var reader = new FileReader();
+            reader.onload = function(e) {
+                document.getElementById('modalPreview').src = e.target.result;
+            }
+            reader.readAsDataURL(input.files[0]);
+        }
+    }
+</script>
+
+{% if latest_document %}
+<div class="modal fade" id="aadhaarPreviewModal" tabindex="-1">
+    <div class="modal-dialog modal-lg modal-dialog-centered">
+        <div class="modal-content"><div class="modal-body text-center"><img src="{{ latest_document.aadhaar_photo.url }}" class="img-fluid rounded"></div></div>
+    </div>
+</div>
 <div class="modal fade" id="licensePreviewModal" tabindex="-1">
     <div class="modal-dialog modal-lg modal-dialog-centered">
-        <div class="modal-content rounded-4">
-            <div class="modal-header">
-                <h6 class="modal-title">Driving License</h6>
-                <button class="btn-close" data-bs-dismiss="modal"></button>
-            </div>
-            <div class="modal-body text-center">
-                <img src="{{ latest_document.driving_license_photo.url }}" class="img-fluid rounded">
-            </div>
-        </div>
+        <div class="modal-content"><div class="modal-body text-center"><img src="{{ latest_document.driving_license_photo.url }}" class="img-fluid rounded"></div></div>
     </div>
 </div>
 {% endif %}

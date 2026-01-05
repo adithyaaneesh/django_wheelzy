@@ -12,6 +12,19 @@ https://docs.djangoproject.com/en/6.0/ref/settings/
 
 from pathlib import Path
 import os
+from dotenv import load_dotenv
+
+
+# ✅ FIRST define BASE_DIR
+BASE_DIR = Path(__file__).resolve().parent.parent
+
+# ✅ THEN load .env
+load_dotenv(BASE_DIR / ".env")
+
+# ✅ Now read env variables
+RAZORPAY_KEY_ID = os.getenv("RAZORPAY_KEY_ID")
+RAZORPAY_KEY_SECRET = os.getenv("RAZORPAY_KEY_SECRET")
+
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -141,6 +154,4 @@ STATICFILES_DIRS = [
 
 
 CLOUDINARY_STORAGE['SECURE'] = True
-
-
 
