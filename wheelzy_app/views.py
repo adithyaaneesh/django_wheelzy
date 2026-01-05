@@ -555,8 +555,22 @@ def admin_delete_vehicle(request, id):
 def admin_bookings(request):
     if not request.user.is_superuser:
         return redirect("home")
-    bookings = Booking.objects.select_related("vehicle", "user").order_by("-ordered_at")
-    return render(request, "admin_bookings.html", {"bookings": bookings})
+
+    bookings_qs = (
+        Booking.objects
+        .select_related("vehicle", "user")
+        .order_by("-ordered_at")
+    )
+
+    paginator = Paginator(bookings_qs, 10) 
+    page_number = request.GET.get("page")
+    bookings = paginator.get_page(page_number)
+
+    return render(
+        request,
+        "admin_bookings.html",
+        {"bookings": bookings}
+    )
 
 @login_required
 def admin_revenue(request):

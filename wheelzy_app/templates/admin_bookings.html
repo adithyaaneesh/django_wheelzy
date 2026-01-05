@@ -177,6 +177,73 @@
             padding: 40px !important;
             color: var(--text-muted);
         }
+
+        .pro-pagination {
+            display: flex;
+            justify-content: center;
+            margin-top: 20px;
+        }
+
+        .pro-pagination ul {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        .pro-pagination li a,
+        .pro-pagination li span {
+            min-width: 28px;
+            height: 28px;
+            padding: 0 8px;
+            border-radius: 6px;
+            font-size: 8px;
+            font-weight: 100;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-decoration: none;
+            border: 1px solid var(--border);
+            background: white;
+            color: var(--text-main);
+            transition: all 0.2s ease;
+        }
+
+        .pro-pagination li a:hover {
+            background: var(--accent);
+            color: white;
+            border-color: var(--accent);
+        }
+
+        .pro-pagination li.active span {
+            background: #111827;
+            color: white;
+            border-color: #111827;
+        }
+
+        .pro-pagination li.disabled span {
+            opacity: 0.35;
+            cursor: not-allowed;
+        }
+
+        .pro-pagination .arrow {
+            border-radius: 50%;
+            padding: 0;
+        }
+
+        .pro-pagination .dots {
+            font-weight: 700;
+            color: var(--text-muted);
+            cursor: default;
+            font-size: 12px;
+            padding: 0 4px;
+        }
+        .pro-pagination li a i,
+        .pro-pagination li span i {
+            font-size: 11px;   
+        }
     </style>
 </head>
 
@@ -209,7 +276,9 @@
             <tbody>
             {% for booking in bookings %}
             <tr>
-                <td style="color: var(--text-muted); font-weight: 500;">{{ forloop.counter }}</td>
+                <td style="color: var(--text-muted); font-weight: 500;">
+                    {{ bookings.start_index|add:forloop.counter0 }}
+                </td>
 
                 <td class="user-info">
                     <strong>{{ booking.user.username }}</strong>
@@ -308,6 +377,68 @@
             </tbody>
         </table>
     </div>
+<!-- PAGINATION -->
+{% if bookings.has_other_pages %}
+<nav class="pro-pagination">
+    <ul>
+
+        <!-- Previous -->
+        {% if bookings.has_previous %}
+            <li>
+                <a href="?page={{ bookings.previous_page_number }}" class="arrow">
+                    <i class="fa-solid fa-chevron-left"></i>
+                </a>
+            </li>
+        {% else %}
+            <li class="disabled">
+                <span class="arrow"><i class="fa-solid fa-chevron-left"></i></span>
+            </li>
+        {% endif %}
+
+        <!-- First page -->
+        {% if bookings.number > 3 %}
+            <li><a href="?page=1">1</a></li>
+            <li class="dots">…</li>
+        {% endif %}
+
+        <!-- Middle pages -->
+        {% for num in bookings.paginator.page_range %}
+            {% if num >= bookings.number|add:-2 and num <= bookings.number|add:2 %}
+                {% if num == bookings.number %}
+                    <li class="active"><span>{{ num }}</span></li>
+                {% else %}
+                    <li><a href="?page={{ num }}">{{ num }}</a></li>
+                {% endif %}
+            {% endif %}
+        {% endfor %}
+
+        <!-- Last page -->
+        {% if bookings.number < bookings.paginator.num_pages|add:-2 %}
+            <li class="dots">…</li>
+            <li>
+                <a href="?page={{ bookings.paginator.num_pages }}">
+                    {{ bookings.paginator.num_pages }}
+                </a>
+            </li>
+        {% endif %}
+
+        <!-- Next -->
+        {% if bookings.has_next %}
+            <li>
+                <a href="?page={{ bookings.next_page_number }}" class="arrow">
+                    <i class="fa-solid fa-chevron-right"></i>
+                </a>
+            </li>
+        {% else %}
+            <li class="disabled">
+                <span class="arrow"><i class="fa-solid fa-chevron-right"></i></span>
+            </li>
+        {% endif %}
+
+    </ul>
+</nav>
+{% endif %}
+
 
 </div>
 </body>
