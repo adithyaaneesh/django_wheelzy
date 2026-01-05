@@ -164,12 +164,27 @@
     <div class="card">
         <h3>Payment Summary</h3>
         <div class="grid">
+
             <div class="info">
                 <strong>Total Rent</strong>
                 <span class="price">₹{{ booking.total_price }}</span>
             </div>
+
+            {% if booking.is_rent_paid %}
+                <div class="info">
+                    <strong>Payment Status</strong>
+                    <span class="status returned">Paid</span>
+                </div>
+            {% else %}
+                <div class="info">
+                    <strong>Payment Status</strong>
+                    <span class="status damage_reported">Pending</span>
+                </div>
+            {% endif %}
+
         </div>
     </div>
+
 
     <!-- DAMAGE PAYMENT DETAILS -->
     {% if booking.damage_report and booking.damage_report.is_paid %}

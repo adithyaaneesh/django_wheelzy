@@ -18,11 +18,14 @@ urlpatterns = [
     path("all_vehicles/", views.all_vehicle, name="all_vehicles"),
     path("vehicle/<int:id>/", views.vehicle_details, name="vehicle_details"),
     path("booking/<int:vehicle_id>/", views.book_vehicle, name="book_vehicle"),
+    path("payment/<int:booking_id>/", views.payment_page, name="payment_page"),
+
 
     # ================= BOOKINGS (CUSTOMER) =================
     path("my_bookings/", views.my_bookings, name="my_bookings"),
     path("booking/<int:booking_id>/cancel/", views.cancel_booking, name="cancel_booking"),
     path("booking/<int:booking_id>/in-use/", views.mark_in_use, name="mark_in_use"),
+
 
     # ================= OWNER =================
     path("owner_dashboard/", views.owner_dashboard, name="owner_dashboard"),

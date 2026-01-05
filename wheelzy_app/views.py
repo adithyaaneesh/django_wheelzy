@@ -232,7 +232,6 @@ def vehicle_details(request, id):
 @login_required
 def book_vehicle(request, vehicle_id):
 
-    # ❌ Block booking if unpaid damage
     if DamageReport.objects.filter(
         booking__user=request.user,
         is_paid=False
@@ -242,9 +241,8 @@ def book_vehicle(request, vehicle_id):
 
     vehicle = get_object_or_404(Vehicle, id=vehicle_id)
 
-    if vehicle.owner == request.user:
-        messages.error(request, "You cannot book your own vehicle.")
-        return redirect("vehicle_details", vehicle.id)
+    owner = vehicle.owner
+    owner_profile = UserProfile.objects.filter(user=owner).first() if owner else None
 
     if request.method == "POST":
         start_time = timezone.make_aware(
@@ -254,44 +252,63 @@ def book_vehicle(request, vehicle_id):
             datetime.strptime(request.POST["end_time"], "%Y-%m-%dT%H:%M")
         )
 
-        if end_time <= start_time:
-            messages.error(request, "Invalid time range.")
-            return redirect(request.path)
+        hours = max(1, int((end_time - start_time).total_seconds() // 3600))
+        total_price = hours * vehicle.price_per_hour
 
         booking = Booking.objects.create(
             user=request.user,
             vehicle=vehicle,
             start_time=start_time,
             end_time=end_time,
-            status="pending"
+            total_price=total_price,
+            status="payment_pending",
+            is_paid=False
         )
-
-        # Mandatory documents
-        aadhaar = request.FILES.get("aadhaar_photo")
-        license = request.FILES.get("driving_license_photo")
-
-        if not aadhaar or not license:
-            booking.delete()
-            messages.error(request, "Documents required.")
-            return redirect(request.path)
 
         UserDocument.objects.create(
             user=request.user,
             booking=booking,
-            aadhaar_photo=aadhaar,
-            driving_license_photo=license
+            aadhaar_photo=request.FILES.get("aadhaar_photo"),
+            driving_license_photo=request.FILES.get("driving_license_photo"),
         )
 
-        # Notify owner
+        return redirect("payment_page", booking_id=booking.id)
+
+    return render(
+        request,
+        "booking_form.html",
+        {
+            "vehicle": vehicle,
+            "owner": owner,
+            "owner_profile": owner_profile,
+        }
+    )
+
+@login_required
+def payment_page(request, booking_id):
+    booking = get_object_or_404(
+        Booking,
+        id=booking_id,
+        user=request.user,
+        status="payment_pending"
+    )
+
+    if request.method == "POST":
+        # ✅ Correct field
+        booking.is_rent_paid = True
+        booking.status = "pending"
+        booking.save()
+
         Notification.objects.create(
-            user=vehicle.owner,
-            message=f"New booking for {vehicle.vehicle_name}. Upload handover photos."
+            user=booking.vehicle.owner,
+            message=f"New booking for {booking.vehicle.vehicle_name}. Upload handover photos."
         )
 
-        messages.success(request, "Booking created. Awaiting handover upload.")
+        messages.success(request, "Payment successful! Booking confirmed.")
         return redirect("my_bookings")
 
-    return render(request, "booking_form.html", {"vehicle": vehicle})
+    return render(request, "payment.html", {"booking": booking})
+
 
 
 @login_required
@@ -664,24 +681,18 @@ def admin_damage_details(request, booking_id):
 @login_required
 def admin_booking_details(request, booking_id):
     booking = get_object_or_404(
-        Booking.objects.select_related(
-            "user",
-            "vehicle"
-        ),
+        Booking.objects.select_related("user", "vehicle"),
         id=booking_id
     )
 
-    # Defaults
     damage_report = None
     damage_amount = None
     display_status = booking.get_status_display()
 
-    # ✅ SAFE access to OneToOneField
     if hasattr(booking, "damage_report"):
         damage_report = booking.damage_report
         damage_amount = damage_report.extra_charge
 
-        # Display-only override
         if booking.status == "damage_reported" and damage_report.is_paid:
             display_status = "Completed"
 
@@ -691,8 +702,8 @@ def admin_booking_details(request, booking_id):
         {
             "booking": booking,
             "display_status": display_status,
-            "damage_report": damage_report,  
-            "damage_amount": damage_amount, 
+            "damage_report": damage_report,
+            "damage_amount": damage_amount,
         }
     )
 
@@ -860,6 +871,44 @@ def owner_damage_list(request):
     return render(request, 'owner_damage_list.html', {'damages': damages})
 
 
+# @login_required
+# def upload_handover_photos(request, booking_id):
+
+#     booking = get_object_or_404(
+#         Booking,
+#         id=booking_id,
+#         vehicle__owner=request.user,
+#         status="pending",
+#         is_paid=True
+#     )
+
+#     if booking.handover_photos.exists():
+#         messages.warning(request, "Already uploaded.")
+#         return redirect("owner_vehicle_bookings")
+
+#     if request.method == "POST":
+#         photos = request.FILES.getlist("photos")
+
+#         if not photos:
+#             messages.error(request, "Upload at least one photo.")
+#             return redirect(request.path)
+
+#         for photo in photos:
+#             VehicleHandoverPhoto.objects.create(
+#                 booking=booking,
+#                 image=photo
+#             )
+
+#         Notification.objects.create(
+#             user=User.objects.filter(is_superuser=True).first(),
+#             message=f"Handover uploaded for booking #{booking.id}"
+#         )
+
+#         messages.success(request, "Handover uploaded. Awaiting admin approval.")
+#         return redirect("owner_vehicle_bookings")
+
+#     return render(request, "upload_handover_photos.html", {"booking": booking})
+
 @login_required
 def upload_handover_photos(request, booking_id):
 
@@ -867,7 +916,8 @@ def upload_handover_photos(request, booking_id):
         Booking,
         id=booking_id,
         vehicle__owner=request.user,
-        status="pending"
+        status="pending",
+        is_rent_paid=True
     )
 
     if booking.handover_photos.exists():
@@ -896,6 +946,7 @@ def upload_handover_photos(request, booking_id):
         return redirect("owner_vehicle_bookings")
 
     return render(request, "upload_handover_photos.html", {"booking": booking})
+
 
 
 @login_required
