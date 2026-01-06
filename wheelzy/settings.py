@@ -155,3 +155,15 @@ STATICFILES_DIRS = [
 
 CLOUDINARY_STORAGE['SECURE'] = True
 
+# ================= EMAIL CONFIGURATION =================
+
+EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
+
+EMAIL_HOST = "smtp.gmail.com"
+EMAIL_PORT = 587
+EMAIL_USE_TLS = True
+
+EMAIL_HOST_USER = "yourgmail@gmail.com"
+EMAIL_HOST_PASSWORD = "your_gmail_app_password"
+
+DEFAULT_FROM_EMAIL = "Wheelzy <yourgmail@gmail.com>"
