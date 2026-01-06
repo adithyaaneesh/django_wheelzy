@@ -275,11 +275,12 @@ def book_vehicle(request, vehicle_id):
 
         if start_time < now:
             messages.error(request, "Pick-up time cannot be in the past.")
-            return redirect('book_vehicle')
+            return redirect("book_vehicle", vehicle_id=vehicle.id)
 
         if end_time <= start_time:
             messages.error(request, "Drop-off time must be after pick-up time.")
-            return redirect('book_vehicle')
+            return redirect("book_vehicle", vehicle_id=vehicle.id)
+        
         hours = max(1, int((end_time - start_time).total_seconds() // 3600))
         total_price = hours * vehicle.price_per_hour
 
@@ -940,44 +941,6 @@ def owner_damage_list(request):
     ).select_related('vehicle', 'user', 'damage_report').order_by('-id')
     return render(request, 'owner_damage_list.html', {'damages': damages})
 
-
-# @login_required
-# def upload_handover_photos(request, booking_id):
-
-#     booking = get_object_or_404(
-#         Booking,
-#         id=booking_id,
-#         vehicle__owner=request.user,
-#         status="pending",
-#         is_paid=True
-#     )
-
-#     if booking.handover_photos.exists():
-#         messages.warning(request, "Already uploaded.")
-#         return redirect("owner_vehicle_bookings")
-
-#     if request.method == "POST":
-#         photos = request.FILES.getlist("photos")
-
-#         if not photos:
-#             messages.error(request, "Upload at least one photo.")
-#             return redirect(request.path)
-
-#         for photo in photos:
-#             VehicleHandoverPhoto.objects.create(
-#                 booking=booking,
-#                 image=photo
-#             )
-
-#         Notification.objects.create(
-#             user=User.objects.filter(is_superuser=True).first(),
-#             message=f"Handover uploaded for booking #{booking.id}"
-#         )
-
-#         messages.success(request, "Handover uploaded. Awaiting admin approval.")
-#         return redirect("owner_vehicle_bookings")
-
-#     return render(request, "upload_handover_photos.html", {"booking": booking})
 
 @login_required
 def upload_handover_photos(request, booking_id):
