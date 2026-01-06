@@ -131,6 +131,7 @@ def home(request):
 
     vehicles = Vehicle.objects.all()
     active_bookings = Booking.objects.filter(
+        is_rent_paid=True,
         status__in=["pending", "confirmed", "in_use"]
     ).values_list("vehicle_id", flat=True)
 
@@ -211,6 +212,7 @@ def all_vehicle(request):
     if seats:
         vehicles = vehicles.filter(seats=seats)
     booked_vehicle_ids = Booking.objects.filter(
+        is_rent_paid=True,
         status__in=["pending", "confirmed", "in_use"]
     ).values_list("vehicle_id", flat=True)
     if available == "1":
@@ -227,6 +229,7 @@ def vehicle_details(request, id):
 
     is_booked = Booking.objects.filter(
         vehicle=vehicle,
+        is_rent_paid=True,
         status__in=["pending", "confirmed", "in_use"]
     ).exists()
 
@@ -363,7 +366,8 @@ def payment_page(request, booking_id):
 def my_bookings(request):
     bookings = (
         Booking.objects
-        .filter(user=request.user)
+        .filter(user=request.user,is_rent_paid=True)
+        
         .select_related("vehicle", "damage_report")
         .order_by("-ordered_at")
     )
@@ -898,7 +902,10 @@ def owner_bookings(request):
         return redirect("home")
     qs = (
         Booking.objects
-        .filter(vehicle__owner=request.user)
+        .filter(vehicle__owner=request.user,
+                is_rent_paid = True
+        )
+        .exclude(status="payment_pending")
         .select_related("vehicle", "user")
         .prefetch_related(
             "handover_photos",
