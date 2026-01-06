@@ -10,7 +10,8 @@ urlpatterns = [
     path("logout/", views.logout_view, name="logout"),
 
     # ================= HOME & PROFILE =================
-    path("", views.home, name="home"),
+    path("", views.splash, name="splash"),
+    path("home/", views.home, name="home"),
     path("profile/", views.profile_view, name="profile"),
     path("profile/edit/", views.edit_profile, name="edit_profile"),
 

@@ -21,6 +21,18 @@ razorpay_client = razorpay.Client(
     auth=(settings.RAZORPAY_KEY_ID, settings.RAZORPAY_KEY_SECRET)
 )
 
+def splash(request):
+    redirect_url = "home"
+
+    if request.user.is_authenticated:
+        if request.user.is_superuser:
+            redirect_url = "admin_dashboard"
+        elif request.user.groups.filter(name="owner").exists():
+            redirect_url = "owner_dashboard"
+
+    return render(request, "splash.html", {
+        "redirect_url": redirect_url
+    })
 
 
 def register(request):
