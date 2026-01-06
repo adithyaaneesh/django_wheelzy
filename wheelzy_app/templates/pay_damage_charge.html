@@ -4,6 +4,8 @@
 <head>
     <title>Pay Damage Charge</title>
     <link rel="icon" type="image/png" href="{% static 'images/wheelzy1.png' %}">
+    <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+
     <style>
         body { font-family:Segoe UI; background:#f4f6fb; padding:30px; }
         .card {
@@ -30,14 +32,52 @@
 
 <div class="card">
     <h2>Pay Damage Charge</h2>
-    <p><strong>Vehicle:</strong> {{ report.vehicle.name }}</p>
+    <p><strong>Vehicle:</strong> {{ report.booking.vehicle.vehicle_name }}</p>
     <p><strong>Amount:</strong> ₹{{ report.extra_charge }}</p>
 
-    <form method="post">
-        {% csrf_token %}
-        <button type="submit">Confirm Payment</button>
-    </form>
+    <button id="pay-btn">Pay Now</button>
 </div>
+
+<script>
+document.getElementById("pay-btn").onclick = function () {
+    var options = {
+        "key": "{{ razorpay_key }}",
+        "amount": "{{ amount }}",
+        "currency": "{{ currency }}",
+        "name": "Wheelzy",
+        "description": "Damage Charge Payment",
+        "order_id": "{{ order_id }}",
+        "handler": function (response) {
+            fetch("{% url 'verify_damage_payment' %}", {
+                method: "POST",
+                headers: {
+                    "X-CSRFToken": "{{ csrf_token }}"
+                },
+                body: new URLSearchParams({
+                    "razorpay_payment_id": response.razorpay_payment_id,
+                    "razorpay_order_id": response.razorpay_order_id,
+                    "razorpay_signature": response.razorpay_signature,
+                    "report_id": "{{ report.id }}"
+                })
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (data.status === "success") {
+                    window.location.href = "{% url 'my_bookings' %}";
+                } else {
+                    alert("Payment verification failed");
+                }
+            });
+        },
+        "theme": {
+            "color": "#16a34a"
+        }
+    };
+
+    var rzp = new Razorpay(options);
+    rzp.open();
+};
+</script>
 
 </body>
 </html>

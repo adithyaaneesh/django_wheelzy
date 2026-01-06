@@ -23,7 +23,6 @@
             color: #1e293b;
         }
 
-        /* Layout Enhancements */
         .checkout-header {
             padding: 40px 0;
             background: white;
@@ -45,7 +44,6 @@
             font-weight: 700;
         }
 
-        /* Sidebar Styling */
         .sticky-sidebar {
             position: sticky;
             top: 20px;
@@ -58,21 +56,10 @@
             padding: 15px;
         }
 
-        /* Form Styling */
         .form-label {
             font-weight: 600;
             font-size: 14px;
             color: #475569;
-        }
-
-        .input-group-text {
-            background-color: #f8fafc;
-            color: #94a3b8;
-        }
-
-        .form-control:focus {
-            border-color: var(--primary);
-            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
         }
 
         .file-upload-wrapper {
@@ -88,7 +75,6 @@
             background: #f0f7ff;
         }
 
-        /* Booking Details Summary */
         .summary-item {
             display: flex;
             justify-content: space-between;
@@ -104,6 +90,7 @@
             border: none;
             width: 100%;
             transition: 0.3s;
+            color: white;
         }
 
         .btn-confirm:hover {
@@ -160,15 +147,40 @@
                             <div class="col-md-6 mb-3">
                                 <label class="form-label">Aadhaar Card (Front/Back)</label>
                                 <div class="file-upload-wrapper">
-                                    <i class="fa-solid fa-id-card mb-2 text-muted"></i>
-                                    <input type="file" name="aadhaar_photo" class="form-control form-control-sm" required>
+                                    {% if previous_document and previous_document.aadhaar_photo %}
+                                        <div class="mb-2">
+                                            <img src="{{ previous_document.aadhaar_photo.url }}" class="img-thumbnail" style="max-height:100px">
+                                            <p class="small text-success mt-1 fw-bold"><i class="fa-solid fa-check-double"></i> Previously uploaded</p>
+                                        </div>
+                                        <label class="btn btn-outline-primary btn-sm w-100">
+                                            Replace Aadhaar
+                                            <input type="file" name="aadhaar_photo" onchange="updateFileName(this)" hidden>
+                                        </label>
+                                        <div class="selected-file-name small text-muted mt-1"></div>
+                                    {% else %}
+                                        <i class="fa-solid fa-id-card mb-2 text-muted"></i>
+                                        <input type="file" name="aadhaar_photo" class="form-control form-control-sm" required>
+                                    {% endif %}
                                 </div>
                             </div>
+
                             <div class="col-md-6 mb-3">
                                 <label class="form-label">Driving License</label>
                                 <div class="file-upload-wrapper">
-                                    <i class="fa-solid fa-address-card mb-2 text-muted"></i>
-                                    <input type="file" name="driving_license_photo" class="form-control form-control-sm" required>
+                                    {% if previous_document and previous_document.driving_license_photo %}
+                                        <div class="mb-2">
+                                            <img src="{{ previous_document.driving_license_photo.url }}" class="img-thumbnail" style="max-height:100px">
+                                            <p class="small text-success mt-1 fw-bold"><i class="fa-solid fa-check-double"></i> Previously uploaded</p>
+                                        </div>
+                                        <label class="btn btn-outline-primary btn-sm w-100">
+                                            Replace License
+                                            <input type="file" name="driving_license_photo" onchange="updateFileName(this)" hidden>
+                                        </label>
+                                        <div class="selected-file-name small text-muted mt-1"></div>
+                                    {% else %}
+                                        <i class="fa-solid fa-address-card mb-2 text-muted"></i>
+                                        <input type="file" name="driving_license_photo" class="form-control form-control-sm" required>
+                                    {% endif %}
                                 </div>
                             </div>
                         </div>
@@ -183,23 +195,17 @@
                         <div class="row">
                             <div class="col-md-6 mb-3">
                                 <label class="form-label">Pick-up Date & Time</label>
-                                <div class="input-group">
-                                    <span class="input-group-text"><i class="fa-regular fa-calendar"></i></span>
-                                    <input type="datetime-local" name="start_time" class="form-control" required>
-                                </div>
+                                <input type="datetime-local" name="start_time" class="form-control" id="start_time" min="{{ now|date:'Y-m-d\\TH:i' }}" required>
                             </div>
                             <div class="col-md-6 mb-3">
                                 <label class="form-label">Drop-off Date & Time</label>
-                                <div class="input-group">
-                                    <span class="input-group-text"><i class="fa-solid fa-calendar-check"></i></span>
-                                    <input type="datetime-local" name="end_time" class="form-control" required>
-                                </div>
+                                <input type="datetime-local" name="end_time" class="form-control" id="end_time" min="{{ now|date:'Y-m-d\\TH:i' }}" required>
                             </div>
                         </div>
                     </div>
                 </div>
 
-                <button type="submit" class="btn btn-primary btn-confirm shadow">
+                <button type="submit" class="btn btn-confirm shadow">
                     Complete Booking Request <i class="fa-solid fa-chevron-right ms-2"></i>
                 </button>
             </form>
@@ -207,7 +213,6 @@
 
         <div class="col-lg-4">
             <div class="sticky-sidebar">
-                
                 <div class="card mb-4 shadow-sm">
                     <div class="card-body">
                         <h6 class="text-muted text-uppercase fw-bold mb-3 small">Vehicle Summary</h6>
@@ -220,7 +225,6 @@
                                 <span class="badge bg-primary-subtle text-primary small">{{ vehicle.vehicle_type }}</span>
                             </div>
                         </div>
-                        
                         <div class="summary-item border-top pt-3">
                             <span>Capacity</span>
                             <span class="fw-bold">{{ vehicle.seats }} Seats</span>
@@ -243,36 +247,51 @@
                                 <span class="fw-bold">{{ owner.username }}</span>
                             </div>
                             <p class="mb-1 small text-muted"><i class="fa-solid fa-envelope me-2"></i> {{ owner.email }}</p>
-                            
                             {% if owner_profile %}
                                 <p class="mb-1 small text-muted"><i class="fa-solid fa-phone me-2"></i> {{ owner_profile.phone_number }}</p>
-                                <p class="mb-0 small text-muted"><i class="fa-solid fa-location-dot me-2"></i> {{ owner_profile.address }}</p>
                             {% endif %}
                         </div>
                     </div>
                 </div>
-
             </div>
         </div>
 
     </div>
 </div>
 
-<div class="modal fade" id="aadhaarModal" tabindex="-1">
-    <div class="modal-dialog modal-lg modal-dialog-centered">
-        <div class="modal-content border-0 rounded-4">
-            <div class="modal-header border-0">
-                <h5 class="modal-title fw-bold">Aadhaar Card Preview</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-            </div>
-            <div class="modal-body text-center p-4">
-                <img src="{{ user_documents.aadhaar_photo.url }}" class="img-fluid rounded-3 shadow">
-            </div>
-        </div>
-    </div>
-</div>
+<script>
+    // Helpful script to show user the file name when they choose to replace
+    function updateFileName(input) {
+        let fileName = input.files[0].name;
+        input.parentElement.nextElementSibling.innerHTML = '<i class="fa-solid fa-file-arrow-up"></i> ' + fileName;
+    }
+</script>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
-
 </body>
+<script>
+    document.querySelector('input[name="start_time"]').addEventListener('change', function () {
+        document.querySelector('input[name="end_time"]').min = this.value;
+    });
+
+const startInput = document.getElementById("start_time");
+const endInput = document.getElementById("end_time");
+
+function getNowLocal() {
+    const now = new Date();
+    now.setSeconds(0, 0);
+    return now.toISOString().slice(0,16);
+}
+
+// Set initial min
+startInput.min = getNowLocal();
+endInput.min = getNowLocal();
+
+// Update end time when start time changes
+startInput.addEventListener("change", function () {
+    endInput.min = this.value;
+});
+
+</script>
+
 </html>

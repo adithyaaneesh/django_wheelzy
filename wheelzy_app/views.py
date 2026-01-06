@@ -6,7 +6,6 @@ from .models import DamagePhoto, UserDocument, Vehicle, Booking, DamageReport, U
 from datetime import datetime
 from django.utils import timezone
 from django.contrib.auth.decorators import login_required
-from django.contrib import messages
 from . import models
 from django.db.models import Prefetch
 from django.http import JsonResponse
@@ -17,6 +16,12 @@ from datetime import timedelta
 import razorpay
 from django.conf import settings
 from django.views.decorators.csrf import csrf_exempt
+
+razorpay_client = razorpay.Client(
+    auth=(settings.RAZORPAY_KEY_ID, settings.RAZORPAY_KEY_SECRET)
+)
+
+
 
 def register(request):
     if request.method == "POST":
@@ -247,6 +252,14 @@ def book_vehicle(request, vehicle_id):
     owner = vehicle.owner
     owner_profile = UserProfile.objects.filter(user=owner).first() if owner else None
 
+    # ✅ FETCH LAST DOCUMENT (IMPORTANT)
+    previous_document = (
+        UserDocument.objects
+        .filter(user=request.user)
+        .order_by("-uploaded_at")
+        .first()
+    )
+
     if request.method == "POST":
         start_time = timezone.make_aware(
             datetime.strptime(request.POST["start_time"], "%Y-%m-%dT%H:%M")
@@ -254,7 +267,16 @@ def book_vehicle(request, vehicle_id):
         end_time = timezone.make_aware(
             datetime.strptime(request.POST["end_time"], "%Y-%m-%dT%H:%M")
         )
+        
+        now = timezone.now()
 
+        if start_time < now:
+            messages.error(request, "Pick-up time cannot be in the past.")
+            return redirect('book_vehicle')
+
+        if end_time <= start_time:
+            messages.error(request, "Drop-off time must be after pick-up time.")
+            return redirect('book_vehicle')
         hours = max(1, int((end_time - start_time).total_seconds() // 3600))
         total_price = hours * vehicle.price_per_hour
 
@@ -268,11 +290,20 @@ def book_vehicle(request, vehicle_id):
             is_rent_paid=False
         )
 
+        # ✅ USE NEW FILES IF PROVIDED, ELSE REUSE OLD ONES
+        aadhaar = request.FILES.get("aadhaar_photo") or (
+            previous_document.aadhaar_photo if previous_document else None
+        )
+
+        dl = request.FILES.get("driving_license_photo") or (
+            previous_document.driving_license_photo if previous_document else None
+        )
+
         UserDocument.objects.create(
             user=request.user,
             booking=booking,
-            aadhaar_photo=request.FILES.get("aadhaar_photo"),
-            driving_license_photo=request.FILES.get("driving_license_photo"),
+            aadhaar_photo=aadhaar,
+            driving_license_photo=dl,
         )
 
         return redirect("payment_page", booking_id=booking.id)
@@ -284,8 +315,12 @@ def book_vehicle(request, vehicle_id):
             "vehicle": vehicle,
             "owner": owner,
             "owner_profile": owner_profile,
+            "previous_document": previous_document,
+            "now": timezone.localtime(),
+
         }
     )
+
 
 
 @login_required
@@ -435,26 +470,61 @@ def pay_damage_charge(request, report_id):
         messages.info(request, "Damage already paid.")
         return redirect("my_bookings")
 
+    # Create Razorpay Order
+    order_amount = int(report.extra_charge * 100)  # paise
+    order_currency = "INR"
+
+    razorpay_order = razorpay_client.order.create({
+        "amount": order_amount,
+        "currency": order_currency,
+        "payment_capture": 1
+    })
+
+    context = {
+        "report": report,
+        "razorpay_key": settings.RAZORPAY_KEY_ID,
+        "order_id": razorpay_order["id"],
+        "amount": order_amount,
+        "currency": order_currency
+    }
+
+    return render(request, "pay_damage_charge.html", context)
+
+
+@csrf_exempt
+def verify_damage_payment(request):
     if request.method == "POST":
+        data = request.POST
+
+        try:
+            razorpay_client.utility.verify_payment_signature({
+                "razorpay_order_id": data.get("razorpay_order_id"),
+                "razorpay_payment_id": data.get("razorpay_payment_id"),
+                "razorpay_signature": data.get("razorpay_signature"),
+            })
+        except razorpay.errors.SignatureVerificationError:
+            return JsonResponse({"status": "failed"})
+
+        report = get_object_or_404(DamageReport, id=data.get("report_id"))
+
         report.is_paid = True
         report.save()
 
+        # Notifications
         Notification.objects.create(
-            user=request.user,
+            user=report.booking.user,
             message="Damage payment successful. You may book again."
         )
-        Notification.objects.create(
-            user=User.objects.filter(is_superuser=True).first(),
-            message=(
-                f"Damage payment completed for booking #{report.booking.id} "
-                f"({report.booking.vehicle.vehicle_name})"
+
+        admin = User.objects.filter(is_superuser=True).first()
+        if admin:
+            Notification.objects.create(
+                user=admin,
+                message=f"Damage payment completed for booking #{report.booking.id}"
             )
-        )
 
-        messages.success(request, "Payment completed.")
-        return redirect("my_bookings")
+        return JsonResponse({"status": "success"})
 
-    return render(request, "pay_damage_charge.html", {"report": report})
 
 @login_required
 def admin_dashboard(request):

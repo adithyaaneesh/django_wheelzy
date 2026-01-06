@@ -78,7 +78,7 @@ urlpatterns = [
     path("payment/<int:booking_id>/", views.payment_page, name="payment_page"),
     path("razorpay/verify/", views.razorpay_verify, name="razorpay_verify"),
 
-
+    path("damage-payment/verify/",views.verify_damage_payment,name="verify_damage_payment"),
 
 
 ]
