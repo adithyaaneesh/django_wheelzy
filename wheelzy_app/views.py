@@ -164,29 +164,29 @@ def profile_view(request):
 
 @login_required
 def edit_profile(request):
+    profile = request.user.profile
+
     if request.method == "POST":
-        profile, _ = UserProfile.objects.get_or_create(user=request.user)
-        new_username = request.POST.get("username")
-        if new_username and new_username != request.user.username:
-            if User.objects.filter(username=new_username).exists():
-                messages.error(request, "Username already exists")
-                return redirect("profile")
-            request.user.username = new_username
+        phone_number = request.POST.get("phone_number")
+        address = request.POST.get("address")
+        photo = request.FILES.get("photo")
 
-        request.user.email = request.POST.get("email")
-        profile.phone_number = request.POST.get("phone")
-        profile.address = request.POST.get("address")
+        # 🔒 Validation
+        if not phone_number:
+            messages.error(request, "Phone number is required.")
+            return redirect("edit_profile")
 
-        if request.FILES.get("photo"):
-            profile.photo = request.FILES["photo"]
+        profile.phone_number = phone_number
+        profile.address = address
 
-        request.user.save()
+        if photo:
+            profile.photo = photo
+
         profile.save()
-
-        messages.success(request, "Profile updated successfully")
+        messages.success(request, "Profile updated successfully.")
         return redirect("profile")
 
-    return redirect("profile")
+    return render(request, "edit_profile.html", {"profile": profile})
 
 
 

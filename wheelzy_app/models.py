@@ -1,6 +1,7 @@
 from django.db import models
 from django.contrib.auth.models import User
 from django.utils import timezone
+from cloudinary.models import CloudinaryField
 
 
 # =========================
@@ -12,13 +13,9 @@ class UserProfile(models.Model):
         on_delete=models.CASCADE,
         related_name="profile"
     )
-    phone_number = models.CharField(max_length=15)
+    phone_number = models.CharField(max_length=15,blank=True, null=True)
     address = models.TextField()
-    photo = models.ImageField(
-        upload_to="profile_photos/",
-        blank=True,
-        null=True
-    )
+    photo = CloudinaryField('profile_photos', blank=True, null=True)
 
     def __str__(self):
         return self.user.username
@@ -46,7 +43,7 @@ class Vehicle(models.Model):
     number_plate = models.CharField(max_length=50, unique=True)
     price_per_hour = models.PositiveIntegerField()
     seats = models.PositiveIntegerField(blank=True)
-    image = models.ImageField(upload_to="vehicles/", null=True, blank=True)
+    image = CloudinaryField('vehicle_images', blank=True, null=True)
 
     is_available = models.BooleanField(default=True)
 
@@ -148,7 +145,7 @@ class VehicleHandoverPhoto(models.Model):
         null=True
     )
 
-    image = models.ImageField(upload_to="handover_photos/")
+    image = CloudinaryField('handover_photos')
     created_at = models.DateTimeField(auto_now_add=True)
 
 
@@ -178,7 +175,7 @@ class DamagePhoto(models.Model):
         on_delete=models.CASCADE,
         related_name="photos"
     )
-    image = models.ImageField(upload_to="damage_photos/")
+    image = CloudinaryField('damage_photos')
 
     def __str__(self):
         return f"Damage Photo - Report #{self.report.id}"
@@ -196,8 +193,8 @@ class UserDocument(models.Model):
         null=True,
         blank=True
     )
-    aadhaar_photo = models.ImageField(upload_to="documents/aadhaar/")
-    driving_license_photo = models.ImageField(upload_to="documents/driving_license/")
+    aadhaar_photo = CloudinaryField('aadhaar', blank=True, null=True)
+    driving_license_photo = CloudinaryField('aadhaar', blank=True, null=True)
     uploaded_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
