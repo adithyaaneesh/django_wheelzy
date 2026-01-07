@@ -4,6 +4,16 @@ from django.utils import timezone
 from cloudinary.models import CloudinaryField
 
 
+class EmailOTP(models.Model):
+    user = models.OneToOneField(User, on_delete=models.CASCADE)
+    otp = models.CharField(max_length=6)
+    attempts = models.PositiveIntegerField(default=0)
+    is_verified = models.BooleanField(default=False)
+    created_at = models.DateTimeField(auto_now=True)
+
+    def __str__(self):
+        return f"{self.user.email} - {self.otp}"
+
 # =========================
 # USER PROFILE
 # =========================

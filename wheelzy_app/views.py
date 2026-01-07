@@ -16,6 +16,11 @@ from datetime import timedelta
 import razorpay
 from django.conf import settings
 from django.views.decorators.csrf import csrf_exempt
+from django.core.mail import send_mail
+from django.http import HttpResponse
+from .models import EmailOTP
+from .utils import generate_otp
+
 
 razorpay_client = razorpay.Client(
     auth=(settings.RAZORPAY_KEY_ID, settings.RAZORPAY_KEY_SECRET)
@@ -33,35 +38,30 @@ def splash(request):
     return render(request, "splash.html", {
         "redirect_url": redirect_url
     })
-
-
 def register(request):
     if request.method == "POST":
         username = request.POST.get("username")
         email = request.POST.get("email")
         password = request.POST.get("password")
         cpassword = request.POST.get("cpassword")
-        role = request.POST.get("role")
         phone = request.POST.get("phone")
         address = request.POST.get("address")
-        photo = request.FILES.get("photo") 
-
-        if not all([username, email, password, cpassword, phone, address, photo]):
-            messages.error(request, "All fields are required")
-            return redirect("register")
-
-        if User.objects.filter(username=username).exists():
-            messages.error(request, "Username already exists")
-            return redirect("register")
+        photo = request.FILES.get("photo")
+        role = request.POST.get("role")
 
         if password != cpassword:
             messages.error(request, "Passwords do not match")
             return redirect("register")
 
+        if User.objects.filter(email=email).exists():
+            messages.error(request, "Email already registered")
+            return redirect("register")
+
         user = User.objects.create_user(
             username=username,
             email=email,
-            password=password
+            password=password,
+            is_active=False   # 🔒 inactive until OTP verified
         )
 
         UserProfile.objects.create(
@@ -75,10 +75,163 @@ def register(request):
             owner_group, _ = Group.objects.get_or_create(name="owner")
             user.groups.add(owner_group)
 
-        messages.success(request, "Registration successful!")
-        return redirect("login")
+        otp = generate_otp()
+        EmailOTP.objects.create(user=user, otp=otp)
+
+        send_mail(
+            subject="Wheelzy Email Verification",
+            message=f"Your OTP is {otp}. Valid for 5 minutes.",
+            from_email=settings.EMAIL_HOST_USER,
+            recipient_list=[email],
+            fail_silently=False,
+        )
+
+        request.session["email"] = email
+        messages.success(request, "OTP sent to your email")
+        return redirect("verify_otp")
 
     return render(request, "register.html")
+
+def verify_otp(request):
+    email = request.session.get("email")
+
+    if not email:
+        messages.error(request, "Session expired. Please register again.")
+        return redirect("register")
+
+    user = get_object_or_404(User, email=email)
+    email_otp = get_object_or_404(EmailOTP, user=user)
+
+    if request.method == "POST":
+        otp_entered = request.POST.get("otp")
+
+        # ⏱ Expiry check (5 minutes)
+        if timezone.now() - email_otp.created_at > timedelta(minutes=5):
+            email_otp.delete()
+            messages.error(request, "OTP expired. Please resend.")
+            return redirect("verify_otp")
+
+        # 🔐 Attempt limit
+        if email_otp.attempts >= 5:
+            email_otp.delete()
+            messages.error(request, "Too many attempts. Please resend OTP.")
+            return redirect("verify_otp")
+
+        if email_otp.otp == otp_entered:
+            email_otp.is_verified = True
+            email_otp.save()
+
+            user.is_active = True
+            user.save()
+
+            send_mail(
+                subject="Welcome to Wheelzy – Email Verified Successfully",
+                message=(
+                    f"Hi {user.username},\n\n"
+                    "Thank you for verifying your email address. Your Wheelzy account has been "
+                    "successfully activated.\n\n"
+                    "You can now log in and start booking vehicles, managing your profile, "
+                    "and enjoying all the features Wheelzy has to offer.\n\n"
+                    "If you have any questions or need assistance, feel free to reach out to "
+                    "our support team.\n\n"
+                    "Welcome aboard!\n\n"
+                    "Best regards,\n"
+                    "Team Wheelzy\n"
+                    "https://wheelzy.com"
+                ),
+                from_email=settings.EMAIL_HOST_USER,
+                recipient_list=[email],
+                fail_silently=False,
+            )
+
+            del request.session["email"]
+            messages.success(request, "Email verified successfully")
+            return redirect("login")
+
+        email_otp.attempts += 1
+        email_otp.save()
+        messages.error(request, "Invalid OTP")
+        return redirect("verify_otp")
+
+    return render(request, "verify_otp.html")
+
+def resend_otp(request):
+    email = request.session.get("email")
+
+    if not email:
+        messages.error(request, "Session expired.")
+        return redirect("register")
+
+    user = get_object_or_404(User, email=email)
+
+    EmailOTP.objects.filter(user=user).delete()
+
+    otp = generate_otp()
+    EmailOTP.objects.create(user=user, otp=otp)
+
+    send_mail(
+        subject="Your New OTP",
+        message=f"Your new OTP is {otp}. Valid for 5 minutes.",
+        from_email=settings.EMAIL_HOST_USER,
+        recipient_list=[email],
+        fail_silently=False,
+    )
+
+    messages.success(request, "New OTP sent")
+    return redirect("verify_otp")
+
+
+# def register(request):
+#     if request.method == "POST":
+#         username = request.POST.get("username")
+#         email = request.POST.get("email")
+#         password = request.POST.get("password")
+#         cpassword = request.POST.get("cpassword")
+#         role = request.POST.get("role")
+#         phone = request.POST.get("phone")
+#         address = request.POST.get("address")
+#         photo = request.FILES.get("photo") 
+
+#         if not all([username, email, password, cpassword, phone, address, photo]):
+#             messages.error(request, "All fields are required")
+#             return redirect("register")
+
+#         if User.objects.filter(username=username).exists():
+#             messages.error(request, "Username already exists")
+#             return redirect("register")
+
+#         if password != cpassword:
+#             messages.error(request, "Passwords do not match")
+#             return redirect("register")
+
+#         user = User.objects.create_user(
+#             username=username,
+#             email=email,
+#             password=password
+#         )
+
+#         UserProfile.objects.create(
+#             user=user,
+#             phone_number=phone,
+#             address=address,
+#             photo=photo
+#         )
+
+#         if role == "owner":
+#             owner_group, _ = Group.objects.get_or_create(name="owner")
+#             user.groups.add(owner_group)
+#         send_mail(
+#             subject="Welcome to Wheelzy 🚗",
+#             message=f"Hi {username},\n\nYour account has been created successfully!",
+#             from_email=settings.EMAIL_HOST_USER,
+#             recipient_list=[email],
+#             fail_silently=False,
+#         )
+        
+#         messages.success(request, "Registration successful!")
+#         return redirect("login")
+
+#     return render(request, "register.html")
 
 
 def login_view(request):
