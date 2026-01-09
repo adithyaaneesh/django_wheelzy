@@ -33,6 +33,7 @@ urlpatterns = [
 
     # ================= OWNER =================
     path("owner_dashboard/", views.owner_dashboard, name="owner_dashboard"),
+    path("edit-profile/", views.edit_owner_profile, name="edit_owner_profile"),
     path("owner_vehicle_list/", views.owner_vehicles, name="owner_vehicle_list"),
     path("owner_vehicle_bookings/", views.owner_bookings, name="owner_vehicle_bookings"),
     path('my-vehicle-damages/', views.owner_damage_list, name='owner_damage_list'),
@@ -83,6 +84,7 @@ urlpatterns = [
     path("razorpay/verify/", views.razorpay_verify, name="razorpay_verify"),
 
     path("damage-payment/verify/",views.verify_damage_payment,name="verify_damage_payment"),
+    path("payment/cancelled/<int:booking_id>/",views.payment_cancelled,name="payment_cancelled"),
 
 
 ]

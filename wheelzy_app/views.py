@@ -1006,6 +1006,31 @@ def owner_dashboard(request):
     }
     return render(request, "owner_dashboard.html", context)
 
+@login_required
+def edit_owner_profile(request):
+    user = request.user
+    profile = user.profile   # ✅ correct relation
+
+    if request.method == "POST":
+
+        # Update email (User model)
+        email = request.POST.get("email")
+        if email:
+            user.email = email
+            user.save()
+
+        # Update profile fields
+        profile.phone_number = request.POST.get("phone_number")
+        profile.address = request.POST.get("address")
+
+        # Update profile photo
+        if request.FILES.get("photo"):
+            profile.photo = request.FILES.get("photo")
+
+        profile.save()
+
+    return redirect(request.META.get("HTTP_REFERER", "/"))
+
 
 @login_required
 def add_vehicle(request):
@@ -1256,3 +1281,20 @@ def razorpay_verify(request):
         except Exception:
             messages.error(request, "Payment verification failed")
             return redirect("payment_page", booking_id=booking.id)
+
+@login_required
+def payment_cancelled(request, booking_id):
+    booking = get_object_or_404(
+        Booking,
+        id=booking_id,
+        user=request.user
+    )
+
+    # Ensure booking is marked unpaid
+    booking.status = "payment_incomplete"
+    booking.is_rent_paid = False
+    booking.save()
+
+    return render(request, "payment_cancelled.html", {
+        "booking": booking
+    })

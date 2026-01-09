@@ -179,38 +179,57 @@
 
 <script>
 var options = {
-    "key": "{{ razorpay_key }}",
-    "amount": "{{ amount|floatformat:0 }}00",
-    "currency": "INR",
-    "name": "Wheelzy",
-    "description": "Vehicle Booking Payment",
-    "order_id": "{{ order_id }}",
-    "handler": function (response){
-        // Add a loading state to UI
-        document.getElementById("rzp-button").innerHTML = '<i class="fa-solid fa-circle-notch fa-spin"></i> Verifying...';
-        document.getElementById("payment_id").value = response.razorpay_payment_id;
-        document.getElementById("signature").value = response.razorpay_signature;
+    key: "{{ razorpay_key }}",
+    amount: "{{ amount|floatformat:0 }}00",
+    currency: "INR",
+    name: "Wheelzy",
+    description: "Vehicle Booking Payment",
+    order_id: "{{ order_id }}",
+
+    // ✅ PAYMENT SUCCESS
+    handler: function (response) {
+        document.getElementById("rzp-button").innerHTML =
+            '<i class="fa-solid fa-circle-notch fa-spin"></i> Verifying...';
+
+        document.getElementById("payment_id").value =
+            response.razorpay_payment_id;
+
+        document.getElementById("signature").value =
+            response.razorpay_signature;
+
         document.getElementById("razorpay-form").submit();
     },
-    "prefill": {
-        "name": "{{ user.username }}",
-        "email": "{{ user.email }}"
+
+    // ❌ USER CLOSES / CANCELS RAZORPAY
+    modal: {
+        ondismiss: function () {
+            window.location.href =
+                "{% url 'payment_cancelled' booking.id %}";
+        }
     },
-    "theme": {
-        "color": "#2563eb"
+
+    prefill: {
+        name: "{{ user.username }}",
+        email: "{{ user.email }}"
+    },
+
+    theme: {
+        color: "#2563eb"
     }
 };
 
 var rzp = new Razorpay(options);
 
-document.getElementById("rzp-button").onclick = function(e){
+// Open Razorpay
+document.getElementById("rzp-button").onclick = function (e) {
     rzp.open();
     e.preventDefault();
-}
+};
 
-// Handle payment failure gracefully
-rzp.on('payment.failed', function (response){
-    alert("Payment Failed: " + response.error.description);
+// ❌ BANK / NETWORK / UPI FAILURE
+rzp.on('payment.failed', function () {
+    window.location.href =
+        "{% url 'payment_cancelled' booking.id %}";
 });
 </script>
 
