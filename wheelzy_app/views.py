@@ -7,7 +7,7 @@ from datetime import datetime
 from django.utils import timezone
 from django.contrib.auth.decorators import login_required
 from . import models
-from django.db.models import Prefetch
+from django.db.models import Prefetch, Sum, Count
 from django.http import JsonResponse
 from django.views.decorators.http import require_POST
 from django.core.paginator import Paginator
@@ -849,16 +849,58 @@ def admin_bookings(request):
         {"bookings": bookings}
     )
 
+
 @login_required
 def admin_revenue(request):
     if not request.user.is_superuser:
         return redirect("home")
-    total_revenue = Booking.objects.filter(
-        status__in=["confirmed", "returned"]
-    ).aggregate(total=models.Sum("total_price"))["total"] or 0
+
+    paid_bookings = Booking.objects.filter(
+        is_rent_paid=True
+    ).exclude(status="cancelled")
+
+    total_rental_revenue = paid_bookings.aggregate(
+        total=Sum("total_price")
+    )["total"] or 0
+
+    platform_commission = total_rental_revenue * 0.10
+    owner_payout = total_rental_revenue * 0.90
+
+    damage_revenue = DamageReport.objects.filter(
+        is_paid=True
+    ).aggregate(
+        total=Sum("extra_charge")
+    )["total"] or 0
+
+    # ✅ Build clean booking rows
+    recent_bookings = []
+    for booking in (
+        paid_bookings
+        .select_related("user", "vehicle")
+        .order_by("-ordered_at")[:10]
+    ):
+        damage_charge = 0
+
+        if hasattr(booking, "damage_report") and booking.damage_report.is_paid:
+            damage_charge = booking.damage_report.extra_charge
+
+        recent_bookings.append({
+            "id": booking.id,
+            "customer": booking.user.username,
+            "vehicle": booking.vehicle.vehicle_name,
+            "booking_charge": booking.total_price,
+            "damage_charge": damage_charge,
+            "final_amount": booking.total_price + damage_charge,
+            "status": booking.get_status_display(),
+            "date": booking.ordered_at,
+        })
 
     return render(request, "admin_revenue.html", {
-        "total_revenue": total_revenue
+        "total_rental_revenue": total_rental_revenue,
+        "platform_commission": platform_commission,
+        "owner_payout": owner_payout,
+        "damage_revenue": damage_revenue,
+        "recent_bookings": recent_bookings,
     })
 
 
@@ -866,15 +908,29 @@ def admin_revenue(request):
 def admin_analytics(request):
     if not request.user.is_superuser:
         return redirect("home")
-
-    data = {
-        "total_users": User.objects.count(),
-        "total_owners": User.objects.filter(groups__name="owner").count(),
+    paid_bookings = Booking.objects.filter(is_rent_paid=True)
+    total_revenue = paid_bookings.aggregate(
+        total=Sum("total_price")
+    )["total"] or 0
+    context = {
+        "total_customers": User.objects.filter(
+            is_superuser=False
+        ).exclude(groups__name="owner").count(),
+        "total_owners": User.objects.filter(
+            groups__name="owner"
+        ).count(),
         "total_vehicles": Vehicle.objects.count(),
         "total_bookings": Booking.objects.count(),
+        "paid_bookings": paid_bookings.count(),
+        "total_revenue": total_revenue,
+        "popular_vehicles": (
+            paid_bookings
+            .values("vehicle__vehicle_name")
+            .annotate(count=Count("id"))
+            .order_by("-count")[:5]
+        ),
     }
-
-    return render(request, "admin_analytics.html", data)
+    return render(request, "admin_analytics.html", context)
 
 
 @login_required

@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<body>
+    <h2>System Analytics</h2>
+
+<p><b>Total Customers:</b> {{ total_customers }}</p>
+<p><b>Total Owners:</b> {{ total_owners }}</p>
+<p><b>Total Vehicles:</b> {{ total_vehicles }}</p>
+<p><b>Total Bookings:</b> {{ total_bookings }}</p>
+<p><b>Paid Bookings:</b> {{ paid_bookings }}</p>
+<p><b>Total Revenue:</b> ₹{{ total_revenue }}</p>
+
+<hr>
+
+<h3>Most Booked Vehicles</h3>
+<ul>
+    {% for v in popular_vehicles %}
+        <li>{{ v.vehicle__vehicle_name }} — {{ v.count }} bookings</li>
+    {% empty %}
+        <li>No data</li>
+    {% endfor %}
+</ul>
+
+</body>
+</html>

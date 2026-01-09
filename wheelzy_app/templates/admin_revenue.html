@@ -8,6 +8,48 @@
     <link rel="icon" type="image/png" href="{% static 'images/wheelzy1.png' %}">
 </head>
 <body>
-    
+    <h2>Admin Revenue Dashboard</h2>
+
+<div>
+    <p><b>Total Rental Revenue:</b> ₹{{ total_rental_revenue }}</p>
+    <p><b>Platform Commission (10%):</b> ₹{{ platform_commission }}</p>
+    <p><b>Owner Payout (90%):</b> ₹{{ owner_payout }}</p>
+    <p><b>Damage Charges Collected:</b> ₹{{ damage_revenue }}</p>
+</div>
+
+<hr>
+<h3>Recent Paid Bookings</h3>
+
+<table border="1" cellpadding="8">
+    <tr>
+        <th>ID</th>
+        <th>Customer</th>
+        <th>Vehicle</th>
+        <th>Booking Charge</th>
+        <th>Damage Charge</th>
+        <th>Total Collected</th>
+        <th>Status</th>
+        <th>Date</th>
+    </tr>
+
+    {% for b in recent_bookings %}
+    <tr>
+        <td>#{{ b.id }}</td>
+        <td>{{ b.customer }}</td>
+        <td>{{ b.vehicle }}</td>
+        <td>₹{{ b.booking_charge }}</td>
+        <td>₹{{ b.damage_charge }}</td>
+        <td><b>₹{{ b.final_amount }}</b></td>
+        <td>{{ b.status }}</td>
+        <td>{{ b.date|date:"d M Y" }}</td>
+    </tr>
+    {% empty %}
+    <tr>
+        <td colspan="8">No revenue yet</td>
+    </tr>
+    {% endfor %}
+</table>
+
+
 </body>
 </html>
