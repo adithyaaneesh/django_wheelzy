@@ -7,6 +7,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="icon" type="image/png" href="{% static 'images/wheelzy1.png' %}">
     <!-- Fonts & Icons -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Poppins:wght@600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
 
@@ -234,22 +235,27 @@
                         </td>
 
                         <td>
+                            {% with doc=booking.documents %}
                             <a href="javascript:void(0)"
-                               class="customer-link"
-                               data-name="{{ booking.user.username }}"
-                               data-email="{{ booking.user.email }}"
-                               data-phone="{{ booking.user.profile.phone_number|default:'' }}"
-                               data-address="{{ booking.user.profile.address|default:'' }}"
-                               data-photo="{% if booking.user.profile.photo %}{{ booking.user.profile.photo.url }}{% endif %}"
-                               data-aadhaar="{% if booking.user.documents.aadhaar %}{{ booking.user.documents.aadhaar.url }}{% endif %}"
-                               data-license="{% if booking.user.documents.license %}{{ booking.user.documents.license.url }}{% endif %}"
-                               style="font-weight:600;color:#2563eb;text-decoration:none;">
-                                {{ booking.user.username }}
-                            </a><br>
+                            class="customer-link"
+                            data-name="{{ booking.user.username }}"
+                            data-email="{{ booking.user.email }}"
+                            data-phone="{{ booking.user.profile.phone_number|default:'' }}"
+                            data-address="{{ booking.user.profile.address|default:'' }}"
+                            data-photo="{{ booking.user.profile.photo.url|default:'' }}"
+                            data-aadhaar="{{ doc.aadhaar_photo.url|default:'' }}"
+                            data-license="{{ doc.driving_license_photo.url|default:'' }}"
+                            style="font-weight:600;color:#2563eb;text-decoration:none;">
+                            {{ booking.user.username }}
+                            </a>
+                            {% endwith %}
+
+                            <br>
                             <small style="color:var(--text-light);">
                                 {{ booking.user.email }}
                             </small>
                         </td>
+
 
                         <td>
                             {{ booking.start_time|date:"d M Y, h:i A" }}<br>
@@ -265,7 +271,7 @@
                                 <span class="status pending">Pending</span>
                                 {% if booking.handover_photos.exists %}
                                     <div class="mt-1">
-                                        <span class="text-light">Handover Uploaded</span>
+                                        <span class="text-dark">Handover Uploaded</span>
                                     </div>
                                 {% endif %}
                             {% elif booking.status == "confirmed" %}
@@ -278,7 +284,7 @@
                                 {% if booking.damage_report and booking.damage_report.is_paid %}
                                     <span class="status completed">Completed</span>
                                     <div class="mt-1">
-                                        <span class="text-light">Damage Paid</span>
+                                        <span class="text-dark">Damage Paid</span>
                                     </div>
                                 {% else %}
                                     <span class="status damage">Damage Reported</span>
@@ -372,7 +378,147 @@
     </nav>
 </div>
 {% endif %}
+<!-- ================= CUSTOMER DETAILS POPUP ================= -->
+
+<div class="modal fade" id="customerModal" tabindex="-1">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content" style="border-radius:20px;">
+
+      <div class="modal-header">
+        <h5 class="modal-title">Customer Details</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+
+      <div class="modal-body">
+        <div style="text-align:center;margin-bottom:15px;">
+          <img id="custPhoto"
+               src=""
+               style="width:110px;height:110px;border-radius:16px;object-fit:cover;border:3px solid #e5e7eb;">
+        </div>
+
+        <p><strong>Name:</strong> <span id="custName"></span></p>
+        <p><strong>Email:</strong> <span id="custEmail"></span></p>
+        <p><strong>Phone:</strong> <span id="custPhone"></span></p>
+        <p><strong>Address:</strong> <span id="custAddress"></span></p>
+
+        <hr>
+
+        <div style="display:flex;gap:10px;justify-content:center;">
+            <button type="button"
+                id="custAadhaar"
+                class="btn btn-outline-primary btn-sm">
+                Aadhaar
+            </button>
+
+            <button type="button"
+                id="custLicense"
+                class="btn btn-outline-primary btn-sm">
+                License
+            </button>
+
+        </div>
+
+      </div>
+
+    </div>
+  </div>
+</div>
+<!-- ================= DOCUMENT PREVIEW MODAL ================= -->
+<div class="modal fade" id="documentModal" tabindex="-1">
+  <div class="modal-dialog modal-dialog-centered modal-lg">
+    <div class="modal-content" style="border-radius:18px;">
+
+      <div class="modal-header">
+        <h5 class="modal-title" id="docTitle">Document</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+
+      <div class="modal-body text-center">
+
+        <!-- IMAGE PREVIEW -->
+        <img id="docImage"
+             style="max-width:100%;max-height:70vh;border-radius:12px;display:none;">
+
+        <!-- PDF PREVIEW -->
+        <iframe id="docFrame"
+                style="width:100%;height:70vh;border:none;display:none;"></iframe>
+
+      </div>
+
+    </div>
+  </div>
+</div>
 
 </body>
+<!-- Bootstrap JS (REQUIRED for modal) -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+
+<script>
+let currentAadhaar = "";
+let currentLicense = "";
+
+document.addEventListener("click", function (e) {
+    const link = e.target.closest(".customer-link");
+    if (!link) return;
+
+    currentAadhaar = link.dataset.aadhaar || "";
+    currentLicense = link.dataset.license || "";
+
+    document.getElementById("custName").innerText = link.dataset.name || "-";
+    document.getElementById("custEmail").innerText = link.dataset.email || "-";
+    document.getElementById("custPhone").innerText = link.dataset.phone || "-";
+    document.getElementById("custAddress").innerText = link.dataset.address || "-";
+
+    document.getElementById("custPhoto").src =
+        link.dataset.photo || "https://via.placeholder.com/150";
+
+    document.getElementById("custAadhaar").style.display =
+        currentAadhaar ? "inline-block" : "none";
+
+    document.getElementById("custLicense").style.display =
+        currentLicense ? "inline-block" : "none";
+
+    new bootstrap.Modal(
+        document.getElementById("customerModal")
+    ).show();
+});
+
+/* ========= DOCUMENT PREVIEW ========= */
+
+function openDocument(url, title) {
+    const img = document.getElementById("docImage");
+    const frame = document.getElementById("docFrame");
+    const modal = new bootstrap.Modal(
+        document.getElementById("documentModal")
+    );
+
+    document.getElementById("docTitle").innerText = title;
+
+    img.style.display = "none";
+    frame.style.display = "none";
+
+    if (!url) return;
+
+    if (url.toLowerCase().endsWith(".pdf")) {
+        frame.src = url;
+        frame.style.display = "block";
+    } else {
+        img.src = url;
+        img.style.display = "block";
+    }
+
+    modal.show();
+}
+
+document.getElementById("custAadhaar").addEventListener("click", function () {
+    openDocument(currentAadhaar, "Aadhaar Document");
+});
+
+document.getElementById("custLicense").addEventListener("click", function () {
+    openDocument(currentLicense, "Driving License");
+});
+</script>
+
+
 
 </html>

@@ -204,7 +204,7 @@ class UserDocument(models.Model):
         blank=True
     )
     aadhaar_photo = CloudinaryField('aadhaar', blank=True, null=True)
-    driving_license_photo = CloudinaryField('aadhaar', blank=True, null=True)
+    driving_license_photo = CloudinaryField('licence', blank=True, null=True)
     uploaded_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):

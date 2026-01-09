@@ -1122,6 +1122,7 @@ def owner_bookings(request):
         )
         .exclude(status="payment_pending")
         .select_related("vehicle", "user")
+        .prefetch_related("documents")
         .prefetch_related(
             "handover_photos",
             Prefetch("damage_report", queryset=DamageReport.objects.all())
