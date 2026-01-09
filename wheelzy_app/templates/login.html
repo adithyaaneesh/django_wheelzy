@@ -179,6 +179,53 @@
         .demo-btn:hover {
             background: #eef4ff;
         }
+        /* GOOGLE BUTTON */
+        .google-btn {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            width: 100%;
+            padding: 11px;
+            border-radius: 14px;
+            border: 1px solid #d1d5db;
+            background: #fff;
+            color: #111;
+            font-size: 14px;
+            font-weight: 600;
+            text-decoration: none;
+            margin-bottom: 16px;
+            transition: .2s;
+        }
+
+        .google-btn img {
+            width: 18px;
+            height: 18px;
+        }
+
+        .google-btn:hover {
+            background: #f9fafb;
+            box-shadow: 0 6px 18px rgba(0,0,0,.12);
+        }
+
+        /* DIVIDER */
+        .divider {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 14px;
+            color: #6b7280;
+            font-size: 12px;
+        }
+
+        .divider::before,
+        .divider::after {
+            content: "";
+            flex: 1;
+            height: 1px;
+            background: #e5e7eb;
+        }
+
 
         /* BUTTON */
         button {
@@ -210,6 +257,38 @@
             text-decoration: none;
             font-weight: 600;
         }
+        .google-note {
+            font-size: 12px;
+            color: #6b7280;
+            text-align: center;
+            margin-bottom: 14px;
+        }
+
+        .google-wrapper {
+            position: relative;
+        }
+            
+        .google-tooltip {
+            position: absolute;
+            bottom: -28px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #111;
+            color: #fff;
+            padding: 4px 10px;
+            border-radius: 6px;
+            font-size: 11px;
+            opacity: 0;
+            pointer-events: none;
+            transition: .2s;
+            white-space: nowrap;
+        }
+
+        .google-wrapper:hover .google-tooltip {
+            opacity: 1;
+        }
+
+
         @media (max-width: 768px) {
 
             body {
@@ -295,6 +374,28 @@
 
         <h1>Please Log In</h1>
         <div class="subtitle">Login to continue your journey</div>
+        <!-- GOOGLE LOGIN -->
+        <a href="/accounts/google/login/" class="google-btn">
+            <img src="https://developers.google.com/identity/images/g-logo.png" alt="Google">
+            Continue with Google
+        </a>
+        <div class="google-note">
+             Google login is available for <b>Customers only</b>.
+        </div>
+
+        <!-- <div class="google-wrapper">
+            <a href="/accounts/google/login/" class="google-btn">
+                <img src="https://developers.google.com/identity/images/g-logo.png" alt="Google">
+                Continue with Google
+            </a>
+            <span class="google-tooltip">
+                Google login is for Customers only
+            </span>
+        </div> -->
+
+        <div class="divider">
+            <span>or login with username</span>
+        </div>
 
         <form method="post">
             {% csrf_token %}
