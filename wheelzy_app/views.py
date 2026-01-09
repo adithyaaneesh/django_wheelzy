@@ -810,7 +810,7 @@ def admin_bookings(request):
         return redirect("home")
 
     bookings_qs = (
-        Booking.objects
+        Booking.objects.filter(is_rent_paid=True)
         .select_related("vehicle", "user")
         .order_by("-ordered_at")
     )
@@ -1284,17 +1284,11 @@ def razorpay_verify(request):
 
 @login_required
 def payment_cancelled(request, booking_id):
-    booking = get_object_or_404(
-        Booking,
+    booking = Booking.objects.filter(
         id=booking_id,
         user=request.user
-    )
+    ).first()
+    if booking:
+        booking.delete()  
 
-    # Ensure booking is marked unpaid
-    booking.status = "payment_incomplete"
-    booking.is_rent_paid = False
-    booking.save()
-
-    return render(request, "payment_cancelled.html", {
-        "booking": booking
-    })
+    return render(request, "payment_cancelled.html")

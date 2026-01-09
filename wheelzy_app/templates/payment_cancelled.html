@@ -77,13 +77,14 @@
     </p>
 
     <div class="d-grid gap-3">
-        <a href="{% url 'payment_page' booking.id %}" class="btn btn-primary">
-            Retry Payment
-        </a>
-
-        <a href="{% url 'my_bookings' %}" class="btn btn-outline-secondary">
+       <a href="{% url 'my_bookings' %}" class="btn btn-primary">
             Go to My Bookings
         </a>
+
+        <a href="{% url 'all_vehicles' %}" class="btn btn-outline-secondary">
+            Browse Vehicles
+        </a>
+
     </div>
 </div>
 
