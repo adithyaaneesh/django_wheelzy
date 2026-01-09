@@ -269,13 +269,23 @@
                             </div>
                         {% endif %}
                         
-                        <div class="badge-floating {% if v.id not in booked_vehicle_ids %}bg-white text-dark shadow-sm{% else %}bg-danger text-white{% endif %}">
-                            {% if v.id not in booked_vehicle_ids %}
-                                <i class="fa-solid fa-circle text-success me-1 small"></i> Ready
+                        <div class="badge-floating
+                            {% if v.id in booked_by_user %}
+                                bg-warning text-dark
+                            {% elif v.id in booked_by_others %}
+                                bg-danger text-white
                             {% else %}
-                                <i class="fa-solid fa-clock me-1 small"></i> Busy
+                                bg-white text-dark shadow-sm
+                            {% endif %}">
+                            {% if v.id in booked_by_user %}
+                                <i class="fa-solid fa-bookmark me-1"></i> Booked
+                            {% elif v.id in booked_by_others %}
+                                <i class="fa-solid fa-clock me-1"></i> Busy
+                            {% else %}
+                                <i class="fa-solid fa-circle text-success me-1 small"></i> Ready
                             {% endif %}
                         </div>
+
                     </div>
 
                     <div class="card-body">

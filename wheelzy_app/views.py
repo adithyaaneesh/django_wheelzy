@@ -369,24 +369,48 @@ def all_vehicle(request):
     vehicle_type = request.GET.get("type")
     seats = request.GET.get("seats")
     available = request.GET.get("available")
+
     if search_query:
-        vehicles = vehicles.filter(vehicle_name__icontains=search_query) | \
-                   vehicles.filter(number_plate__icontains=search_query)
+        vehicles = vehicles.filter(
+            vehicle_name__icontains=search_query
+        ) | vehicles.filter(
+            number_plate__icontains=search_query
+        )
+
     if vehicle_type:
         vehicles = vehicles.filter(vehicle_type=vehicle_type)
+
     if seats:
         vehicles = vehicles.filter(seats=seats)
-    booked_vehicle_ids = Booking.objects.filter(
+
+    # ✅ ONLY PAID + ACTIVE BOOKINGS ARE CONSIDERED
+    active_bookings = Booking.objects.filter(
         is_rent_paid=True,
         status__in=["pending", "confirmed", "in_use"]
+    )
+
+    # 🔹 Vehicles booked by current user
+    booked_by_user = active_bookings.filter(
+        user=request.user
     ).values_list("vehicle_id", flat=True)
+
+    # 🔹 Vehicles booked by other users
+    booked_by_others = active_bookings.exclude(
+        user=request.user
+    ).values_list("vehicle_id", flat=True)
+
+    # 🔹 Filter available vehicles only (if checkbox selected)
     if available == "1":
-        vehicles = vehicles.exclude(id__in=booked_vehicle_ids)
+        vehicles = vehicles.exclude(
+            id__in=active_bookings.values_list("vehicle_id", flat=True)
+        )
 
     return render(request, "vehicle_list.html", {
         "vehicles": vehicles,
-        "booked_vehicle_ids": booked_vehicle_ids
+        "booked_by_user": booked_by_user,
+        "booked_by_others": booked_by_others,
     })
+
 
 @login_required
 def vehicle_details(request, id):
