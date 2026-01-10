@@ -2,11 +2,10 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.models import User, Group
 from django.contrib.auth import login, authenticate, logout
 from django.contrib import messages
-from .models import DamagePhoto, UserDocument, Vehicle, Booking, DamageReport, UserProfile, Notification, VehicleHandoverPhoto
+from .models import DamagePhoto, UserDocument, Vehicle, Booking, DamageReport, UserProfile, Notification, VehicleHandoverPhoto, EmailOTP
 from datetime import datetime
 from django.utils import timezone
 from django.contrib.auth.decorators import login_required
-from . import models
 from django.db.models import Prefetch, Sum, Count
 from django.http import JsonResponse
 from django.views.decorators.http import require_POST
@@ -17,9 +16,11 @@ import razorpay
 from django.conf import settings
 from django.views.decorators.csrf import csrf_exempt
 from django.core.mail import send_mail
-from django.http import HttpResponse
-from .models import EmailOTP
 from .utils import generate_otp
+from django.db.models.functions import TruncMonth
+from django.contrib.auth.models import User
+
+
 
 
 razorpay_client = razorpay.Client(
@@ -179,59 +180,6 @@ def resend_otp(request):
 
     messages.success(request, "New OTP sent")
     return redirect("verify_otp")
-
-
-# def register(request):
-#     if request.method == "POST":
-#         username = request.POST.get("username")
-#         email = request.POST.get("email")
-#         password = request.POST.get("password")
-#         cpassword = request.POST.get("cpassword")
-#         role = request.POST.get("role")
-#         phone = request.POST.get("phone")
-#         address = request.POST.get("address")
-#         photo = request.FILES.get("photo") 
-
-#         if not all([username, email, password, cpassword, phone, address, photo]):
-#             messages.error(request, "All fields are required")
-#             return redirect("register")
-
-#         if User.objects.filter(username=username).exists():
-#             messages.error(request, "Username already exists")
-#             return redirect("register")
-
-#         if password != cpassword:
-#             messages.error(request, "Passwords do not match")
-#             return redirect("register")
-
-#         user = User.objects.create_user(
-#             username=username,
-#             email=email,
-#             password=password
-#         )
-
-#         UserProfile.objects.create(
-#             user=user,
-#             phone_number=phone,
-#             address=address,
-#             photo=photo
-#         )
-
-#         if role == "owner":
-#             owner_group, _ = Group.objects.get_or_create(name="owner")
-#             user.groups.add(owner_group)
-#         send_mail(
-#             subject="Welcome to Wheelzy 🚗",
-#             message=f"Hi {username},\n\nYour account has been created successfully!",
-#             from_email=settings.EMAIL_HOST_USER,
-#             recipient_list=[email],
-#             fail_silently=False,
-#         )
-        
-#         messages.success(request, "Registration successful!")
-#         return redirect("login")
-
-#     return render(request, "register.html")
 
 
 def login_view(request):
@@ -904,29 +852,97 @@ def admin_revenue(request):
 def admin_analytics(request):
     if not request.user.is_superuser:
         return redirect("home")
+
+    # ---------------- COUNTS ----------------
     paid_bookings = Booking.objects.filter(is_rent_paid=True)
+
     total_revenue = paid_bookings.aggregate(
         total=Sum("total_price")
     )["total"] or 0
+
+    total_customers = User.objects.filter(
+        is_superuser=False
+    ).exclude(groups__name="owner").count()
+
+    total_owners = User.objects.filter(
+        groups__name="owner"
+    ).count()
+
+    total_vehicles = Vehicle.objects.count()
+
+    total_bookings = Booking.objects.count()
+
+    paid_bookings_count = paid_bookings.count()
+
+    # ---------------- POPULAR VEHICLES ----------------
+    popular_vehicles = (
+        paid_bookings
+        .values("vehicle__vehicle_name")
+        .annotate(count=Count("id"))
+        .order_by("-count")[:5]
+    )
+
+    # ---------------- MONTHLY REVENUE ----------------
+    monthly_data = (
+        paid_bookings
+        .annotate(month=TruncMonth("ordered_at"))
+        .values("month")
+        .annotate(total=Sum("total_price"))
+        .order_by("month")
+    )
+
+    months = []
+    revenues = []
+
+    for row in monthly_data:
+        if row["month"]:
+            months.append(row["month"].strftime("%b %Y"))
+            revenues.append(row["total"])
+    if len(months) == 1:
+        months.insert(0, "Prev Month")
+        revenues.insert(0, 0)
+
     context = {
-        "total_customers": User.objects.filter(
-            is_superuser=False
-        ).exclude(groups__name="owner").count(),
-        "total_owners": User.objects.filter(
-            groups__name="owner"
-        ).count(),
-        "total_vehicles": Vehicle.objects.count(),
-        "total_bookings": Booking.objects.count(),
-        "paid_bookings": paid_bookings.count(),
+        "total_customers": total_customers,
+        "total_owners": total_owners,
+        "total_vehicles": total_vehicles,
+        "total_bookings": total_bookings,
+        "paid_bookings": paid_bookings_count,
         "total_revenue": total_revenue,
-        "popular_vehicles": (
-            paid_bookings
-            .values("vehicle__vehicle_name")
-            .annotate(count=Count("id"))
-            .order_by("-count")[:5]
-        ),
+        "popular_vehicles": popular_vehicles,
+        "months": months,
+        "revenues": revenues,
     }
+
     return render(request, "admin_analytics.html", context)
+
+# @login_required
+# def admin_analytics(request):
+#     if not request.user.is_superuser:
+#         return redirect("home")
+#     paid_bookings = Booking.objects.filter(is_rent_paid=True)
+#     total_revenue = paid_bookings.aggregate(
+#         total=Sum("total_price")
+#     )["total"] or 0
+#     context = {
+#         "total_customers": User.objects.filter(
+#             is_superuser=False
+#         ).exclude(groups__name="owner").count(),
+#         "total_owners": User.objects.filter(
+#             groups__name="owner"
+#         ).count(),
+#         "total_vehicles": Vehicle.objects.count(),
+#         "total_bookings": Booking.objects.count(),
+#         "paid_bookings": paid_bookings.count(),
+#         "total_revenue": total_revenue,
+#         "popular_vehicles": (
+#             paid_bookings
+#             .values("vehicle__vehicle_name")
+#             .annotate(count=Count("id"))
+#             .order_by("-count")[:5]
+#         ),
+#     }
+#     return render(request, "admin_analytics.html", context)
 
 
 @login_required
