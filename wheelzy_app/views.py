@@ -854,52 +854,48 @@ def admin_bookings(request):
 def admin_revenue(request):
     if not request.user.is_superuser:
         return redirect("home")
-
     paid_bookings = Booking.objects.filter(
         is_rent_paid=True
     ).exclude(status="cancelled")
-
-    total_rental_revenue = paid_bookings.aggregate(
+    rent_paid_total = paid_bookings.aggregate(
         total=Sum("total_price")
     )["total"] or 0
-
-    platform_commission = total_rental_revenue * 0.10
-    owner_payout = total_rental_revenue * 0.90
-
-    damage_revenue = DamageReport.objects.filter(
+    platform_commission = rent_paid_total * 0.10
+    owner_payout = rent_paid_total * 0.90
+    damage_paid_total = DamageReport.objects.filter(
         is_paid=True
     ).aggregate(
         total=Sum("extra_charge")
     )["total"] or 0
-
-    # ✅ Build clean booking rows
+    total_paid_amount = rent_paid_total + damage_paid_total
     recent_bookings = []
     for booking in (
         paid_bookings
         .select_related("user", "vehicle")
         .order_by("-ordered_at")[:10]
     ):
-        damage_charge = 0
-
+        damage_amount = 0
         if hasattr(booking, "damage_report") and booking.damage_report.is_paid:
-            damage_charge = booking.damage_report.extra_charge
-
+            damage_amount = booking.damage_report.extra_charge
         recent_bookings.append({
             "id": booking.id,
             "customer": booking.user.username,
             "vehicle": booking.vehicle.vehicle_name,
-            "booking_charge": booking.total_price,
-            "damage_charge": damage_charge,
-            "final_amount": booking.total_price + damage_charge,
+            "rent_amount": booking.total_price,
+            "damage_amount": damage_amount,
+            "final_amount": booking.total_price + damage_amount,
             "status": booking.get_status_display(),
             "date": booking.ordered_at,
         })
 
     return render(request, "admin_revenue.html", {
-        "total_rental_revenue": total_rental_revenue,
+        "total_rental_revenue": rent_paid_total,
+        "rent_paid_total": rent_paid_total,
         "platform_commission": platform_commission,
         "owner_payout": owner_payout,
-        "damage_revenue": damage_revenue,
+        "damage_revenue": damage_paid_total,
+        "damage_paid_total": damage_paid_total,
+        "total_paid_amount": total_paid_amount,
         "recent_bookings": recent_bookings,
     })
 
