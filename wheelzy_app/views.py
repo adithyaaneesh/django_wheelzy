@@ -919,21 +919,41 @@ def admin_analytics(request):
 
 @login_required
 def approve_booking(request, booking_id):
-    booking = get_object_or_404(Booking, id=booking_id, status="pending")
+    booking = get_object_or_404(Booking, id=booking_id, status="booked")
+
     if not booking.handover_photos.exists():
         messages.error(request, "Upload handover photos first.")
         return redirect("admin_bookings")
+
     booking.status = "confirmed"
     booking.save()
+
+    # 📧 FINAL CONFIRMATION EMAIL
+    send_mail(
+        subject="Booking Confirmed – Wheelzy",
+        message=(
+            f"Hi {booking.user.username},\n\n"
+            "Good news! 🎉\n\n"
+            "Your booking has been officially confirmed by the admin.\n\n"
+            f"Vehicle: {booking.vehicle.vehicle_name}\n"
+            f"Pick-up: {booking.start_time.strftime('%d %b %Y, %I:%M %p')}\n"
+            f"Drop-off: {booking.end_time.strftime('%d %b %Y, %I:%M %p')}\n\n"
+            "You may now proceed with the vehicle handover.\n\n"
+            "Happy Riding!\n"
+            "Team Wheelzy"
+        ),
+        from_email=settings.EMAIL_HOST_USER,
+        recipient_list=[booking.user.email],
+        fail_silently=False,
+    )
+
     Notification.objects.create(
         user=booking.user,
-        message=f"Booking confirmed for {booking.vehicle.vehicle_name}."
+        message=f"Your booking for {booking.vehicle.vehicle_name} has been confirmed."
     )
-    Notification.objects.create(
-        user=booking.vehicle.owner,
-        message=f"Booking #{booking.id} confirmed."
-    )
+
     return redirect("admin_bookings")
+
 
 @login_required
 def mark_in_use(request, booking_id):
