@@ -916,34 +916,6 @@ def admin_analytics(request):
 
     return render(request, "admin_analytics.html", context)
 
-# @login_required
-# def admin_analytics(request):
-#     if not request.user.is_superuser:
-#         return redirect("home")
-#     paid_bookings = Booking.objects.filter(is_rent_paid=True)
-#     total_revenue = paid_bookings.aggregate(
-#         total=Sum("total_price")
-#     )["total"] or 0
-#     context = {
-#         "total_customers": User.objects.filter(
-#             is_superuser=False
-#         ).exclude(groups__name="owner").count(),
-#         "total_owners": User.objects.filter(
-#             groups__name="owner"
-#         ).count(),
-#         "total_vehicles": Vehicle.objects.count(),
-#         "total_bookings": Booking.objects.count(),
-#         "paid_bookings": paid_bookings.count(),
-#         "total_revenue": total_revenue,
-#         "popular_vehicles": (
-#             paid_bookings
-#             .values("vehicle__vehicle_name")
-#             .annotate(count=Count("id"))
-#             .order_by("-count")[:5]
-#         ),
-#     }
-#     return render(request, "admin_analytics.html", context)
-
 
 @login_required
 def approve_booking(request, booking_id):
@@ -1342,6 +1314,7 @@ def clear_read_notifications(request):
 def razorpay_verify(request):
     if request.method == "POST":
         data = request.POST
+
         try:
             booking = Booking.objects.get(
                 razorpay_order_id=data.get("razorpay_order_id")
@@ -1357,23 +1330,65 @@ def razorpay_verify(request):
                 "razorpay_signature": data.get("razorpay_signature"),
             })
 
-            # ✅ Payment Success
+            # ✅ PAYMENT SUCCESS
             booking.razorpay_payment_id = data.get("razorpay_payment_id")
             booking.razorpay_signature = data.get("razorpay_signature")
             booking.is_rent_paid = True
             booking.status = "pending"
             booking.save()
 
+            user = booking.user
+            vehicle = booking.vehicle
+
+            # ================= EMAIL 1: PAYMENT SUCCESS =================
+            send_mail(
+                subject="Payment Successful – Wheelzy",
+                message=(
+                    f"Hi {user.username},\n\n"
+                    "Your payment has been successfully completed.\n\n"
+                    f"Booking ID: {booking.id}\n"
+                    f"Vehicle: {vehicle.vehicle_name}\n"
+                    f"Amount Paid: ₹{booking.total_price}\n\n"
+                    "Thank you for choosing Wheelzy.\n\n"
+                    "Regards,\n"
+                    "Team Wheelzy"
+                ),
+                from_email=settings.EMAIL_HOST_USER,
+                recipient_list=[user.email],
+                fail_silently=False,
+            )
+
+            # ================= EMAIL 2: BOOKING CONFIRMED =================
+            send_mail(
+                subject="Booking Placed Successfully – Wheelzy",
+                message=(
+                    f"Hi {user.username},\n\n"
+                    "Your payment was successful and your booking has been placed.\n\n"
+                    f"Booking ID: {booking.id}\n"
+                    f"Vehicle: {vehicle.vehicle_name}\n"
+                    f"Amount Paid: ₹{booking.total_price}\n\n"
+                    "⏳ Your booking is awaiting admin confirmation.\n"
+                    "You will receive another email once it is confirmed.\n\n"
+                    "Thank you for choosing Wheelzy.\n\n"
+                    "Team Wheelzy"
+                ),
+                from_email=settings.EMAIL_HOST_USER,
+                recipient_list=[user.email],
+                fail_silently=False,
+            )
+
+            # 🔔 OWNER NOTIFICATION
             Notification.objects.create(
                 user=booking.vehicle.owner,
-                message=f"New booking for {booking.vehicle.vehicle_name}. Upload handover photos."
+                message=f"New booking for {vehicle.vehicle_name}. Upload handover photos."
             )
 
             return redirect("my_bookings")
 
-        except Exception:
+        except Exception as e:
             messages.error(request, "Payment verification failed")
             return redirect("payment_page", booking_id=booking.id)
+
 
 @login_required
 def payment_cancelled(request, booking_id):
@@ -1381,7 +1396,35 @@ def payment_cancelled(request, booking_id):
         id=booking_id,
         user=request.user
     ).first()
+
     if booking:
-        booking.delete()  
+        user = booking.user
+        vehicle = booking.vehicle
+        amount = booking.total_price
+
+        # 📧 PAYMENT FAILED EMAIL
+        send_mail(
+            subject="Payment Failed – Wheelzy",
+            message=(
+                f"Hi {user.username},\n\n"
+                "Unfortunately, your payment could not be completed.\n\n"
+                f"Vehicle: {vehicle.vehicle_name}\n"
+                f"Amount: ₹{amount}\n\n"
+                "Possible reasons:\n"
+                "- Network issues\n"
+                "- Payment cancelled\n"
+                "- Bank declined the transaction\n\n"
+                "No amount has been deducted from your account.\n"
+                "Please try booking again.\n\n"
+                "Regards,\n"
+                "Team Wheelzy"
+            ),
+            from_email=settings.EMAIL_HOST_USER,
+            recipient_list=[user.email],
+            fail_silently=False,
+        )
+
+        # ❌ Delete unpaid booking
+        booking.delete()
 
     return render(request, "payment_cancelled.html")
