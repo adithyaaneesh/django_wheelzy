@@ -977,15 +977,11 @@ def approve_booking(request, booking_id):
         messages.error(request, "Booking not found.")
         return redirect("admin_bookings")
 
-    if booking.status != "booked":
+    if booking.status != "pending":
         messages.error(
             request,
             f"Booking cannot be approved. Current status: {booking.get_status_display()}"
         )
-        return redirect("admin_bookings")
-
-    if not booking.handover_photos.exists():
-        messages.error(request, "Upload handover photos first.")
         return redirect("admin_bookings")
 
     booking.status = "confirmed"
@@ -996,11 +992,10 @@ def approve_booking(request, booking_id):
         subject="Booking Confirmed – Wheelzy",
         message=(
             f"Hi {booking.user.username},\n\n"
-            "Your booking has been approved and confirmed by the admin.\n\n"
+            "Your booking has been confirmed by the admin.\n\n"
             f"Vehicle: {booking.vehicle.vehicle_name}\n"
             f"Pick-up: {booking.start_time.strftime('%d %b %Y, %I:%M %p')}\n"
             f"Drop-off: {booking.end_time.strftime('%d %b %Y, %I:%M %p')}\n\n"
-            "You may now proceed with the vehicle handover.\n\n"
             "Happy Riding!\n"
             "Team Wheelzy"
         ),
@@ -1011,11 +1006,66 @@ def approve_booking(request, booking_id):
 
     Notification.objects.create(
         user=booking.user,
-        message=f"Your booking for {booking.vehicle.vehicle_name} has been confirmed."
+        message="Your booking has been confirmed by admin."
     )
 
     messages.success(request, "Booking approved successfully.")
     return redirect("admin_bookings")
+
+
+# @login_required
+# def approve_booking(request, booking_id):
+#     if not request.user.is_superuser:
+#         return redirect("home")
+
+#     booking = Booking.objects.filter(
+#         id=booking_id,
+#         is_rent_paid=True
+#     ).select_related("vehicle", "user").first()
+
+#     if not booking:
+#         messages.error(request, "Booking not found.")
+#         return redirect("admin_bookings")
+
+#     if booking.status != "booked":
+#         messages.error(
+#             request,
+#             f"Booking cannot be approved. Current status: {booking.get_status_display()}"
+#         )
+#         return redirect("admin_bookings")
+
+#     if not booking.handover_photos.exists():
+#         messages.error(request, "Upload handover photos first.")
+#         return redirect("admin_bookings")
+
+#     booking.status = "confirmed"
+#     booking.save()
+
+#     # 📧 EMAIL
+#     send_mail(
+#         subject="Booking Confirmed – Wheelzy",
+#         message=(
+#             f"Hi {booking.user.username},\n\n"
+#             "Your booking has been approved and confirmed by the admin.\n\n"
+#             f"Vehicle: {booking.vehicle.vehicle_name}\n"
+#             f"Pick-up: {booking.start_time.strftime('%d %b %Y, %I:%M %p')}\n"
+#             f"Drop-off: {booking.end_time.strftime('%d %b %Y, %I:%M %p')}\n\n"
+#             "You may now proceed with the vehicle handover.\n\n"
+#             "Happy Riding!\n"
+#             "Team Wheelzy"
+#         ),
+#         from_email=settings.EMAIL_HOST_USER,
+#         recipient_list=[booking.user.email],
+#         fail_silently=False,
+#     )
+
+#     Notification.objects.create(
+#         user=booking.user,
+#         message=f"Your booking for {booking.vehicle.vehicle_name} has been confirmed."
+#     )
+
+#     messages.success(request, "Booking approved successfully.")
+#     return redirect("admin_bookings")
 
 
 
@@ -1316,36 +1366,75 @@ def owner_damage_list(request):
     ).select_related('vehicle', 'user', 'damage_report').order_by('-id')
     return render(request, 'owner_damage_list.html', {'damages': damages})
 
-
 @login_required
 def upload_handover_photos(request, booking_id):
     booking = get_object_or_404(
         Booking,
         id=booking_id,
         vehicle__owner=request.user,
-        status="pending",
+        status="booked",
         is_rent_paid=True
     )
+
     if booking.handover_photos.exists():
         messages.warning(request, "Already uploaded.")
         return redirect("owner_vehicle_bookings")
+
     if request.method == "POST":
         photos = request.FILES.getlist("photos")
+
         if not photos:
             messages.error(request, "Upload at least one photo.")
             return redirect(request.path)
+
         for photo in photos:
             VehicleHandoverPhoto.objects.create(
                 booking=booking,
                 image=photo
             )
+
+        booking.status = "handover_uploaded"
+        booking.save()
+
         Notification.objects.create(
             user=User.objects.filter(is_superuser=True).first(),
             message=f"Handover uploaded for booking #{booking.id}"
         )
+
         messages.success(request, "Handover uploaded. Awaiting admin approval.")
         return redirect("owner_vehicle_bookings")
+
     return render(request, "upload_handover_photos.html", {"booking": booking})
+
+# @login_required
+# def upload_handover_photos(request, booking_id):
+#     booking = get_object_or_404(
+#         Booking,
+#         id=booking_id,
+#         vehicle__owner=request.user,
+#         status="pending",
+#         is_rent_paid=True
+#     )
+#     if booking.handover_photos.exists():
+#         messages.warning(request, "Already uploaded.")
+#         return redirect("owner_vehicle_bookings")
+#     if request.method == "POST":
+#         photos = request.FILES.getlist("photos")
+#         if not photos:
+#             messages.error(request, "Upload at least one photo.")
+#             return redirect(request.path)
+#         for photo in photos:
+#             VehicleHandoverPhoto.objects.create(
+#                 booking=booking,
+#                 image=photo
+#             )
+#         Notification.objects.create(
+#             user=User.objects.filter(is_superuser=True).first(),
+#             message=f"Handover uploaded for booking #{booking.id}"
+#         )
+#         messages.success(request, "Handover uploaded. Awaiting admin approval.")
+#         return redirect("owner_vehicle_bookings")
+#     return render(request, "upload_handover_photos.html", {"booking": booking})
 
 
 @login_required
