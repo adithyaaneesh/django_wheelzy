@@ -16,11 +16,11 @@ import razorpay
 from django.conf import settings
 from django.views.decorators.csrf import csrf_exempt
 from django.core.mail import send_mail
+from django.core.mail import EmailMessage
 from .utils import generate_otp
 from django.db.models.functions import TruncMonth
 from django.contrib.auth.models import User
-
-
+from .utils import generate_booking_invoice, generate_owner_payout_invoice
 
 
 razorpay_client = razorpay.Client(
@@ -1521,82 +1521,111 @@ def clear_read_notifications(request):
 
 @csrf_exempt
 def razorpay_verify(request):
-    if request.method == "POST":
-        data = request.POST
+    if request.method != "POST":
+        return redirect("home")
 
-        try:
-            booking = Booking.objects.get(
-                razorpay_order_id=data.get("razorpay_order_id")
-            )
+    data = request.POST
 
-            client = razorpay.Client(
-                auth=(settings.RAZORPAY_KEY_ID, settings.RAZORPAY_KEY_SECRET)
-            )
+    try:
+        booking = Booking.objects.get(
+            razorpay_order_id=data.get("razorpay_order_id")
+        )
 
-            client.utility.verify_payment_signature({
-                "razorpay_order_id": data.get("razorpay_order_id"),
-                "razorpay_payment_id": data.get("razorpay_payment_id"),
-                "razorpay_signature": data.get("razorpay_signature"),
-            })
+        client = razorpay.Client(
+            auth=(settings.RAZORPAY_KEY_ID, settings.RAZORPAY_KEY_SECRET)
+        )
 
-            # ✅ PAYMENT SUCCESS
-            booking.razorpay_payment_id = data.get("razorpay_payment_id")
-            booking.razorpay_signature = data.get("razorpay_signature")
-            booking.is_rent_paid = True
-            booking.status = "booked"
-            booking.save()
+        # 🔐 Verify Razorpay Signature
+        client.utility.verify_payment_signature({
+            "razorpay_order_id": data.get("razorpay_order_id"),
+            "razorpay_payment_id": data.get("razorpay_payment_id"),
+            "razorpay_signature": data.get("razorpay_signature"),
+        })
 
-            user = booking.user
-            vehicle = booking.vehicle
+        # ✅ Payment Success
+        booking.razorpay_payment_id = data.get("razorpay_payment_id")
+        booking.razorpay_signature = data.get("razorpay_signature")
+        booking.is_rent_paid = True
+        booking.status = "booked"
+        booking.save()
 
-            # ================= EMAIL 1: PAYMENT SUCCESS =================
-            send_mail(
-                subject="Payment Successful – Wheelzy",
-                message=(
-                    f"Hi {user.username},\n\n"
-                    "Your payment has been successfully completed.\n\n"
-                    f"Booking ID: {booking.id}\n"
-                    f"Vehicle: {vehicle.vehicle_name}\n"
-                    f"Amount Paid: ₹{booking.total_price}\n\n"
-                    "Thank you for choosing Wheelzy.\n\n"
-                    "Regards,\n"
-                    "Team Wheelzy"
-                ),
+        user = booking.user
+        vehicle = booking.vehicle
+
+        # 📄 Generate PDFs
+        customer_invoice = generate_booking_invoice(booking)
+        owner_invoice = generate_owner_payout_invoice(booking)
+
+        # 📧 EMAIL TO CUSTOMER (Invoice)
+        customer_mail = EmailMessage(
+            subject="Wheelzy | Booking Confirmed & Invoice",
+            body=f"""
+Hi {user.username},
+
+Your payment was successful and your booking is confirmed.
+
+ Booking ID: {booking.id}
+ Vehicle: {vehicle.vehicle_name}
+ Amount Paid: ₹{booking.total_price}
+
+Your invoice is attached with GST details.
+
+Thank you for choosing Wheelzy.
+Ride Safe !!
+
+Team Wheelzy
+""",
+            from_email=settings.EMAIL_HOST_USER,
+            to=[user.email],
+        )
+
+        customer_mail.attach(
+            f"Wheelzy_Invoice_{booking.id}.pdf",
+            customer_invoice.read(),
+            "application/pdf"
+        )
+        customer_mail.send()
+
+        # 📧 EMAIL TO OWNER (Payout Invoice)
+        if vehicle.owner:
+            owner_mail = EmailMessage(
+                subject="Wheelzy | Owner Payout Statement",
+                body=f"""
+Hi {vehicle.owner.username},
+
+A booking has been confirmed for your vehicle.
+
+ Booking ID: {booking.id}
+ Vehicle: {vehicle.vehicle_name}
+
+Your payout statement is attached.
+
+Regards,
+Team Wheelzy
+""",
                 from_email=settings.EMAIL_HOST_USER,
-                recipient_list=[user.email],
-                fail_silently=False,
+                to=[vehicle.owner.email],
             )
 
-            # ================= EMAIL 2: BOOKING CONFIRMED =================
-            send_mail(
-                subject="Booking Placed Successfully – Wheelzy",
-                message=(
-                    f"Hi {user.username},\n\n"
-                    "Your payment was successful and your booking has been placed.\n\n"
-                    f"Booking ID: {booking.id}\n"
-                    f"Vehicle: {vehicle.vehicle_name}\n"
-                    f"Amount Paid: ₹{booking.total_price}\n\n"
-                    "⏳ Your booking is awaiting admin confirmation.\n"
-                    "You will receive another email once it is confirmed.\n\n"
-                    "Thank you for choosing Wheelzy.\n\n"
-                    "Team Wheelzy"
-                ),
-                from_email=settings.EMAIL_HOST_USER,
-                recipient_list=[user.email],
-                fail_silently=False,
+            owner_mail.attach(
+                f"Owner_Payout_{booking.id}.pdf",
+                owner_invoice.read(),
+                "application/pdf"
             )
+            owner_mail.send()
 
-            # 🔔 OWNER NOTIFICATION
             Notification.objects.create(
-                user=booking.vehicle.owner,
-                message=f"New booking for {vehicle.vehicle_name}. Upload handover photos."
+                user=vehicle.owner,
+                message=f"Booking #{booking.id} confirmed. Payout statement sent."
             )
 
-            return redirect("my_bookings")
+        return redirect("my_bookings")
 
-        except Exception as e:
-            messages.error(request, "Payment verification failed")
-            return redirect("payment_page", booking_id=booking.id)
+    except Exception as e:
+        print("Razorpay verification error:", e)
+        messages.error(request, "Payment verification failed")
+        return redirect("home")
+
 
 
 @login_required
