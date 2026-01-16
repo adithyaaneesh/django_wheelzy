@@ -267,19 +267,21 @@
                         </td>
 
                         <td>
-                            {% if booking.status == "pending" %}
-                                <span class="status pending">Pending</span>
-                                {% if booking.handover_photos.exists %}
-                                    <div class="mt-1">
-                                        <span class="text-dark">Handover Uploaded</span>
-                                    </div>
-                                {% endif %}
+                            {% if booking.status == "booked" %}
+                                <span class="status pending">Booked</span>
+
+                            {% elif booking.status == "handover_uploaded" %}
+                                <span class="status confirmed">Handover Uploaded</span>
+
                             {% elif booking.status == "confirmed" %}
                                 <span class="status confirmed">Confirmed</span>
+
                             {% elif booking.status == "in_use" %}
                                 <span class="status in_use">In Use</span>
+
                             {% elif booking.status == "returned" %}
                                 <span class="status completed">Completed</span>
+
                             {% elif booking.status == "damage_reported" %}
                                 {% if booking.damage_report and booking.damage_report.is_paid %}
                                     <span class="status completed">Completed</span>
@@ -292,21 +294,25 @@
                             {% endif %}
                         </td>
 
+
                         <td>
-                            {% if booking.status == "pending" %}
+                            {% if booking.status == "booked" %}
                                 <a href="{% url 'upload_handover_photos' booking.id %}"
-                                   class="btn-action btn-primary">
+                                class="btn-action btn-primary">
                                     Upload Handover
                                 </a>
+
                             {% elif booking.status == "returned" %}
                                 <a href="{% url 'add_damage_report' booking.id %}"
-                                   class="btn-action btn-danger">
+                                class="btn-action btn-danger">
                                     Report Damage
                                 </a>
+
                             {% else %}
                                 —
                             {% endif %}
                         </td>
+
                     </tr>
 
                 {% endfor %}

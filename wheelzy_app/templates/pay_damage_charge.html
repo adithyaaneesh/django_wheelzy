@@ -1,41 +1,177 @@
 {% load static %}
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <title>Pay Damage Charge</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Complete Payment | Wheelzy</title>
     <link rel="icon" type="image/png" href="{% static 'images/wheelzy1.png' %}">
+    
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
 
     <style>
-        body { font-family:Segoe UI; background:#f4f6fb; padding:30px; }
-        .card {
-            background:#fff;
-            padding:30px;
-            max-width:400px;
-            margin:auto;
-            border-radius:16px;
-            box-shadow:0 20px 40px rgba(0,0,0,.15);
-            text-align:center;
+        :root {
+            --brand-primary: #16a34a; /* Green for success/payment */
+            --bg-body: #f1f5f9;
         }
-        button {
-            padding:12px 20px;
-            background:#16a34a;
-            color:white;
-            border:none;
-            border-radius:10px;
-            font-weight:600;
-            cursor:pointer;
+
+        body {
+            font-family: 'Inter', -apple-system, sans-serif;
+            background: var(--bg-body);
+            height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0;
+        }
+
+        .payment-card {
+            background: #ffffff;
+            width: 100%;
+            max-width: 440px;
+            border-radius: 24px;
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+            overflow: hidden;
+            border: 1px solid #e2e8f0;
+        }
+
+        .card-header {
+            background: #ffffff;
+            padding: 30px 30px 10px 30px;
+            text-align: center;
+            border: none;
+        }
+
+        .logo-box {
+            width: 60px;
+            height: 60px;
+            background: #f0fdf4;
+            border-radius: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 20px;
+        }
+
+        .card-body {
+            padding: 30px;
+        }
+
+        .summary-box {
+            background: #f8fafc;
+            border-radius: 16px;
+            padding: 20px;
+            margin-bottom: 25px;
+            border: 1px dashed #cbd5e1;
+        }
+
+        .info-row {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 10px;
+        }
+
+        .info-row span:first-child {
+            color: #64748b;
+            font-size: 14px;
+        }
+
+        .info-row span:last-child {
+            font-weight: 600;
+            color: #1e293b;
+        }
+
+        .amount-display {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .amount-display h1 {
+            font-weight: 800;
+            color: #1e293b;
+            margin-bottom: 5px;
+        }
+
+        .amount-display p {
+            color: #64748b;
+            font-size: 13px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        #pay-btn {
+            width: 100%;
+            padding: 16px;
+            background: var(--brand-primary);
+            color: white;
+            border: none;
+            border-radius: 14px;
+            font-size: 16px;
+            font-weight: 700;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+
+        #pay-btn:hover {
+            background: #15803d;
+            transform: translateY(-2px);
+            box-shadow: 0 10px 15px -3px rgba(22, 163, 74, 0.3);
+        }
+
+        .secure-footer {
+            text-align: center;
+            margin-top: 20px;
+            color: #94a3b8;
+            font-size: 12px;
         }
     </style>
 </head>
 <body>
 
-<div class="card">
-    <h2>Pay Damage Charge</h2>
-    <p><strong>Vehicle:</strong> {{ report.booking.vehicle.vehicle_name }}</p>
-    <p><strong>Amount:</strong> ₹{{ report.extra_charge }}</p>
+<div class="payment-card">
+    <div class="card-header">
+        <div class="logo-box">
+            <img src="{% static 'images/wheelzy1.png' %}" width="35" alt="Wheelzy">
+        </div>
+        <h4 class="fw-bold">Payment Required</h4>
+        <p class="text-muted small">Outstanding damage charges for your rental</p>
+    </div>
 
-    <button id="pay-btn">Pay Now</button>
+    <div class="card-body">
+        <div class="summary-box">
+            <div class="info-row">
+                <span>Vehicle</span>
+                <span>{{ report.booking.vehicle.vehicle_name }}</span>
+            </div>
+            <div class="info-row">
+                <span>Booking ID</span>
+                <span>#{{ report.booking.id }}</span>
+            </div>
+            <div class="info-row mb-0">
+                <span>Damage Status</span>
+                <span class="text-danger">Assessed</span>
+            </div>
+        </div>
+
+        <div class="amount-display">
+            <p>Total Amount Due</p>
+            <h1>₹{{ report.extra_charge }}</h1>
+        </div>
+
+        <button id="pay-btn">
+            <i class="fa-solid fa-shield-check"></i>
+            Pay Now via Razorpay
+        </button>
+
+        <div class="secure-footer">
+            <i class="fa-solid fa-lock me-1"></i> Secure 256-bit SSL encrypted payment
+        </div>
+    </div>
 </div>
 
 <script>

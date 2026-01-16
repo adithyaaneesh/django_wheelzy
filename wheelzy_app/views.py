@@ -977,7 +977,7 @@ def approve_booking(request, booking_id):
         messages.error(request, "Booking not found.")
         return redirect("admin_bookings")
 
-    if booking.status != "pending":
+    if booking.status != "handover_uploaded":
         messages.error(
             request,
             f"Booking cannot be approved. Current status: {booking.get_status_display()}"

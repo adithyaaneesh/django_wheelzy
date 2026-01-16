@@ -310,7 +310,7 @@
                             {{ booking.get_status_display }}
                         </span>
 
-                        {% if booking.status == "pending" %}
+                        {% if booking.status == "booked" %}
                             {% if booking.handover_photos.exists %}
                                 <div class="muted" style="color: var(--success);">Handover uploaded</div>
                             {% else %}
@@ -321,7 +321,7 @@
                 </td>
 
                 <td>
-                    {% if booking.status == "pending" %}
+                    {% if booking.status == "handover_uploaded" %}
                         {% if booking.handover_photos.exists %}
                             <a href="{% url 'approve_booking' booking.id %}" class="btn btn-success">
                                 <i class="fa-solid fa-check"></i> Confirm
