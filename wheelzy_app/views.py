@@ -2,7 +2,7 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.models import User, Group
 from django.contrib.auth import login, authenticate, logout
 from django.contrib import messages
-from .models import DamagePhoto, UserDocument, Vehicle, Booking, DamageReport, UserProfile, Notification, VehicleHandoverPhoto, EmailOTP
+from .models import DamagePhoto, UserDocument, Vehicle, Booking, DamageReport, UserProfile, Notification, VehicleHandoverPhoto, EmailOTP, Refund
 from datetime import datetime
 from django.utils import timezone
 from django.contrib.auth.decorators import login_required
@@ -524,21 +524,68 @@ def my_bookings(request):
         }
     )
 
-
+CANCEL_ALLOWED_STATUSES = ["booked", "confirmed"]
 
 @login_required
 def cancel_booking(request, booking_id):
-    booking = get_object_or_404(Booking, id=booking_id, user=request.user)
+    booking = Booking.objects.filter(
+        id=booking_id,
+        user=request.user,
+        is_rent_paid=True
+    ).select_related("vehicle").first()
 
-    if booking.status == "pending":
-        booking.status = "cancelled"
-        booking.save()
+    if not booking:
+        messages.error(request, "Booking not found.")
+        return redirect("my_bookings")
 
+    # ❌ Block cancellation if ride already started or completed
+    if booking.status not in CANCEL_ALLOWED_STATUSES:
+        messages.error(
+            request,
+            "This booking cannot be cancelled at the current stage."
+        )
+        return redirect("my_bookings")
+
+    # 🔁 PROCESS REFUND
+    refund = process_refund(
+        booking,
+        reason="Customer cancelled booking"
+    )
+
+    booking.status = "cancelled"
+    booking.save()
+
+    # 📧 EMAIL TO CUSTOMER
+    send_mail(
+        subject="Booking Cancelled & Refund Initiated – Wheelzy",
+        message=(
+            f"Hi {booking.user.username},\n\n"
+            "Your booking has been cancelled successfully.\n\n"
+            f"Vehicle: {booking.vehicle.vehicle_name}\n"
+            f"Refund Amount: ₹{booking.total_price}\n\n"
+            "💳 The refund has been initiated and will be credited "
+            "within 5–7 business days.\n\n"
+            "Thank you for using Wheelzy.\n\n"
+            "Team Wheelzy"
+        ),
+        from_email=settings.EMAIL_HOST_USER,
+        recipient_list=[booking.user.email],
+        fail_silently=False,
+    )
+
+    # 🔔 NOTIFICATIONS
+    Notification.objects.create(
+        user=booking.user,
+        message="Your booking was cancelled. Refund initiated."
+    )
+
+    if booking.vehicle.owner:
         Notification.objects.create(
-            user=booking.user,
-            message="Your booking has been cancelled."
+            user=booking.vehicle.owner,
+            message=f"Booking #{booking.id} was cancelled by the customer."
         )
 
+    messages.success(request, "Booking cancelled and refund initiated.")
     return redirect("my_bookings")
 
 # model
@@ -916,10 +963,26 @@ def admin_analytics(request):
 
     return render(request, "admin_analytics.html", context)
 
-
 @login_required
 def approve_booking(request, booking_id):
-    booking = get_object_or_404(Booking, id=booking_id, status="booked")
+    if not request.user.is_superuser:
+        return redirect("home")
+
+    booking = Booking.objects.filter(
+        id=booking_id,
+        is_rent_paid=True
+    ).select_related("vehicle", "user").first()
+
+    if not booking:
+        messages.error(request, "Booking not found.")
+        return redirect("admin_bookings")
+
+    if booking.status != "booked":
+        messages.error(
+            request,
+            f"Booking cannot be approved. Current status: {booking.get_status_display()}"
+        )
+        return redirect("admin_bookings")
 
     if not booking.handover_photos.exists():
         messages.error(request, "Upload handover photos first.")
@@ -928,13 +991,12 @@ def approve_booking(request, booking_id):
     booking.status = "confirmed"
     booking.save()
 
-    # 📧 FINAL CONFIRMATION EMAIL
+    # 📧 EMAIL
     send_mail(
         subject="Booking Confirmed – Wheelzy",
         message=(
             f"Hi {booking.user.username},\n\n"
-            "Good news! 🎉\n\n"
-            "Your booking has been officially confirmed by the admin.\n\n"
+            "Your booking has been approved and confirmed by the admin.\n\n"
             f"Vehicle: {booking.vehicle.vehicle_name}\n"
             f"Pick-up: {booking.start_time.strftime('%d %b %Y, %I:%M %p')}\n"
             f"Drop-off: {booking.end_time.strftime('%d %b %Y, %I:%M %p')}\n\n"
@@ -952,7 +1014,9 @@ def approve_booking(request, booking_id):
         message=f"Your booking for {booking.vehicle.vehicle_name} has been confirmed."
     )
 
+    messages.success(request, "Booking approved successfully.")
     return redirect("admin_bookings")
+
 
 
 @login_required
@@ -1077,6 +1141,42 @@ def admin_damage_report_detail(request, report_id):
             "handover_photos": handover_photos,
             "damage_photos": damage_photos
         }
+    )
+
+@login_required
+def admin_refund_list(request):
+    if not request.user.is_superuser:
+        return redirect("home")
+
+    refunds = Refund.objects.select_related(
+        "booking", "user"
+    ).order_by("-created_at")
+
+    return render(
+        request,
+        "admin_refund_list.html",
+        {"refunds": refunds}
+    )
+
+
+@login_required
+def admin_refund_detail(request, refund_id):
+    if not request.user.is_superuser:
+        return redirect("home")
+
+    refund = get_object_or_404(Refund, id=refund_id)
+
+    if request.method == "POST":
+        new_status = request.POST.get("status")
+        if new_status in dict(Refund.REFUND_STATUS):
+            refund.status = new_status
+            refund.save()
+            messages.success(request, "Refund status updated.")
+
+    return render(
+        request,
+        "admin_refund_detail.html",
+        {"refund": refund}
     )
 
 
@@ -1354,7 +1454,7 @@ def razorpay_verify(request):
             booking.razorpay_payment_id = data.get("razorpay_payment_id")
             booking.razorpay_signature = data.get("razorpay_signature")
             booking.is_rent_paid = True
-            booking.status = "pending"
+            booking.status = "booked"
             booking.save()
 
             user = booking.user
@@ -1448,3 +1548,85 @@ def payment_cancelled(request, booking_id):
         booking.delete()
 
     return render(request, "payment_cancelled.html")
+
+@login_required
+def process_refund(booking, reason):
+    if not booking.razorpay_payment_id:
+        return None
+
+    client = razorpay.Client(
+        auth=(settings.RAZORPAY_KEY_ID, settings.RAZORPAY_KEY_SECRET)
+    )
+
+    # Create refund in Razorpay
+    refund_response = client.payment.refund(
+        booking.razorpay_payment_id,
+        {
+            "amount": int(booking.total_price * 100),
+            "notes": {
+                "booking_id": booking.id,
+                "reason": reason
+            }
+        }
+    )
+
+    # Save refund record
+    refund = Refund.objects.create(
+        booking=booking,
+        user=booking.user,
+        payment_id=booking.razorpay_payment_id,
+        refund_id=refund_response.get("id"),
+        amount=booking.total_price,
+        reason=reason,
+        status="processed"
+    )
+
+    return refund
+
+
+@login_required
+def reject_booking(request, booking_id):
+    if not request.user.is_superuser:
+        return redirect("home")
+
+    booking = get_object_or_404(
+        Booking,
+        id=booking_id,
+        status="booked",
+        is_rent_paid=True
+    )
+
+    # 🔁 REFUND
+    process_refund(
+        booking,
+        reason="Admin rejected booking"
+    )
+
+    booking.status = "rejected"
+    booking.save()
+
+    # 📧 EMAIL TO CUSTOMER
+    send_mail(
+        subject="Booking Rejected & Refund Initiated – Wheelzy",
+        message=(
+            f"Hi {booking.user.username},\n\n"
+            "Unfortunately, your booking has been rejected by the admin.\n\n"
+            f"Vehicle: {booking.vehicle.vehicle_name}\n"
+            f"Refund Amount: ₹{booking.total_price}\n\n"
+            "💳 The refund has been initiated and will reflect in your account "
+            "within 5–7 business days.\n\n"
+            "Sorry for the inconvenience.\n\n"
+            "Team Wheelzy"
+        ),
+        from_email=settings.EMAIL_HOST_USER,
+        recipient_list=[booking.user.email],
+        fail_silently=False,
+    )
+
+    Notification.objects.create(
+        user=booking.user,
+        message="Your booking was rejected. Refund initiated."
+    )
+
+    messages.success(request, "Booking rejected and refund initiated.")
+    return redirect("admin_bookings")

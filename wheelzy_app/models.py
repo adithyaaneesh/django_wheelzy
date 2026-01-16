@@ -80,6 +80,7 @@ class Booking(models.Model):
         ("returned", "Returned"),
         ("damage_reported", "Damage Reported"),
         ("cancelled", "Cancelled"),
+        ("rejected", "Rejected"),
     ]
 
     user = models.ForeignKey(User, on_delete=models.CASCADE)
@@ -212,3 +213,40 @@ class UserDocument(models.Model):
             return f"Documents - {self.user.username} - Booking #{self.booking.id}"
         return f"Documents - {self.user.username} (No Booking)"
 
+class Refund(models.Model):
+    REFUND_STATUS = [
+        ("initiated", "Initiated"),
+        ("processed", "Processed"),
+        ("completed", "Completed"),
+        ("failed", "Failed"),
+    ]
+
+    booking = models.OneToOneField(
+        Booking,
+        on_delete=models.CASCADE,
+        related_name="refund"
+    )
+
+    user = models.ForeignKey(
+        User,
+        on_delete=models.CASCADE,
+        related_name="refunds"
+    )
+
+    payment_id = models.CharField(max_length=255)
+    refund_id = models.CharField(max_length=255, blank=True, null=True)
+
+    amount = models.DecimalField(max_digits=10, decimal_places=2)
+    reason = models.CharField(max_length=255)
+
+    status = models.CharField(
+        max_length=20,
+        choices=REFUND_STATUS,
+        default="initiated"
+    )
+
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    def __str__(self):
+        return f"Refund #{self.id} - Booking #{self.booking.id}"

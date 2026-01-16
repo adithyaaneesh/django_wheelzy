@@ -85,6 +85,11 @@ urlpatterns = [
 
     path("damage-payment/verify/",views.verify_damage_payment,name="verify_damage_payment"),
     path("payment/cancelled/<int:booking_id>/",views.payment_cancelled,name="payment_cancelled"),
+    path("booking/<int:booking_id>/reject/", views.reject_booking, name="reject_booking"),
+
+    path("admin-panel/refunds/", views.admin_refund_list, name="admin_refund_list"),
+    path("admin_refund/<int:refund_id>/", views.admin_refund_detail, name="admin_refund_detail"),
+
 
 
 ]
