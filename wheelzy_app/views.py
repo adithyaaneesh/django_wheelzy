@@ -1339,7 +1339,7 @@ def owner_bookings(request):
         )
         .order_by("-ordered_at")   # ✅ LATEST → OLDEST
     )
-    paginator = Paginator(qs, 10)
+    paginator = Paginator(qs, 7)
     page_number = request.GET.get("page")
     bookings = paginator.get_page(page_number)
     today = timezone.now().date()
