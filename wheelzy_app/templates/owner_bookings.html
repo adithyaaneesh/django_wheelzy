@@ -280,14 +280,14 @@
                                 <span class="status in_use">In Use</span>
 
                             {% elif booking.status == "returned" %}
-                                <span class="status completed">Completed</span>
+                                <span class="status pending">Awaiting Return Check</span>
+
+                            {% elif booking.status == "return_uploaded" %}
+                                <span class="status confirmed">Return Condition Uploaded</span>
 
                             {% elif booking.status == "damage_reported" %}
-                                {% if booking.damage_report and booking.damage_report.is_paid %}
+                                {% if booking.damage_report.is_paid %}
                                     <span class="status completed">Completed</span>
-                                    <div class="mt-1">
-                                        <span class="text-dark">Damage Paid</span>
-                                    </div>
                                 {% else %}
                                     <span class="status damage">Damage Reported</span>
                                 {% endif %}
@@ -295,23 +295,40 @@
                         </td>
 
 
+
                         <td>
+
+                            {# 1️⃣ Upload handover before journey #}
                             {% if booking.status == "booked" %}
                                 <a href="{% url 'upload_handover_photos' booking.id %}"
                                 class="btn-action btn-primary">
                                     Upload Handover
                                 </a>
 
+                            {# 2️⃣ Journey completed → MUST upload return condition #}
                             {% elif booking.status == "returned" %}
+                                <a href="{% url 'upload_return_photos' booking.id %}"
+                                class="btn-action btn-primary">
+                                    Upload Return Condition
+                                </a>
+
+                            {# 3️⃣ After return condition → optional damage report #}
+                            {% elif booking.status == "return_uploaded" %}
                                 <a href="{% url 'add_damage_report' booking.id %}"
                                 class="btn-action btn-danger">
                                     Report Damage
                                 </a>
 
+                            {# 4️⃣ Damage already reported #}
+                            {% elif booking.status == "damage_reported" %}
+                                —
+
                             {% else %}
                                 —
                             {% endif %}
+
                         </td>
+
 
                     </tr>
 

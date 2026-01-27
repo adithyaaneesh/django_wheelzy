@@ -2,7 +2,7 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.models import User, Group
 from django.contrib.auth import login, authenticate, logout
 from django.contrib import messages
-from .models import DamagePhoto, UserDocument, Vehicle, Booking, DamageReport, UserProfile, Notification, VehicleHandoverPhoto, EmailOTP, Refund
+from .models import DamagePhoto, UserDocument, Vehicle, Booking, DamageReport, UserProfile, Notification, VehicleHandoverPhoto, EmailOTP, Refund, VehicleReturnPhoto
 from datetime import datetime
 from django.utils import timezone
 from django.contrib.auth.decorators import login_required
@@ -359,20 +359,25 @@ def all_vehicle(request):
         "booked_by_others": booked_by_others,
     })
 
-
 @login_required
 def vehicle_details(request, id):
     vehicle = get_object_or_404(Vehicle, id=id)
 
-    is_booked = Booking.objects.filter(
-        vehicle=vehicle,
-        is_rent_paid=True,
-        status__in=["pending", "confirmed", "in_use"]
-    ).exists()
+    booking = (
+        Booking.objects
+        .filter(vehicle=vehicle, user=request.user)
+        .order_by("-ordered_at")
+        .first()
+    )
+
+    return_photos = []
+    if booking:
+        return_photos = booking.return_photos.all()
 
     return render(request, "vehicle_detail.html", {
         "vehicle": vehicle,
-        "is_booked": is_booked
+        "booking": booking,
+        "return_photos": return_photos
     })
 
 
@@ -1082,10 +1087,12 @@ def mark_returned(request, booking_id):
     booking = get_object_or_404(Booking, id=booking_id, status="in_use")
     booking.status = "returned"
     booking.save()
+
     Notification.objects.create(
         user=booking.vehicle.owner,
-        message=f"Vehicle returned. You may report damage if any."
+        message=f"Booking #{booking.id} completed. Upload return condition photos."
     )
+
     return redirect("admin_bookings")
 
 
@@ -1111,6 +1118,8 @@ def admin_damage_review(request, booking_id):
 def admin_damage_details(request, booking_id):
     booking = get_object_or_404(Booking, id=booking_id)
     damage_report = getattr(booking, "damage_report", None)
+    return_photos = VehicleReturnPhoto.objects.filter(booking=booking)
+
     handover_photos = VehicleHandoverPhoto.objects.filter(
         booking=booking
     )
@@ -1127,6 +1136,7 @@ def admin_damage_details(request, booking_id):
             "damage_report": damage_report,
             "handover_photos": handover_photos,
             "damage_photos": damage_photos,
+            "return_photos": return_photos,
         }
     )
 
@@ -1445,6 +1455,10 @@ def owner_add_damage_report(request, booking_id):
         vehicle__owner=request.user,
         status="returned"
     )
+    if booking.status != "return_uploaded":
+        messages.error(request, "Upload return vehicle condition photos first.")
+        return redirect("owner_vehicle_bookings")
+
     if hasattr(booking, "damage_report"):
         messages.error(request, "Damage already reported.")
         return redirect("owner_vehicle_bookings")
@@ -1748,3 +1762,51 @@ def reject_booking(request, booking_id):
 
     messages.success(request, "Booking rejected and refund initiated.")
     return redirect("admin_bookings")
+
+
+@login_required
+def upload_return_photos(request, booking_id):
+    booking = get_object_or_404(
+        Booking,
+        id=booking_id,
+        vehicle__owner=request.user,
+        status="returned",
+        is_rent_paid=True
+    )
+
+    # Prevent duplicate upload
+    if booking.return_photos.exists():
+        messages.warning(request, "Return photos already uploaded.")
+        return redirect("owner_vehicle_bookings")
+
+    if request.method == "POST":
+        photos = request.FILES.getlist("photos")
+
+        if not photos:
+            messages.error(request, "Upload at least one photo.")
+            return redirect(request.path)
+
+        for photo in photos:
+            VehicleReturnPhoto.objects.create(
+                booking=booking,
+                owner=request.user,
+                image=photo
+            )
+
+        booking.status = "return_uploaded"
+        booking.save()
+
+        Notification.objects.create(
+            user=booking.user,
+            message=f"Return condition uploaded for booking #{booking.id}."
+        )
+
+        Notification.objects.create(
+            user=User.objects.filter(is_superuser=True).first(),
+            message=f"Return condition uploaded for booking #{booking.id}."
+        )
+
+        messages.success(request, "Return condition uploaded successfully.")
+        return redirect("owner_vehicle_bookings")
+
+    return render(request, "upload_return_photos.html", {"booking": booking})

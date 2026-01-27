@@ -78,6 +78,7 @@ class Booking(models.Model):
         ("confirmed", "Confirmed"),
         ("in_use", "In Use"),
         ("returned", "Returned"),
+        ("return_uploaded", "Return Uploaded"),
         ("damage_reported", "Damage Reported"),
         ("cancelled", "Cancelled"),
         ("rejected", "Rejected"),
@@ -250,3 +251,25 @@ class Refund(models.Model):
 
     def __str__(self):
         return f"Refund #{self.id} - Booking #{self.booking.id}"
+
+
+# =========================
+# VEHICLE RETURN PHOTOS
+# =========================
+class VehicleReturnPhoto(models.Model):
+    booking = models.ForeignKey(
+        Booking,
+        on_delete=models.CASCADE,
+        related_name="return_photos"
+    )
+    owner = models.ForeignKey(
+        User,
+        on_delete=models.CASCADE,
+        null=True,
+        blank=True
+    )
+    image = CloudinaryField('return_photos')
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"Return Photo - Booking #{self.booking.id}"

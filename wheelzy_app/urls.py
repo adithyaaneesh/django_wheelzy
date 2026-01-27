@@ -89,6 +89,7 @@ urlpatterns = [
 
     path("admin-panel/refunds/", views.admin_refund_list, name="admin_refund_list"),
     path("admin_refund/<int:refund_id>/", views.admin_refund_detail, name="admin_refund_detail"),
+    path("booking/<int:booking_id>/return-photos/", views.upload_return_photos, name="upload_return_photos"),
 
 
 
