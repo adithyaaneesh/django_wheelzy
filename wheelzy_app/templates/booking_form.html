@@ -1,4 +1,8 @@
 {% load static %}
+{% extends "base.html" %}
+
+{% block content %}
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -10,107 +14,107 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
 
-    <style>
-        :root {
-            --primary: #2563eb;
-            --bg: #f8fafc;
-            --card-border: #e2e8f0;
-        }
+<style>
+    :root {
+        --primary: #2563eb;
+        --bg: #f8fafc;
+        --card-border: #e2e8f0;
+    }
 
-        body {
-            background-color: var(--bg);
-            font-family: 'Inter', sans-serif;
-            color: #1e293b;
-        }
+    body {
+        background-color: var(--bg);
+        font-family: 'Inter', sans-serif;
+        color: #1e293b;
+    }
 
-        .checkout-header {
-            padding: 40px 0;
-            background: white;
-            border-bottom: 1px solid var(--card-border);
-            margin-bottom: 40px;
-        }
+    .checkout-header {
+        padding: 40px 0;
+        background: white;
+        border-bottom: 1px solid var(--card-border);
+        margin-bottom: 40px;
+    }
 
-        .card {
-            border: 1px solid var(--card-border);
-            border-radius: 16px;
-            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
-            overflow: hidden;
-        }
+    .card {
+        border: 1px solid var(--card-border);
+        border-radius: 16px;
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+        overflow: hidden;
+    }
 
-        .card-header {
-            background: #fff;
-            border-bottom: 1px solid var(--card-border);
-            padding: 20px;
-            font-weight: 700;
-        }
+    .card-header {
+        background: #fff;
+        border-bottom: 1px solid var(--card-border);
+        padding: 20px;
+        font-weight: 700;
+    }
 
-        .sticky-sidebar {
-            position: sticky;
-            top: 20px;
-        }
+    .sticky-sidebar {
+        position: sticky;
+        top: 20px;
+    }
 
-        .owner-box {
-            background: #eff6ff;
-            border: 1px dashed var(--primary);
-            border-radius: 12px;
-            padding: 15px;
-        }
+    .owner-box {
+        background: #eff6ff;
+        border: 1px dashed var(--primary);
+        border-radius: 12px;
+        padding: 15px;
+    }
 
-        .form-label {
-            font-weight: 600;
-            font-size: 14px;
-            color: #475569;
-        }
+    .form-label {
+        font-weight: 600;
+        font-size: 14px;
+        color: #475569;
+    }
 
-        .file-upload-wrapper {
-            padding: 15px;
-            border: 2px dashed #cbd5e1;
-            border-radius: 12px;
-            text-align: center;
-            transition: 0.3s;
-        }
+    .file-upload-wrapper {
+        padding: 15px;
+        border: 2px dashed #cbd5e1;
+        border-radius: 12px;
+        text-align: center;
+        transition: 0.3s;
+    }
 
-        .file-upload-wrapper:hover {
-            border-color: var(--primary);
-            background: #f0f7ff;
-        }
+    .file-upload-wrapper:hover {
+        border-color: var(--primary);
+        background: #f0f7ff;
+    }
 
-        .summary-item {
-            display: flex;
-            justify-content: space-between;
-            margin-bottom: 10px;
-            font-size: 14px;
-        }
+    .summary-item {
+        display: flex;
+        justify-content: space-between;
+        margin-bottom: 10px;
+        font-size: 14px;
+    }
 
-        .btn-confirm {
-            padding: 14px;
-            border-radius: 12px;
-            font-weight: 700;
-            background: var(--primary);
-            border: none;
-            width: 100%;
-            transition: 0.3s;
-            color: white;
-        }
+    .btn-confirm {
+        padding: 14px;
+        border-radius: 12px;
+        font-weight: 700;
+        background: var(--primary);
+        border: none;
+        width: 100%;
+        transition: 0.3s;
+        color: white;
+    }
 
-        .btn-confirm:hover {
-            background: #1d4ed8;
-            transform: translateY(-2px);
-        }
+    .btn-confirm:hover {
+        background: #1d4ed8;
+        transform: translateY(-2px);
+    }
 
-        .step-badge {
-            width: 28px;
-            height: 28px;
-            background: var(--primary);
-            color: white;
-            border-radius: 50%;
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 14px;
-            margin-right: 10px;
-        }
-    </style>
+    .step-badge {
+        width: 28px;
+        height: 28px;
+        background: var(--primary);
+        color: white;
+        border-radius: 50%;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 14px;
+        margin-right: 10px;
+    }
+</style>
 </head>
 
 <body>
@@ -293,5 +297,5 @@ startInput.addEventListener("change", function () {
 });
 
 </script>
-
 </html>
+{% endblock %}

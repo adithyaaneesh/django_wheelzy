@@ -21,6 +21,9 @@ from .utils import generate_otp
 from django.db.models.functions import TruncMonth
 from django.contrib.auth.models import User
 from .utils import generate_booking_invoice, generate_owner_payout_invoice
+import openai
+import json
+from openai import OpenAI
 
 
 razorpay_client = razorpay.Client(
@@ -1810,3 +1813,231 @@ def upload_return_photos(request, booking_id):
         return redirect("owner_vehicle_bookings")
 
     return render(request, "upload_return_photos.html", {"booking": booking})
+
+from django.http import JsonResponse
+import json
+
+
+openai.api_key = settings.OPENAI_API_KEY
+
+
+# @csrf_exempt
+# def wheelzy_ai(request):
+#     if request.method == "POST":
+#         data = json.loads(request.body)
+#         user_message = data.get("message")
+#         user = request.user
+
+#         # Step 1: Ask AI to classify intent
+#         response = openai.ChatCompletion.create(
+#             model="gpt-4o-mini",
+#             messages=[
+#                 {
+#                     "role": "system",
+#                     "content": """
+# You are Wheelzy AI.
+# Classify user request into one of these intents:
+# 1. search_vehicle
+# 2. booking_status
+# 3. unpaid_damage
+# 4. revenue
+# 5. faq
+# Return only JSON:
+# {
+#   "intent": "",
+#   "vehicle_type": "",
+#   "max_price": ""
+# }
+# """
+#                 },
+#                 {"role": "user", "content": user_message}
+#             ]
+#         )
+
+#         try:
+#             ai_data = json.loads(response.choices[0].message.content)
+#         except Exception:
+#             return JsonResponse({"reply": "AI could not process request properly."})
+
+
+#         intent = ai_data.get("intent")
+
+#         # ------------------------------
+#         # VEHICLE SEARCH
+#         # ------------------------------
+#         if intent == "search_vehicle":
+#             vehicles = Vehicle.objects.filter(is_available=True)
+
+#             if ai_data.get("vehicle_type"):
+#                 vehicles = vehicles.filter(
+#                     vehicle_type=ai_data["vehicle_type"]
+#                 )
+
+#             if ai_data.get("max_price"):
+#                 vehicles = vehicles.filter(
+#                     price_per_hour__lte=ai_data["max_price"]
+#                 )
+
+#             result = [
+#                 f"{v.vehicle_name} - ₹{v.price_per_hour}/hr"
+#                 for v in vehicles[:5]
+#             ]
+
+#             return JsonResponse({
+#                 "reply": "\n".join(result) if result else "No vehicles found."
+#             })
+
+#         # ------------------------------
+#         # BOOKING STATUS
+#         # ------------------------------
+#         elif intent == "booking_status":
+#             booking = Booking.objects.filter(
+#                 user=user
+#             ).order_by("-ordered_at").first()
+
+#             if booking:
+#                 return JsonResponse({
+#                     "reply": f"Your latest booking is {booking.get_status_display()}"
+#                 })
+#             return JsonResponse({"reply": "No bookings found."})
+
+#         # ------------------------------
+#         # UNPAID DAMAGE
+#         # ------------------------------
+#         elif intent == "unpaid_damage":
+#             unpaid = DamageReport.objects.filter(
+#                 booking__user=user,
+#                 is_paid=False
+#             ).exists()
+
+#             return JsonResponse({
+#                 "reply": "You have unpaid damage charges."
+#                 if unpaid else
+#                 "No unpaid damage charges."
+#             })
+
+#         # ------------------------------
+#         # FAQ DEFAULT
+#         # ------------------------------
+#         return JsonResponse({
+#             "reply": "Please contact support@wheelzy.com"
+#         })
+
+client = OpenAI(api_key=settings.OPENAI_API_KEY)
+
+
+@csrf_exempt
+def wheelzy_ai(request):
+    if request.method != "POST":
+        return JsonResponse({"reply": "Invalid request method."})
+
+    try:
+        data = json.loads(request.body)
+        user_message = data.get("message")
+
+        if not user_message:
+            return JsonResponse({"reply": "Please enter a message."})
+
+        # 🔹 AI Intent Classification
+        response = client.chat.completions.create(
+            model="gpt-4o-mini",
+            messages=[
+                {
+                    "role": "system",
+                    "content": """
+You are Wheelzy AI.
+Classify user request into one of these intents:
+1. search_vehicle
+2. booking_status
+3. unpaid_damage
+4. faq
+
+Return ONLY valid JSON like:
+{
+  "intent": "",
+  "vehicle_type": "",
+  "max_price": ""
+}
+"""
+                },
+                {"role": "user", "content": user_message}
+            ],
+            temperature=0.3
+        )
+
+        ai_text = response.choices[0].message.content.strip()
+
+        # 🔹 SAFE JSON PARSE
+        try:
+            ai_data = json.loads(ai_text)
+        except json.JSONDecodeError:
+            return JsonResponse({"reply": "AI response format error."})
+
+        intent = ai_data.get("intent")
+        user = request.user
+
+        # ===============================
+        # 🔍 SEARCH VEHICLE
+        # ===============================
+        if intent == "search_vehicle":
+            vehicles = Vehicle.objects.all()
+
+            if ai_data.get("vehicle_type"):
+                vehicles = vehicles.filter(
+                    vehicle_type__icontains=ai_data["vehicle_type"]
+                )
+
+            if ai_data.get("max_price"):
+                vehicles = vehicles.filter(
+                    price_per_hour__lte=ai_data["max_price"]
+                )
+
+            result = [
+                f"{v.vehicle_name} - ₹{v.price_per_hour}/hr"
+                for v in vehicles[:5]
+            ]
+
+            return JsonResponse({
+                "reply": "\n".join(result) if result else "No vehicles found."
+            })
+
+        # ===============================
+        # 📦 BOOKING STATUS
+        # ===============================
+        elif intent == "booking_status":
+            booking = Booking.objects.filter(
+                user=user
+            ).order_by("-ordered_at").first()
+
+            if booking:
+                return JsonResponse({
+                    "reply": f"Your latest booking is {booking.get_status_display()}."
+                })
+            return JsonResponse({"reply": "No bookings found."})
+
+        # ===============================
+        # 💥 UNPAID DAMAGE
+        # ===============================
+        elif intent == "unpaid_damage":
+            unpaid = DamageReport.objects.filter(
+                booking__user=user,
+                is_paid=False
+            ).exists()
+
+            return JsonResponse({
+                "reply": "You have unpaid damage charges."
+                if unpaid else
+                "No unpaid damage charges."
+            })
+
+        # ===============================
+        # 📌 DEFAULT FAQ
+        # ===============================
+        else:
+            return JsonResponse({
+                "reply": "For help, contact support@wheelzy.com"
+            })
+
+    except Exception as e:
+        print("Wheelzy AI Error:", e)
+        return JsonResponse({"reply": "Server error. Try again later."})
