@@ -95,8 +95,7 @@
     <div id="chat-container">
         <h5>Wheelzy AI</h5>
         <div style="display: flex; gap: 5px;">
-            <input type="text" id="ai-message" placeholder="Ask Wheelzy AI...">
-            <button onclick="sendAI()">Send</button>
+            <input type="text" id="ai-message" placeholder="Ask Wheelzy AI..." onkeypress="if(event.key==='Enter'){sendAI()}">            <button onclick="sendAI()">Send</button>
         </div>
         <div id="ai-response"></div>
     </div>
@@ -105,27 +104,35 @@
 
 </body>
 <script>
-    function sendAI() {
-    const message = document.getElementById("ai-message").value;
-    const csrfToken = document.getElementById("csrf-token").value;
+function sendAI() {
+    
+    const input = document.getElementById("ai-message");
+    const message = input.value.trim();
+    const responseBox = document.getElementById("ai-response");
 
+    if (!message) return;
+
+    // Show user message
+    responseBox.innerHTML += `<p><b>You:</b> ${message}</p>`;
+    responseBox.innerHTML += `<p><i>Typing...</i></p>`;
     fetch("/ai-chat/", {
         method: "POST",
         headers: {
             "Content-Type": "application/json",
-            "X-CSRFToken": csrfToken
+            "X-CSRFToken": document.getElementById("csrf-token").value
         },
         body: JSON.stringify({ message: message })
     })
     .then(res => res.json())
     .then(data => {
-        document.getElementById("ai-response").innerHTML +=
-            "<p>" + data.reply + "</p>";
-        document.getElementById("ai-message").value = "";
+        responseBox.innerHTML += `<p><b>AI:</b> ${data.reply}</p>`;
+        responseBox.scrollTop = responseBox.scrollHeight;
     })
-    .catch(error => console.log("Error:", error));
+    .catch(() => {
+        responseBox.innerHTML += `<p>Error connecting to AI</p>`;
+    });
+
+    input.value = "";
 }
-
 </script>
-
 </html>

@@ -2,7 +2,7 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.models import User, Group
 from django.contrib.auth import login, authenticate, logout
 from django.contrib import messages
-from .models import DamagePhoto, UserDocument, Vehicle, Booking, DamageReport, UserProfile, Notification, VehicleHandoverPhoto, EmailOTP, Refund, VehicleReturnPhoto
+from .models import DamagePhoto, UserDocument, Vehicle, Booking, DamageReport, UserProfile, Notification, VehicleHandoverPhoto, EmailOTP, Refund, VehicleReturnPhoto, AIChatHistory
 from datetime import datetime
 from django.utils import timezone
 from django.contrib.auth.decorators import login_required
@@ -2039,5 +2039,50 @@ Return ONLY valid JSON like:
             })
 
     except Exception as e:
-        print("Wheelzy AI Error:", e)
-        return JsonResponse({"reply": "Server error. Try again later."})
+        print("AI ERROR:", str(e))
+
+        if "insufficient_quota" in str(e):
+            return JsonResponse({
+                "reply": "AI is currently unavailable (quota exceeded)."
+            })
+
+        return JsonResponse({"reply": "Server error"})
+    
+
+
+client = OpenAI(api_key=settings.OPENAI_API_KEY)
+
+@csrf_exempt
+@login_required
+def ai_chat(request):
+    if request.method == "POST":
+        try:
+            data = json.loads(request.body)
+            user_message = data.get("message")
+
+            if not user_message:
+                return JsonResponse({"reply": "Please type something."})
+
+            # 🔥 OpenAI call
+            response = client.chat.completions.create(
+                model="gpt-4o-mini",
+                messages=[
+                    {"role": "system", "content": "You are Wheelzy AI assistant. Help users with vehicle booking."},
+                    {"role": "user", "content": user_message}
+                ]
+            )
+
+            ai_reply = response.choices[0].message.content
+
+            AIChatHistory.objects.create(
+                user=request.user,
+                message=user_message,
+                response=ai_reply
+            )
+
+            return JsonResponse({"reply": ai_reply})
+
+        except Exception as e:
+            return JsonResponse({"reply": "Error: " + str(e)})
+
+    return JsonResponse({"reply": "Invalid request"})

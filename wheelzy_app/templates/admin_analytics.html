@@ -1,5 +1,5 @@
+
 {% load static %}
-{% extends "base.html" %}
 
 {% block content %}
 
@@ -193,7 +193,7 @@
 
 
     <div class="data-section">
-        <h5 class="fw-bold mb-4">🚗 Most Booked Vehicles</h5>
+        <h5 class="fw-bold mb-4"> Most Booked Vehicles</h5>
         {% for v in popular_vehicles %}
         <div class="list-item">
             <span class="fw-semibold">{{ v.vehicle__vehicle_name }}</span>

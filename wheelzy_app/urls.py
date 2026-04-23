@@ -93,6 +93,7 @@ urlpatterns = [
 
     # ================= AI CHAT BOT =================
     path("ai-chat/", views.wheelzy_ai, name="wheelzy_ai"),
+    path("ai-chatbot/", views.ai_chat, name="ai_chat"),
 
 
 ]
