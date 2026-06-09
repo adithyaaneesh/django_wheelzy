@@ -24,6 +24,7 @@ from .utils import generate_booking_invoice, generate_owner_payout_invoice
 import openai
 import json
 from openai import OpenAI
+import os
 
 
 razorpay_client = razorpay.Client(
@@ -115,7 +116,7 @@ def verify_otp(request):
             messages.error(request, "OTP expired. Please resend.")
             return redirect("verify_otp")
 
-        # 🔐 Attempt limit
+        # Attempt limit
         if email_otp.attempts >= 5:
             email_otp.delete()
             messages.error(request, "Too many attempts. Please resend OTP.")
@@ -1923,7 +1924,10 @@ openai.api_key = settings.OPENAI_API_KEY
 #             "reply": "Please contact support@wheelzy.com"
 #         })
 
-client = OpenAI(api_key=settings.OPENAI_API_KEY)
+
+
+def my_view(request):
+    client = OpenAI(api_key=os.environ.get("OPENAI_API_KEY"))
 
 
 @csrf_exempt
