@@ -26,23 +26,19 @@ RAZORPAY_KEY_ID = os.getenv("RAZORPAY_KEY_ID")
 RAZORPAY_KEY_SECRET = os.getenv("RAZORPAY_KEY_SECRET")
 
 
-# Build paths inside the project like this: BASE_DIR / 'subdir'.
-BASE_DIR = Path(__file__).resolve().parent.parent
-
-
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/6.0/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-t1a#8oh6q^aclkjwf=)77)tg5=nydq8ho!m)r@q)mw%zi@#e_1'
+SECRET_KEY = os.getenv("SECRET_KEY")
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = os.getenv("DEBUG", "False") == "True"
 
-ALLOWED_HOSTS = []
-
-# DEBUG = False
-# ALLOWED_HOSTS = ["127.0.0.1", "localhost"]
+ALLOWED_HOSTS = os.getenv(
+    "ALLOWED_HOSTS",
+    "localhost,127.0.0.1"
+).split(",")
 
 
 # Application definition
@@ -81,13 +77,6 @@ MIDDLEWARE = [
 
 ]
 
-AUTHENTICATION_BACKENDS = (
-    "django.contrib.auth.backends.ModelBackend",
-    "allauth.account.auth_backends.AuthenticationBackend",
-)
-
-LOGIN_REDIRECT_URL = "/"
-LOGOUT_REDIRECT_URL = "/login/"
 
 # ================= AUTHENTICATION =================
 
@@ -160,14 +149,15 @@ WSGI_APPLICATION = 'wheelzy.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/6.0/ref/settings/#databases
 
+
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'wheelzydb',
-        'USER': 'postgres',
-        'PASSWORD': 'root',
-        'HOST': 'localhost',
-        'PORT': '5432',
+        'NAME': os.getenv("DB_NAME"),
+        'USER': os.getenv("DB_USER"),
+        'PASSWORD': os.getenv("DB_PASSWORD"),
+        'HOST': os.getenv("DB_HOST"),
+        'PORT': os.getenv("DB_PORT", "5432"),
     }
 }
 
@@ -212,8 +202,14 @@ STATICFILES_DIRS = [
     BASE_DIR / "static",
 ]
 
-
-CLOUDINARY_STORAGE['SECURE'] = True
+STORAGES = {
+    "default": {
+        "BACKEND": "cloudinary_storage.storage.MediaCloudinaryStorage",
+    },
+    "staticfiles": {
+        "BACKEND": "whitenoise.storage.CompressedManifestStaticFilesStorage",
+    },
+}
 
 # ================= EMAIL CONFIGURATION =================
 
