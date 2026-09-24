@@ -91,9 +91,6 @@ urlpatterns = [
     path("admin_refund/<int:refund_id>/", views.admin_refund_detail, name="admin_refund_detail"),
     path("booking/<int:booking_id>/return-photos/", views.upload_return_photos, name="upload_return_photos"),
 
-    # ================= AI CHAT BOT =================
-    path("ai-chat/", views.wheelzy_ai, name="wheelzy_ai"),
-    path("ai-chatbot/", views.ai_chat, name="ai_chat"),
 
 
 ]
