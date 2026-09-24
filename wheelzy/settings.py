@@ -85,6 +85,16 @@ AUTHENTICATION_BACKENDS = (
     "allauth.account.auth_backends.AuthenticationBackend",
 )
 
+LOGIN_REDIRECT_URL = "/"
+LOGOUT_REDIRECT_URL = "/login/"
+
+# ================= AUTHENTICATION =================
+
+AUTHENTICATION_BACKENDS = (
+    "django.contrib.auth.backends.ModelBackend",
+    "allauth.account.auth_backends.AuthenticationBackend",
+)
+
 SITE_ID = 1
 
 LOGIN_REDIRECT_URL = "/"
@@ -93,26 +103,24 @@ LOGOUT_REDIRECT_URL = "/login/"
 ACCOUNT_LOGIN_METHODS = {"username", "email"}
 
 ACCOUNT_SIGNUP_FIELDS = [
-    "email*",
     "username*",
+    "email*",
     "password1*",
     "password2*",
 ]
 
-
-SOCIALACCOUNT_AUTO_SIGNUP = True
-ACCOUNT_USERNAME_REQUIRED = False
-ACCOUNT_EMAIL_REQUIRED = True
-ACCOUNT_AUTHENTICATION_METHOD = "email"
 ACCOUNT_EMAIL_VERIFICATION = "none"
 
+SOCIALACCOUNT_AUTO_SIGNUP = True
 SOCIALACCOUNT_LOGIN_ON_GET = True
 SOCIALACCOUNT_QUERY_EMAIL = True
 
 SOCIALACCOUNT_PROVIDERS = {
     "google": {
         "SCOPE": ["profile", "email"],
-        "AUTH_PARAMS": {"access_type": "online"},
+        "AUTH_PARAMS": {
+            "access_type": "online",
+        },
     }
 }
 
