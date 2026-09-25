@@ -207,6 +207,22 @@
             background: #f9fafb;
             box-shadow: 0 6px 18px rgba(0,0,0,.12);
         }
+        .message {
+            padding: 10px;
+            margin-bottom: 15px;
+            border-radius: 6px;
+            text-align: center;
+        }
+
+        .message.error {
+            background: #ffe5e5;
+            color: #d00000;
+        }
+
+        .message.success {
+            background: #e5ffe9;
+            color: #087f23;
+        }
 
         /* DIVIDER */
         .divider {
@@ -367,9 +383,9 @@
 
     <!-- FORM -->
     <div class="login-form">
-        <!-- {% for message in messages %}
+        {% for message in messages %}
         <p>{{ message }}</p>
-        {% endfor %} -->
+        {% endfor %}
         <div class="brand">WHEELZY</div>
 
         <h1>Please Log In</h1>

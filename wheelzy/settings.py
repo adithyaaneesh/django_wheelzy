@@ -35,11 +35,9 @@ SECRET_KEY = os.getenv("SECRET_KEY")
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = os.getenv("DEBUG", "False") == "True"
 
-ALLOWED_HOSTS = os.getenv(
-    "ALLOWED_HOSTS",
-    "localhost,127.0.0.1"
-).split(",")
-
+ALLOWED_HOSTS = [
+    "wheelzy-x8k2.onrender.com",
+]
 
 # Application definition
 
@@ -229,3 +227,15 @@ EMAIL_HOST_USER = os.getenv("EMAIL_HOST_USER")
 EMAIL_HOST_PASSWORD = os.getenv("EMAIL_HOST_PASSWORD")
 
 DEFAULT_FROM_EMAIL = 'adithyaaneesh48@gmail.com'
+
+
+# ================= RENDER / PRODUCTION =================
+
+CSRF_TRUSTED_ORIGINS = [
+    "https://wheelzy-x8k2.onrender.com",
+]
+
+SESSION_COOKIE_SECURE = True
+CSRF_COOKIE_SECURE = True
+
+SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
