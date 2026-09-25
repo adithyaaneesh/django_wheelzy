@@ -10,231 +10,414 @@
     <style>
         * {
             box-sizing: border-box;
-            font-family: "Segoe UI", Tahoma, sans-serif;
+            margin: 0;
+            padding: 0;
+            font-family: "Inter", "Segoe UI", Arial, sans-serif;
         }
 
         body {
-            margin: 0;
             min-height: 100vh;
+            background:
+                linear-gradient(
+                    135deg,
+                    rgba(8, 15, 30, 0.88),
+                    rgba(16, 35, 65, 0.82)
+                ),
+                url("{% static 'images/register-car.jpg' %}") center/cover fixed;
             display: flex;
-            align-items: center;
             justify-content: center;
-            background: #f4f6fb;
+            align-items: center;
+            padding: 35px 20px;
         }
 
-        /* CARD */
+        /* ==============================
+           MAIN CARD
+        ============================== */
+
         .register-wrapper {
             width: 100%;
-            max-width: 980px;
-            height: 570px;
-            background: #fff;
-            border-radius: 22px;
-            overflow: hidden;
+            max-width: 1080px;
+            min-height: 650px;
             display: flex;
-            box-shadow: 0 25px 60px rgba(0,0,0,.25);
+            background: rgba(255, 255, 255, 0.97);
+            border-radius: 26px;
+            overflow: hidden;
+            box-shadow:
+                0 30px 80px rgba(0, 0, 0, 0.35),
+                0 10px 30px rgba(0, 0, 0, 0.12);
         }
 
-        /* LEFT FORM */
+        /* ==============================
+           FORM SIDE
+        ============================== */
+
         .register-form {
-            flex: 1;
-            padding: 22px 34px;
+            width: 55%;
+            padding: 38px 48px;
             display: flex;
             flex-direction: column;
             justify-content: center;
         }
 
         .brand {
-            font-size: 11px;
-            font-weight: 700;
-            letter-spacing: 2px;
-            color: #1e88e5;
-            margin-bottom: 6px;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            color: #1683e8;
+            font-size: 13px;
+            font-weight: 800;
+            letter-spacing: 3px;
+            margin-bottom: 8px;
+        }
+
+        .brand::before {
+            content: "";
+            width: 28px;
+            height: 3px;
+            border-radius: 10px;
+            background: #1683e8;
         }
 
         h1 {
-            font-size: 22px;
-            margin: 0 0 2px;
+            font-size: 31px;
+            line-height: 1.2;
+            font-weight: 750;
+            color: #111827;
+            margin-bottom: 7px;
         }
 
         .subtitle {
-            font-size: 12px;
             color: #6b7280;
-            margin-bottom: 10px;
+            font-size: 13px;
+            line-height: 1.5;
+        }
+
+        .header-subtitle {
+            margin-bottom: 22px;
+        }
+
+        /* ==============================
+           FORM GRID
+        ============================== */
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 13px 14px;
         }
 
         .form-group {
-            margin-bottom: 8px;
+            position: relative;
+        }
+
+        .form-group.full {
+            grid-column: 1 / -1;
+        }
+
+        .field-label {
+            display: block;
+            font-size: 11.5px;
+            font-weight: 650;
+            color: #374151;
+            margin-bottom: 6px;
+        }
+
+        .required {
+            color: #ef4444;
         }
 
         input,
         textarea {
             width: 100%;
-            padding: 10px 12px;
-            font-size: 12.5px;
-            border-radius: 9px;
-            border: 1px solid #d1d5db;
-            background: #f9fafb;
+            border: 1px solid #dce1e8;
+            background: #f8fafc;
+            border-radius: 11px;
+            padding: 11px 13px;
+            font-size: 13px;
+            color: #111827;
+            outline: none;
+            transition: all .2s ease;
+        }
+
+        input {
+            height: 43px;
         }
 
         textarea {
-            resize: none;
+            min-height: 68px;
+            resize: vertical;
+        }
+
+        input::placeholder,
+        textarea::placeholder {
+            color: #9ca3af;
+        }
+
+        input:hover,
+        textarea:hover {
+            border-color: #b8c2cf;
         }
 
         input:focus,
         textarea:focus {
-            outline: none;
-            border-color: #1e88e5;
-            box-shadow: 0 0 0 3px rgba(30,136,229,.18);
-            background: #fff;
+            border-color: #1683e8;
+            background: #ffffff;
+            box-shadow: 0 0 0 4px rgba(22, 131, 232, 0.10);
         }
 
-        /* ROLE */
+        /* ==============================
+           PHOTO UPLOAD
+        ============================== */
+
+        .photo-upload {
+            position: relative;
+        }
+
+        .photo-input {
+            height: auto;
+            padding: 9px 11px;
+            cursor: pointer;
+        }
+
+        .photo-help {
+            margin-top: 4px;
+            color: #9ca3af;
+            font-size: 10.5px;
+        }
+
+        /* ==============================
+           USERNAME HELP
+        ============================== */
+
+        .username-help {
+            display: block;
+            margin-top: 4px;
+            font-size: 10.5px;
+            color: #9ca3af;
+        }
+
+        /* ==============================
+           ROLE SELECTION
+        ============================== */
+
         .role-section {
-            margin: 6px 0 10px;
+            margin-top: 17px;
         }
 
         .role-title {
             font-size: 11.5px;
-            font-weight: 600;
-            margin-bottom: 6px;
+            font-weight: 650;
+            color: #374151;
+            margin-bottom: 8px;
         }
 
         .role-cards {
-            display: flex;
-            gap: 8px;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
         }
 
         .role-card {
-            flex: 1;
-            border: 1.5px solid #e5e7eb;
-            border-radius: 20px;
-            padding: 6px 8px;
+            position: relative;
+            border: 1.5px solid #dfe4eb;
+            background: #f8fafc;
+            border-radius: 13px;
+            padding: 11px;
             cursor: pointer;
-            background: #f9fafb;
             text-align: center;
-            transition: .25s ease;
+            transition: all .2s ease;
         }
 
-        .role-card h4 {
-            margin: 0;
-            font-size: 12px;
-            font-weight: 600;
+        .role-card:hover {
+            border-color: #8fc5f4;
+            transform: translateY(-1px);
         }
 
         .role-card input {
             display: none;
         }
 
+        .role-card h4 {
+            font-size: 13px;
+            font-weight: 650;
+            color: #374151;
+        }
+
+        .role-card p {
+            margin-top: 2px;
+            font-size: 10px;
+            color: #9ca3af;
+        }
+
         .role-card:has(input:checked) {
-            border-color: #1e88e5;
-            background: #eef4ff;
-            color: #1e88e5;
+            border-color: #1683e8;
+            background: #edf6ff;
+            box-shadow: 0 0 0 3px rgba(22, 131, 232, .08);
         }
 
-        /* BUTTON */
-        button {
-            background: linear-gradient(135deg, #1e88e5, #1987e7);
+        .role-card:has(input:checked) h4 {
+            color: #1683e8;
+        }
+
+        /* ==============================
+           DJANGO MESSAGES
+        ============================== */
+
+        .messages {
+            margin-bottom: 14px;
+        }
+
+        .message {
+            padding: 10px 12px;
+            border-radius: 10px;
+            font-size: 12px;
+            margin-bottom: 7px;
+            border: 1px solid transparent;
+        }
+
+        .message.error {
+            color: #991b1b;
+            background: #fef2f2;
+            border-color: #fecaca;
+        }
+
+        .message.success {
+            color: #166534;
+            background: #f0fdf4;
+            border-color: #bbf7d0;
+        }
+
+        .message.warning {
+            color: #92400e;
+            background: #fffbeb;
+            border-color: #fde68a;
+        }
+
+        .message.info {
+            color: #1e40af;
+            background: #eff6ff;
+            border-color: #bfdbfe;
+        }
+
+        /* ==============================
+           REGISTER BUTTON
+        ============================== */
+
+        .register-btn {
+            width: 100%;
+            height: 46px;
+            margin-top: 18px;
             border: none;
-            padding: 11px;
             border-radius: 12px;
-            font-size: 13.5px;
-            font-weight: 600;
-            color: #fff;
+            background: linear-gradient(135deg, #1683e8, #0869c5);
+            color: white;
+            font-size: 13px;
+            font-weight: 700;
+            letter-spacing: .4px;
             cursor: pointer;
-            margin-top: 6px;
+            box-shadow: 0 8px 20px rgba(22, 131, 232, .25);
+            transition: all .25s ease;
         }
 
-        button:hover {
-            box-shadow: 0 10px 25px rgba(30,136,229,.35);
+        .register-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 12px 28px rgba(22, 131, 232, .32);
         }
+
+        .register-btn:active {
+            transform: translateY(0);
+        }
+
+        /* ==============================
+           LOGIN
+        ============================== */
 
         .login-link {
-            margin-top: 8px;
-            font-size: 12.5px;
+            margin-top: 15px;
             text-align: center;
+            font-size: 12.5px;
             color: #6b7280;
         }
 
         .login-link a {
-            color: #1e88e5;
-            font-weight: 600;
-            text-decoration: none;
-        }
-
-        /* RIGHT IMAGE */
-        .register-image {
-            flex: 1;
-            background: url("/static/images/register.jpg") center/cover no-repeat;
-            position: relative;
-        }
-
-        .register-image::after {
-            content: "";
-            position: absolute;
-            inset: 0;
-            background: linear-gradient(to left, rgba(0,0,0,.15), rgba(0,0,0,.55));
-        }
-
-        .image-text {
-            position: absolute;
-            bottom: 24px;
-            right: 24px;
-            color: #fff;
-            text-align: right;
-        }
-
-        .image-text h2 {
-            margin: 0;
-            font-size: 25px;
+            color: #1683e8;
             font-weight: 700;
+            text-decoration: none;
+            margin-left: 3px;
         }
 
-        .image-text p {
-            font-size: 12px;
-            opacity: .9;
-            margin-top: 4px;
+        .login-link a:hover {
+            text-decoration: underline;
         }
 
-        /* MOBILE */
-        @media (max-width: 768px) {
-            .register-wrapper {
-                height: auto;
-                border-radius: 0;
-            }
+        /* ==============================
+           IMAGE SIDE
+        ============================== */
 
-            .register-image {
-                display: none;
-            }
-
-            .register-form {
-                padding: 26px 22px;
-            }
+        .register-image {
+            width: 45%;
+            min-height: 650px;
+            position: relative;
+            background:
+                linear-gradient(
+                    180deg,
+                    rgba(5, 15, 30, .10),
+                    rgba(5, 15, 30, .78)
+                ),
+                url("{% static 'images/register.jpg' %}") center/cover no-repeat;
         }
-        @media (max-width: 768px) {
+
+        .image-content {
+            position: absolute;
+            left: 40px;
+            right: 40px;
+            bottom: 42px;
+            color: white;
+            z-index: 2;
+        }
+
+        .image-badge {
+            display: inline-block;
+            padding: 6px 10px;
+            border-radius: 20px;
+            background: rgba(255,255,255,.14);
+            border: 1px solid rgba(255,255,255,.25);
+            backdrop-filter: blur(8px);
+            font-size: 10px;
+            font-weight: 600;
+            letter-spacing: .8px;
+            margin-bottom: 12px;
+        }
+
+        .image-content h2 {
+            font-size: 32px;
+            line-height: 1.15;
+            margin-bottom: 8px;
+            font-weight: 750;
+        }
+
+        .image-content p {
+            max-width: 330px;
+            font-size: 13px;
+            line-height: 1.6;
+            color: rgba(255,255,255,.82);
+        }
+
+        /* ==============================
+           MOBILE
+        ============================== */
+
+        @media (max-width: 850px) {
 
             body {
-                background: url("/static/images/register-car.jpg") center / cover no-repeat fixed;
-                position: relative;
-            }
-
-            body::before {
-                content: "";
-                position: fixed;
-                inset: 0;
-                background: linear-gradient(
-                    rgba(0,0,0,0.6),
-                    rgba(0,0,0,0.85)
-                );
-                z-index: -1;
+                padding: 20px 14px;
+                align-items: flex-start;
             }
 
             .register-wrapper {
-                height: auto;
-                max-width: 360px;
-                border-radius: 28px;
-                background: rgba(255,255,255,0.08);
-                backdrop-filter: blur(14px);
-                box-shadow: 0 25px 60px rgba(0,0,0,.6);
+                max-width: 520px;
+                min-height: auto;
+                margin: 15px auto;
             }
 
             .register-image {
@@ -242,49 +425,53 @@
             }
 
             .register-form {
-                padding: 26px 22px;
-                color: #fff;
-            }
-
-            .register-form input,
-            .register-form textarea {
-                background: rgba(255,255,255,0.15);
-                border: 1px solid rgba(255,255,255,0.25);
-                color: #fff;
-            }
-
-            .register-form input::placeholder,
-            .register-form textarea::placeholder {
-                color: rgba(255,255,255,0.7);
-            }
-
-            .register-form input:focus,
-            .register-form textarea:focus {
-                background: rgba(255,255,255,0.2);
-                border-color: #1e88e5;
-            }
-
-            .register-form h1,
-            .register-form .brand,
-            .register-form .subtitle,
-            .register-form .login-link,
-            .register-form .login-link a {
-                color: #fff;
-                text-align: center;
-            }
-
-            .role-card {
-                background: rgba(255,255,255,0.12);
-                border-color: rgba(255,255,255,0.3);
-                color: #fff;
-            }
-
-            .role-card:has(input:checked) {
-                background: rgba(30,136,229,0.35);
-                border-color: #1e88e5;
+                width: 100%;
+                padding: 34px 30px;
             }
         }
 
+        @media (max-width: 520px) {
+
+            body {
+                padding: 15px;
+                background:
+                    linear-gradient(
+                        rgba(5, 12, 25, .78),
+                        rgba(5, 12, 25, .9)
+                    ),
+                    url("{% static 'images/register-car.jpg' %}") center/cover fixed;
+            }
+
+            .register-wrapper {
+                border-radius: 22px;
+                background: rgba(255,255,255,.97);
+            }
+
+            .register-form {
+                padding: 28px 20px;
+            }
+
+            h1 {
+                font-size: 26px;
+            }
+
+            .form-grid {
+                grid-template-columns: 1fr;
+                gap: 12px;
+            }
+
+            .form-group.full {
+                grid-column: auto;
+            }
+
+            .role-cards {
+                grid-template-columns: 1fr 1fr;
+            }
+
+            input {
+                height: 45px;
+            }
+        }
     </style>
 </head>
 
@@ -292,75 +479,247 @@
 
 <div class="register-wrapper">
 
-    <!-- FORM -->
-    <form method="post" class="register-form" enctype="multipart/form-data">
+    <!-- ==============================
+         FORM
+    ============================== -->
+
+    <form method="post"
+          class="register-form"
+          enctype="multipart/form-data">
+
         {% csrf_token %}
 
-        <div class="brand">WHEELZY</div>
-        <h1>Create Account</h1>
-        <div class="subtitle">Get started in just a minute</div>
-
-        <div class="form-group">
-            <input type="file" name="photo" accept="image/*" >
+        <div class="brand">
+            WHEELZY
         </div>
 
-        <div class="form-group">
-            <input type="text" name="username" placeholder="Username" required>
-            <span class="subtitle">Please remember this username for login</span>
+        <h1>Create your account</h1>
+
+        <div class="subtitle header-subtitle">
+            Join Wheelzy and start your journey today.
         </div>
 
-        <div class="form-group">
-            <input type="email" name="email" placeholder="Email" required>
-        </div>
+        <!-- DJANGO MESSAGES -->
 
-        <div class="form-group">
-            <input type="password" name="password" placeholder="Password" required>
+        {% if messages %}
+        <div class="messages">
+            {% for message in messages %}
+                <div class="message {{ message.tags }}">
+                    {{ message }}
+                </div>
+            {% endfor %}
         </div>
+        {% endif %}
 
-        <div class="form-group">
-            <input type="password" name="cpassword" placeholder="Confirm Password" required>
-        </div>
+        <!-- FORM GRID -->
 
-        <div class="form-group">
-            <input type="text" name="phone" placeholder="Phone Number" required>
-        </div>
+        <div class="form-grid">
 
-        <div class="form-group">
-            <textarea name="address" rows="2" placeholder="Address" required></textarea>
+            <!-- PHOTO -->
+
+            <div class="form-group full photo-upload">
+                <label class="field-label">
+                    Profile Photo
+                </label>
+
+                <input
+                    class="photo-input"
+                    type="file"
+                    name="photo"
+                    accept="image/*"
+                >
+
+                <span class="photo-help">
+                    JPG, PNG or WEBP • Optional
+                </span>
+            </div>
+
+            <!-- USERNAME -->
+
+            <div class="form-group">
+                <label class="field-label">
+                    Username <span class="required">*</span>
+                </label>
+
+                <input
+                    type="text"
+                    name="username"
+                    placeholder="Choose a username"
+                    required
+                >
+
+                <span class="username-help">
+                    Remember this username for login.
+                </span>
+            </div>
+
+            <!-- EMAIL -->
+
+            <div class="form-group">
+                <label class="field-label">
+                    Email <span class="required">*</span>
+                </label>
+
+                <input
+                    type="email"
+                    name="email"
+                    placeholder="you@example.com"
+                    required
+                >
+            </div>
+
+            <!-- PASSWORD -->
+
+            <div class="form-group">
+                <label class="field-label">
+                    Password <span class="required">*</span>
+                </label>
+
+                <input
+                    type="password"
+                    name="password"
+                    placeholder="Create a password"
+                    required
+                >
+            </div>
+
+            <!-- CONFIRM PASSWORD -->
+
+            <div class="form-group">
+                <label class="field-label">
+                    Confirm Password <span class="required">*</span>
+                </label>
+
+                <input
+                    type="password"
+                    name="cpassword"
+                    placeholder="Confirm your password"
+                    required
+                >
+            </div>
+
+            <!-- PHONE -->
+
+            <div class="form-group">
+                <label class="field-label">
+                    Phone Number <span class="required">*</span>
+                </label>
+
+                <input
+                    type="text"
+                    name="phone"
+                    placeholder="Enter phone number"
+                    required
+                >
+            </div>
+
+            <!-- ADDRESS -->
+
+            <div class="form-group">
+                <label class="field-label">
+                    Address <span class="required">*</span>
+                </label>
+
+                <textarea
+                    name="address"
+                    rows="2"
+                    placeholder="Enter your address"
+                    required
+                ></textarea>
+            </div>
+
         </div>
 
         <!-- ROLE -->
+
         <div class="role-section">
-            <div class="role-title">Select Role</div>
+
+            <div class="role-title">
+                Select your account type
+            </div>
+
             <div class="role-cards">
+
                 <label class="role-card">
-                    <input type="radio" name="role" value="customer" required>
+
+                    <input
+                        type="radio"
+                        name="role"
+                        value="customer"
+                        required
+                    >
+
                     <h4>Customer</h4>
+
+                    <p>Rent vehicles</p>
+
                 </label>
 
                 <label class="role-card">
-                    <input type="radio" name="role" value="owner">
-                    <h4>Owner</h4>
+
+                    <input
+                        type="radio"
+                        name="role"
+                        value="owner"
+                    >
+
+                    <h4>Vehicle Owner</h4>
+
+                    <p>List your vehicles</p>
+
                 </label>
+
             </div>
+
         </div>
 
-        <button type="submit">REGISTER</button>
+        <!-- REGISTER -->
+
+        <button
+            type="submit"
+            class="register-btn"
+        >
+            CREATE ACCOUNT
+        </button>
+
+        <!-- LOGIN -->
 
         <div class="login-link">
+
             Already have an account?
-            <a href="{% url 'login' %}">Login</a>
+
+            <a href="{% url 'login' %}">
+                Login
+            </a>
+
         </div>
+
     </form>
-{% for message in messages %}
-<p>{{ message }}</p>
-{% endfor %}
-    <!-- IMAGE -->
+
+    <!-- ==============================
+         IMAGE
+    ============================== -->
+
     <div class="register-image">
-        <div class="image-text">
-            <h2>Join Wheelzy</h2>
-            <p>Create your account & start riding</p>
+
+        <div class="image-content">
+
+            <div class="image-badge">
+                YOUR JOURNEY STARTS HERE
+            </div>
+
+            <h2>
+                Join Wheelzy
+            </h2>
+
+            <p>
+                Create your account, discover vehicles,
+                and enjoy a simple and convenient
+                rental experience.
+            </p>
+
         </div>
+
     </div>
 
 </div>
