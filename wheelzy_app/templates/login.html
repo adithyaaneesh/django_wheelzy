@@ -1,3 +1,4 @@
+
 {% load static %}
 <!DOCTYPE html>
 <html lang="en">
@@ -6,232 +7,257 @@
     <title>Login | Wheelzy</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="icon" type="image/png" href="{% static 'images/wheelzy1.png' %}">
+
     <style>
+        /* =========================================================
+           RESET
+        ========================================================= */
         * {
+            margin: 0;
+            padding: 0;
             box-sizing: border-box;
-            font-family: "Segoe UI", Tahoma, sans-serif;
+            font-family: "Inter", "Segoe UI", Arial, sans-serif;
         }
 
         body {
-            margin: 0;
             min-height: 100vh;
             display: flex;
             align-items: center;
             justify-content: center;
-            background: #f4f6fb;
+            padding: 30px;
+            background:
+                radial-gradient(circle at top left, rgba(30, 136, 229, .08), transparent 35%),
+                #f5f7fb;
         }
 
-        /* CARD */
+        /* =========================================================
+           LOGIN CONTAINER
+        ========================================================= */
         .login-wrapper {
-            width: 100%;
-            max-width: 980px;
-            height: 570px;
-            background: #fff;
-            border-radius: 22px;
+            width: min(1050px, 100%);
+            min-height: 620px;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
             overflow: hidden;
-            display: flex;
-            box-shadow: 0 25px 60px rgba(0,0,0,.25);
+            background: #ffffff;
+            border-radius: 26px;
+            box-shadow:
+                0 25px 70px rgba(15, 23, 42, .14),
+                0 8px 25px rgba(15, 23, 42, .06);
         }
 
-        /* LEFT IMAGE */
+        /* =========================================================
+           LEFT IMAGE
+        ========================================================= */
         .login-image {
-            flex: 1;
-            background: url("/static/images/login-logo.jpg") center/cover no-repeat;
             position: relative;
+            min-height: 620px;
+            background:
+                linear-gradient(
+                    135deg,
+                    rgba(0, 0, 0, .18),
+                    rgba(0, 0, 0, .65)
+                ),
+                url("{% static 'images/login-logo.jpg' %}")
+                center / cover no-repeat;
         }
 
-        .login-image::after {
-            content: "";
+        .login-image-content {
             position: absolute;
-            inset: 0;
-            background: linear-gradient(to right, rgba(0,0,0,.15), rgba(0,0,0,.55));
-        }
-
-        .image-text {
-            position: absolute;
-            bottom: 28px;
-            left: 28px;
+            inset: auto 45px 45px 45px;
             color: #fff;
-            z-index: 1;
+            z-index: 2;
         }
 
-        .image-text h2 {
-            margin: 0;
-            font-size: 26px;
-            font-weight: 700;
+        .image-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 7px;
+            padding: 7px 12px;
+            margin-bottom: 18px;
+            border: 1px solid rgba(255,255,255,.25);
+            border-radius: 50px;
+            background: rgba(255,255,255,.12);
+            backdrop-filter: blur(8px);
+            font-size: 11px;
+            font-weight: 600;
+            letter-spacing: .5px;
         }
 
-        .image-text p {
-            font-size: 13px;
-            opacity: .9;
-            margin-top: 4px;
+        .image-badge span {
+            width: 7px;
+            height: 7px;
+            border-radius: 50%;
+            background: #4ade80;
+            box-shadow: 0 0 10px rgba(74,222,128,.8);
         }
 
-        /* RIGHT FORM */
+        .login-image h2 {
+            font-size: 38px;
+            line-height: 1.15;
+            font-weight: 800;
+            letter-spacing: -.8px;
+            margin-bottom: 12px;
+        }
+
+        .login-image p {
+            max-width: 360px;
+            color: rgba(255,255,255,.82);
+            font-size: 14px;
+            line-height: 1.7;
+        }
+
+        /* =========================================================
+           RIGHT FORM
+        ========================================================= */
         .login-form {
-            flex: 1;
-            padding: 32px 36px; /* TIGHTER */
-            color: #111;
             display: flex;
             flex-direction: column;
             justify-content: center;
+            padding: 55px 60px;
+            background: #fff;
         }
 
         .brand {
-            font-weight: 700;
-            letter-spacing: 2px;
-            font-size: 12px;
-            margin-bottom: 14px;
+            display: flex;
+            align-items: center;
+            gap: 9px;
+            margin-bottom: 28px;
             color: #1e88e5;
+            font-size: 13px;
+            font-weight: 800;
+            letter-spacing: 2.5px;
+        }
+
+        .brand-mark {
+            width: 30px;
+            height: 30px;
+            display: grid;
+            place-items: center;
+            border-radius: 9px;
+            color: #fff;
+            background: linear-gradient(135deg, #1e88e5, #1565c0);
+            font-size: 14px;
+            font-weight: 800;
+            box-shadow: 0 7px 18px rgba(30,136,229,.25);
         }
 
         h1 {
-            margin: 0 0 4px;
-            font-size: 24px;
+            color: #111827;
+            font-size: 30px;
+            line-height: 1.2;
+            font-weight: 750;
+            letter-spacing: -.6px;
+            margin-bottom: 8px;
         }
 
         .subtitle {
-            font-size: 13px;
             color: #6b7280;
+            font-size: 14px;
+            line-height: 1.6;
+            margin-bottom: 26px;
+        }
+
+        /* =========================================================
+           DJANGO MESSAGES
+        ========================================================= */
+        .messages {
+            display: flex;
+            flex-direction: column;
+            gap: 9px;
             margin-bottom: 18px;
         }
 
-        label {
-            font-size: 12px;
-            font-weight: 600;
-            margin-bottom: 4px;
-            display: block;
-        }
-
-        input {
-            width: 100%;
+        .message {
+            display: flex;
+            align-items: center;
+            gap: 9px;
             padding: 11px 13px;
-            background: #f9fafb;
-            border: 1px solid #d1d5db;
             border-radius: 10px;
-            font-size: 13px;
-            margin-bottom: 14px;
-        }
-
-        input:focus {
-            outline: none;
-            border-color: #1e88e5;
-            box-shadow: 0 0 0 3px rgba(30,136,229,.18);
-            background: #fff;
-        }
-
-        /* ROLE */
-        .role-box {
-            display: flex;
-            gap: 8px;
-            margin-bottom: 14px;
-        }
-
-        .role-box label {
-            flex: 1;
-            border: 2px solid #e5e7eb;
-            border-radius: 12px;
-            padding: 8px;
-            text-align: center;
-            cursor: pointer;
             font-size: 12px;
-            font-weight: 600;
-            color: #374151;
-            transition: .25s;
+            font-weight: 500;
+            line-height: 1.4;
         }
 
-        .role-box input {
-            display: none;
+        .message.error {
+            color: #b91c1c;
+            background: #fef2f2;
+            border: 1px solid #fecaca;
         }
 
-        .role-box label:has(input:checked) {
-            border-color: #1e88e5;
-            background: #eef4ff;
-            color: #1e88e5;
+        .message.success {
+            color: #15803d;
+            background: #f0fdf4;
+            border: 1px solid #bbf7d0;
         }
 
-        /* DEMO */
-        .demo-title {
-            font-size: 11px;
-            color: #6b7280;
-            text-align: center;
-            margin: 6px 0 4px;
+        .message.warning {
+            color: #a16207;
+            background: #fefce8;
+            border: 1px solid #fde68a;
         }
 
-        .demo-box {
-            display: flex;
-            justify-content: center;
-            gap: 10px;
-            margin-bottom: 14px;
+        .message.info {
+            color: #1d4ed8;
+            background: #eff6ff;
+            border: 1px solid #bfdbfe;
         }
 
-        .demo-btn {
-            border: 1px dashed #1e88e5;
-            padding: 5px 12px;
-            border-radius: 8px;
-            font-size: 11px;
-            font-weight: 600;
-            color: #1e88e5;
-            cursor: pointer;
-            transition: .2s;
-        }
-
-        .demo-btn:hover {
-            background: #eef4ff;
-        }
-        /* GOOGLE BUTTON */
+        /* =========================================================
+           GOOGLE LOGIN
+        ========================================================= */
         .google-btn {
+            width: 100%;
+            height: 48px;
             display: flex;
             align-items: center;
             justify-content: center;
-            gap: 10px;
-            width: 100%;
-            padding: 11px;
-            border-radius: 14px;
-            border: 1px solid #d1d5db;
+            gap: 11px;
+            border: 1px solid #dfe3e8;
+            border-radius: 11px;
             background: #fff;
-            color: #111;
-            font-size: 14px;
-            font-weight: 600;
+            color: #1f2937;
             text-decoration: none;
-            margin-bottom: 16px;
-            transition: .2s;
+            font-size: 13px;
+            font-weight: 650;
+            transition: .2s ease;
         }
 
-        .google-btn img {
+        .google-btn:hover {
+            border-color: #cbd5e1;
+            background: #f8fafc;
+            box-shadow: 0 7px 20px rgba(15,23,42,.08);
+            transform: translateY(-1px);
+        }
+
+        .google-icon {
             width: 18px;
             height: 18px;
         }
 
-        .google-btn:hover {
-            background: #f9fafb;
-            box-shadow: 0 6px 18px rgba(0,0,0,.12);
-        }
-        .message {
-            padding: 10px;
-            margin-bottom: 15px;
-            border-radius: 6px;
+        .google-note {
+            margin-top: 9px;
+            margin-bottom: 22px;
             text-align: center;
+            color: #9ca3af;
+            font-size: 11px;
         }
 
-        .message.error {
-            background: #ffe5e5;
-            color: #d00000;
+        .google-note b {
+            color: #6b7280;
         }
 
-        .message.success {
-            background: #e5ffe9;
-            color: #087f23;
-        }
-
-        /* DIVIDER */
+        /* =========================================================
+           DIVIDER
+        ========================================================= */
         .divider {
             display: flex;
             align-items: center;
             gap: 12px;
-            margin-bottom: 14px;
-            color: #6b7280;
-            font-size: 12px;
+            margin-bottom: 23px;
+            color: #9ca3af;
+            font-size: 11px;
+            white-space: nowrap;
         }
 
         .divider::before,
@@ -242,94 +268,233 @@
             background: #e5e7eb;
         }
 
+        /* =========================================================
+           FORM
+        ========================================================= */
+        .form-group {
+            margin-bottom: 18px;
+        }
 
-        /* BUTTON */
-        button {
-            background: linear-gradient(135deg, #1e88e5, #1987e7);
-            border: none;
-            padding: 12px;
-            border-radius: 14px;
+        .form-label {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 7px;
+            color: #374151;
+            font-size: 12px;
+            font-weight: 650;
+        }
+
+        .input-wrapper {
+            position: relative;
+        }
+
+        .input-icon {
+            position: absolute;
+            left: 14px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #9ca3af;
             font-size: 14px;
-            font-weight: 600;
-            color: #fff;
-            cursor: pointer;
-            transition: transform .15s ease, box-shadow .15s ease;
+            pointer-events: none;
         }
 
-        button:hover {
-            transform: translateY(-1px);
-            box-shadow: 0 10px 25px rgba(30,136,229,.35);
-        }
-
-        .signup {
-            margin-top: 14px;
+        .form-input {
+            width: 100%;
+            height: 48px;
+            padding: 0 43px;
+            border: 1px solid #d9dee7;
+            border-radius: 11px;
+            outline: none;
+            background: #f9fafb;
+            color: #111827;
             font-size: 13px;
-            text-align: center;
+            transition: .2s ease;
+        }
+
+        .form-input::placeholder {
+            color: #a1a8b3;
+        }
+
+        .form-input:hover {
+            border-color: #c4cad3;
+        }
+
+        .form-input:focus {
+            border-color: #1e88e5;
+            background: #fff;
+            box-shadow: 0 0 0 4px rgba(30,136,229,.10);
+        }
+
+        .password-toggle {
+            position: absolute;
+            right: 13px;
+            top: 50%;
+            transform: translateY(-50%);
+            border: none;
+            padding: 4px;
+            background: transparent;
+            color: #9ca3af;
+            cursor: pointer;
+            font-size: 13px;
+        }
+
+        .password-toggle:hover {
+            color: #1e88e5;
+            box-shadow: none;
+            transform: translateY(-50%);
+        }
+
+        /* =========================================================
+           ROLE SELECTOR
+        ========================================================= */
+        .role-title {
+            margin-bottom: 8px;
+            color: #374151;
+            font-size: 12px;
+            font-weight: 650;
+        }
+
+        .role-box {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 8px;
+            margin-bottom: 19px;
+        }
+
+        .role-option {
+            position: relative;
+        }
+
+        .role-option input {
+            position: absolute;
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        .role-option label {
+            min-height: 43px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: 1px solid #dfe3e8;
+            border-radius: 10px;
+            background: #fff;
             color: #6b7280;
+            font-size: 11px;
+            font-weight: 650;
+            cursor: pointer;
+            transition: .2s ease;
+        }
+
+        .role-option label:hover {
+            border-color: #93c5fd;
+            color: #1e88e5;
+        }
+
+        .role-option input:checked + label {
+            border-color: #1e88e5;
+            background: #eff6ff;
+            color: #1e88e5;
+            box-shadow: inset 0 0 0 1px rgba(30,136,229,.08);
+        }
+
+        /* =========================================================
+           DEMO LOGIN
+        ========================================================= */
+        .demo-section {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 18px;
+            padding: 10px 12px;
+            border: 1px dashed #d7dce4;
+            border-radius: 10px;
+            background: #fafbfc;
+        }
+
+        .demo-title {
+            color: #6b7280;
+            font-size: 11px;
+        }
+
+        .demo-btn {
+            border: 0;
+            padding: 7px 11px;
+            border-radius: 7px;
+            background: #eaf3ff;
+            color: #1e88e5;
+            font-size: 10px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: .2s ease;
+        }
+
+        .demo-btn:hover {
+            background: #dbeafe;
+            transform: none;
+            box-shadow: none;
+        }
+
+        /* =========================================================
+           LOGIN BUTTON
+        ========================================================= */
+        .login-btn {
+            width: 100%;
+            height: 48px;
+            border: 0;
+            border-radius: 11px;
+            background: linear-gradient(135deg, #1e88e5, #1565c0);
+            color: #fff;
+            font-size: 13px;
+            font-weight: 700;
+            letter-spacing: .2px;
+            cursor: pointer;
+            box-shadow: 0 9px 22px rgba(30,136,229,.22);
+            transition: .2s ease;
+        }
+
+        .login-btn:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 13px 28px rgba(30,136,229,.30);
+        }
+
+        .login-btn:active {
+            transform: translateY(0);
+        }
+
+        /* =========================================================
+           SIGN UP
+        ========================================================= */
+        .signup {
+            margin-top: 22px;
+            text-align: center;
+            color: #9ca3af;
+            font-size: 12px;
         }
 
         .signup a {
             color: #1e88e5;
+            font-weight: 700;
             text-decoration: none;
-            font-weight: 600;
-        }
-        .google-note {
-            font-size: 12px;
-            color: #6b7280;
-            text-align: center;
-            margin-bottom: 14px;
         }
 
-        .google-wrapper {
-            position: relative;
-        }
-            
-        .google-tooltip {
-            position: absolute;
-            bottom: -28px;
-            left: 50%;
-            transform: translateX(-50%);
-            background: #111;
-            color: #fff;
-            padding: 4px 10px;
-            border-radius: 6px;
-            font-size: 11px;
-            opacity: 0;
-            pointer-events: none;
-            transition: .2s;
-            white-space: nowrap;
+        .signup a:hover {
+            text-decoration: underline;
         }
 
-        .google-wrapper:hover .google-tooltip {
-            opacity: 1;
-        }
-
-
-        @media (max-width: 768px) {
-
+        /* =========================================================
+           RESPONSIVE
+        ========================================================= */
+        @media (max-width: 850px) {
             body {
-                background: url("/static/images/login-car.jpg") center / cover no-repeat fixed;
-                position: relative;
-            }
-
-            body::before {
-                content: "";
-                position: fixed;
-                inset: 0;
-                background: linear-gradient(
-                    rgba(0,0,0,0.65),
-                    rgba(0,0,0,0.85)
-                );
-                z-index: -1;
+                padding: 20px;
             }
 
             .login-wrapper {
-                height: auto;
-                max-width: 360px;
-                border-radius: 28px;
-                background: rgba(255,255,255,0.08);
-                backdrop-filter: blur(14px);
-                box-shadow: 0 25px 60px rgba(0,0,0,.6);
+                grid-template-columns: 1fr;
+                max-width: 480px;
+                min-height: auto;
             }
 
             .login-image {
@@ -337,35 +502,36 @@
             }
 
             .login-form {
-                padding: 28px 22px;
-                color: #fff;
-            }
-
-            .login-form input {
-                background: rgba(255,255,255,0.15);
-                border: 1px solid rgba(255,255,255,0.25);
-                color: #fff;
-            }
-
-            .login-form input::placeholder {
-                color: rgba(255,255,255,0.7);
-            }
-
-            .login-form input:focus {
-                background: rgba(255,255,255,0.2);
-                border-color: #1e88e5;
-            }
-
-            .login-form h1,
-            .login-form .brand,
-            .login-form .subtitle,
-            .login-form .signup,
-            .login-form .signup a {
-                color: #fff;
-                text-align: center;
+                padding: 42px 35px;
             }
         }
 
+        @media (max-width: 480px) {
+            body {
+                padding: 12px;
+                background: #f5f7fb;
+            }
+
+            .login-wrapper {
+                border-radius: 20px;
+            }
+
+            .login-form {
+                padding: 32px 22px;
+            }
+
+            h1 {
+                font-size: 26px;
+            }
+
+            .role-box {
+                gap: 6px;
+            }
+
+            .role-option label {
+                font-size: 10px;
+            }
+        }
     </style>
 </head>
 
@@ -373,105 +539,308 @@
 
 <div class="login-wrapper">
 
-    <!-- IMAGE -->
-    <div class="login-image">
-        <div class="image-text">
-            <h2>Journey Beyond</h2>
-            <p>Experience premium rides with Wheelzy</p>
+    <!-- =========================================================
+         LEFT SIDE
+    ========================================================== -->
+    <section class="login-image">
+        <div class="login-image-content">
+
+            <div class="image-badge">
+                <span></span>
+                Premium Mobility Experience
+            </div>
+
+            <h2>Journey Beyond.</h2>
+
+            <p>
+                Discover a smarter and more comfortable way to travel
+                with Wheelzy.
+            </p>
+
         </div>
-    </div>
+    </section>
 
-    <!-- FORM -->
-    <div class="login-form">
-        {% for message in messages %}
-        <p>{{ message }}</p>
-        {% endfor %}
-        <div class="brand">WHEELZY</div>
 
-        <h1>Please Log In</h1>
-        <div class="subtitle">Login to continue your journey</div>
+    <!-- =========================================================
+         RIGHT SIDE
+    ========================================================== -->
+    <section class="login-form">
+
+        <!-- DJANGO MESSAGES -->
+        {% if messages %}
+        <div class="messages">
+            {% for message in messages %}
+                <div class="message {{ message.tags }}">
+                    {{ message }}
+                </div>
+            {% endfor %}
+        </div>
+        {% endif %}
+
+
+        <!-- BRAND -->
+        <div class="brand">
+            <span class="brand-mark">W</span>
+            WHEELZY
+        </div>
+
+
+        <!-- HEADING -->
+        <h1>Welcome back</h1>
+
+        <p class="subtitle">
+            Sign in to continue your journey with Wheelzy.
+        </p>
+
+
         <!-- GOOGLE LOGIN -->
         <a href="/accounts/google/login/" class="google-btn">
-            <img src="https://developers.google.com/identity/images/g-logo.png" alt="Google">
+            <img
+                class="google-icon"
+                src="https://developers.google.com/identity/images/g-logo.png"
+                alt="Google"
+            >
             Continue with Google
         </a>
+
         <div class="google-note">
-             Google login is available for <b>Customers only</b>.
+            Google login is available for <b>Customers only</b>.
         </div>
 
-        <!-- <div class="google-wrapper">
-            <a href="/accounts/google/login/" class="google-btn">
-                <img src="https://developers.google.com/identity/images/g-logo.png" alt="Google">
-                Continue with Google
-            </a>
-            <span class="google-tooltip">
-                Google login is for Customers only
-            </span>
-        </div> -->
 
+        <!-- DIVIDER -->
         <div class="divider">
-            <span>or login with username</span>
+            <span>OR CONTINUE WITH USERNAME</span>
         </div>
 
+
+        <!-- LOGIN FORM -->
         <form method="post">
+
             {% csrf_token %}
 
-            <label>Username</label>
-            <input type="text" id="username" name="username" required>
+            <!-- USERNAME -->
+            <div class="form-group">
 
-            <label>Password</label>
-            <input type="password" id="password" name="password" required>
+                <label class="form-label" for="username">
+                    Username
+                </label>
+
+                <div class="input-wrapper">
+
+                    <span class="input-icon"></span>
+
+                    <input
+                        class="form-input"
+                        type="text"
+                        id="username"
+                        name="username"
+                        placeholder="Enter your username"
+                        autocomplete="username"
+                        required
+                    >
+
+                </div>
+
+            </div>
+
+
+            <!-- PASSWORD -->
+            <div class="form-group">
+
+                <label class="form-label" for="password">
+                    Password
+                </label>
+
+                <div class="input-wrapper">
+
+                    <span class="input-icon"></span>
+
+                    <input
+                        class="form-input"
+                        type="password"
+                        id="password"
+                        name="password"
+                        placeholder="Enter your password"
+                        autocomplete="current-password"
+                        required
+                    >
+
+                    <button
+                        type="button"
+                        class="password-toggle"
+                        id="passwordToggle"
+                        aria-label="Show password"
+                    >
+                        👁
+                    </button>
+
+                </div>
+
+            </div>
+
 
             <!-- ROLE -->
+            <div class="role-title">
+                Login as
+            </div>
+
             <div class="role-box">
-                <label>
-                    <input type="radio" name="role" value="customer" checked onclick="setRole('customer')">
-                    Customer
-                </label>
-                <label>
-                    <input type="radio" name="role" value="owner" onclick="setRole('owner')">
-                    Owner
-                </label>
-                <label>
-                    <input type="radio" name="role" value="admin" onclick="setRole('admin')">
-                    Admin
-                </label>
+
+                <div class="role-option">
+                    <input
+                        type="radio"
+                        id="customer"
+                        name="role"
+                        value="customer"
+                        checked
+                    >
+                    <label for="customer">
+                        Customer
+                    </label>
+                </div>
+
+                <div class="role-option">
+                    <input
+                        type="radio"
+                        id="owner"
+                        name="role"
+                        value="owner"
+                    >
+                    <label for="owner">
+                        Owner
+                    </label>
+                </div>
+
+                <div class="role-option">
+                    <input
+                        type="radio"
+                        id="admin"
+                        name="role"
+                        value="admin"
+                    >
+                    <label for="admin">
+                        Admin
+                    </label>
+                </div>
+
             </div>
 
-            <!-- DEMO -->
-            <div class="demo-title">Quick demo login</div>
-            <div class="demo-box">
-                <div class="demo-btn" onclick="fillDemo()">Use demo</div>
+
+            <!-- DEMO LOGIN -->
+            <div class="demo-section">
+
+                <span class="demo-title">
+                    Need a quick demo login?
+                </span>
+
+                <button
+                    type="button"
+                    class="demo-btn"
+                    id="demoBtn"
+                >
+                    Use Demo
+                </button>
+
             </div>
 
-            <button type="submit">LOGIN</button>
+
+            <!-- LOGIN -->
+            <button type="submit" class="login-btn">
+                Sign In
+            </button>
+
         </form>
 
+
+        <!-- SIGN UP -->
         <div class="signup">
-            Don’t have an account?
-            <a href="{% url 'register' %}">Sign up</a>
+            Don't have an account?
+            <a href="{% url 'register' %}">
+                Create an account
+            </a>
         </div>
-    </div>
+
+    </section>
 
 </div>
 
+
 <script>
-    let selectedRole = "customer";
+    /* =========================================================
+       DEMO USERS
+    ========================================================== */
 
     const demoUsers = {
-        customer: { username: "Sree", password: "Sree@123" },
-        owner: { username: "owner", password: "1234567890" },
-        admin: { username: "admin", password: "admin" }
+        customer: {
+            username: "Sree",
+            password: "Sree@123"
+        },
+
+        owner: {
+            username: "owner",
+            password: "1234567890"
+        },
+
+        admin: {
+            username: "admin",
+            password: "admin"
+        }
     };
 
-    function setRole(role) {
-        selectedRole = role;
-    }
 
-    function fillDemo() {
-        document.getElementById("username").value = demoUsers[selectedRole].username;
-        document.getElementById("password").value = demoUsers[selectedRole].password;
-    }
+    /* =========================================================
+       ELEMENTS
+    ========================================================== */
+
+    const usernameInput = document.getElementById("username");
+    const passwordInput = document.getElementById("password");
+    const demoBtn = document.getElementById("demoBtn");
+    const passwordToggle = document.getElementById("passwordToggle");
+
+
+    /* =========================================================
+       DEMO LOGIN
+    ========================================================== */
+
+    demoBtn.addEventListener("click", function () {
+
+        const selectedRole =
+            document.querySelector(
+                'input[name="role"]:checked'
+            ).value;
+
+        const user = demoUsers[selectedRole];
+
+        usernameInput.value = user.username;
+        passwordInput.value = user.password;
+
+    });
+
+
+    /* =========================================================
+       PASSWORD VISIBILITY
+    ========================================================== */
+
+    passwordToggle.addEventListener("click", function () {
+
+        const isPassword =
+            passwordInput.type === "password";
+
+        passwordInput.type =
+            isPassword ? "text" : "password";
+
+        passwordToggle.textContent =
+            isPassword ? "🙈" : "👁";
+
+        passwordToggle.setAttribute(
+            "aria-label",
+            isPassword
+                ? "Hide password"
+                : "Show password"
+        );
+
+    });
 </script>
 
 </body>
