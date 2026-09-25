@@ -13,6 +13,7 @@ from django.core.paginator import Paginator
 from django.db.models import Prefetch
 from datetime import timedelta
 import razorpay
+import resend
 from django.conf import settings
 from django.views.decorators.csrf import csrf_exempt
 from django.core.mail import send_mail
@@ -23,8 +24,85 @@ from django.contrib.auth.models import User
 from .utils import generate_booking_invoice, generate_owner_payout_invoice
 import json
 import os
+import base64
 import json
 
+
+resend.api_key = settings.RESEND_API_KEY
+
+# ============================================================
+# EMAIL HELPERS
+# ============================================================
+# Render Free blocks outbound SMTP ports (25/465/587).
+# When RESEND_API_KEY is configured, email is sent through
+# Resend's HTTPS API. Without it, the existing Django SMTP
+# configuration is used, so localhost can continue using Gmail.
+def send_wheelzy_email(
+    subject,
+    message,
+    from_email=None,
+    recipient_list=None,
+    fail_silently=False,
+):
+    if settings.RESEND_API_KEY:
+        resend.api_key = settings.RESEND_API_KEY
+
+        return resend.Emails.send({
+            "from": f"Wheelzy <{getattr(settings, 'RESEND_FROM_EMAIL', 'onboarding@resend.dev')}>",
+            "to": recipient_list or [],
+            "subject": subject,
+            "text": message,
+        })
+
+    return send_mail(
+        subject=subject,
+        message=message,
+        from_email=from_email or settings.EMAIL_HOST_USER,
+        recipient_list=recipient_list or [],
+        fail_silently=fail_silently,
+    )
+
+
+def send_wheelzy_email_message(email_message):
+    """
+    Send an existing Django EmailMessage through Resend when
+    RESEND_API_KEY is available. Otherwise use the original
+    Django SMTP EmailMessage.send() behavior.
+    """
+    if not settings.RESEND_API_KEY:
+        return email_message.send(fail_silently=False)
+
+    resend.api_key = settings.RESEND_API_KEY
+
+    resend_attachments = []
+
+    for attachment in email_message.attachments:
+        filename = getattr(attachment, "filename", None)
+        content = getattr(attachment, "content", None)
+
+        # Django may store attachments as MIMEBase objects.
+        if hasattr(content, "get_payload"):
+            payload = content.get_payload(decode=True)
+            content = payload if payload is not None else content.as_bytes()
+        elif isinstance(content, str):
+            content = content.encode("utf-8")
+
+        resend_attachments.append({
+            "filename": filename,
+            "content": base64.b64encode(content).decode("utf-8"),
+        })
+
+    params = {
+        "from": f"Wheelzy <{getattr(settings, 'RESEND_FROM_EMAIL', 'onboarding@resend.dev')}>",
+        "to": list(email_message.to),
+        "subject": email_message.subject,
+        "text": email_message.body,
+    }
+
+    if resend_attachments:
+        params["attachments"] = resend_attachments
+
+    return resend.Emails.send(params)
 
 
 razorpay_client = razorpay.Client(
@@ -83,7 +161,7 @@ def register(request):
         otp = generate_otp()
         EmailOTP.objects.create(user=user, otp=otp)
 
-        send_mail(
+        send_wheelzy_email(
             subject="Wheelzy Email Verification",
             message=f"Your OTP is {otp}. Valid for 5 minutes.",
             from_email=settings.EMAIL_HOST_USER,
@@ -129,7 +207,7 @@ def verify_otp(request):
             user.is_active = True
             user.save()
 
-            send_mail(
+            send_wheelzy_email(
                 subject="Welcome to Wheelzy – Email Verified Successfully",
                 message=(
                     f"Hi {user.username},\n\n"
@@ -174,7 +252,7 @@ def resend_otp(request):
     otp = generate_otp()
     EmailOTP.objects.create(user=user, otp=otp)
 
-    send_mail(
+    send_wheelzy_email(
         subject="Your New OTP",
         message=f"Your new OTP is {otp}. Valid for 5 minutes.",
         from_email=settings.EMAIL_HOST_USER,
@@ -565,7 +643,7 @@ def cancel_booking(request, booking_id):
     booking.save()
 
     # 📧 EMAIL TO CUSTOMER
-    send_mail(
+    send_wheelzy_email(
         subject="Booking Cancelled & Refund Initiated – Wheelzy",
         message=(
             f"Hi {booking.user.username},\n\n"
@@ -997,7 +1075,7 @@ def approve_booking(request, booking_id):
     booking.save()
 
     # 📧 EMAIL
-    send_mail(
+    send_wheelzy_email(
         subject="Booking Confirmed – Wheelzy",
         message=(
             f"Hi {booking.user.username},\n\n"
@@ -1602,7 +1680,7 @@ Team Wheelzy
             customer_invoice.read(),
             "application/pdf"
         )
-        customer_mail.send()
+        send_wheelzy_email_message(customer_mail)
 
         # 📧 EMAIL TO OWNER (Payout Invoice)
         if vehicle.owner:
@@ -1630,7 +1708,7 @@ Team Wheelzy
                 owner_invoice.read(),
                 "application/pdf"
             )
-            owner_mail.send()
+            send_wheelzy_email_message(owner_mail)
 
             Notification.objects.create(
                 user=vehicle.owner,
@@ -1659,7 +1737,7 @@ def payment_cancelled(request, booking_id):
         amount = booking.total_price
 
         # 📧 PAYMENT FAILED EMAIL
-        send_mail(
+        send_wheelzy_email(
             subject="Payment Failed – Wheelzy",
             message=(
                 f"Hi {user.username},\n\n"
@@ -1742,7 +1820,7 @@ def reject_booking(request, booking_id):
     booking.save()
 
     # 📧 EMAIL TO CUSTOMER
-    send_mail(
+    send_wheelzy_email(
         subject="Booking Rejected & Refund Initiated – Wheelzy",
         message=(
             f"Hi {booking.user.username},\n\n"
